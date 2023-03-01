@@ -1,5 +1,10 @@
 
-abstract type Flash{T} end
+abstract type Stimulus end
+
+struct Flash <: Stimulus
+    intensity::Real #The flash intensity of the flash
+end
+Flash() = Flash(0.0)
 
 """
 A stimulus protocol contains information about the stimulus. 
@@ -12,49 +17,41 @@ A stimulus protocol contains information about the stimulus.
         5) timestamps::Tuple{T, T} - The timestamps which the stimulus starts at and ends at. 
 """
 mutable struct StimulusProtocol{T}
-    type::Symbol
-    sweep::Int64
-    channel::Union{String,Int64}
-    index_range::Tuple{Int64,Int64}
-    timestamps::Tuple{T,T}
+    type::Stimulus
+    channelName::Union{String,Int64}
+    timestamps::Vector{Tuple{T,T}}
+    #index_range::Tuple{Int64,Int64}
 end
 
-function StimulusProtocol(type::Symbol, sweep::Int64, channel::Union{Int64,String}, index_range::Tuple{T,T}, t::Vector) where {T<:Real}
-    t1 = t[index_range[1]]
-    t2 = t[index_range[2]]
-    StimulusProtoco(type, sweep, channel, index_range, (t1, t2))
+StimulusProtocol() = StimulusProtocol(Flash(), "Nothing", [(0.0, 0.0)])
+StimulusProtocol(stimulus_channel::String) = StimulusProtocol(Flash(), stimulus_channel, [(0.0, 0.0)])
+StimulusProtocol(swp::Int64) = StimulusProtocol(Flash(), "Nothing", fill((0.0, 0.0), swp))
+StimulusProtocol(stimulus_channel::String, swp::Int64) = StimulusProtocol(Flash(), stimulus_channel, fill((0.0, 0.0), swp))
+
+getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Real = stimulus_protocol.timestamps[inds...]
+function setindex!(stimulus_protocol::StimulusProtocol{T}, X, I...) where T <: Real 
+     #println(X)
+     stimulus_protocol.timestamps[I...] = X
 end
 
 #Initialize an empty stimulus protocol
-StimulusProtocol() = StimulusProtocol(:None, 0, 0, (0, 0), (0.0, 0.0))
 
 """
 this function utilizes all julia to extract ABF file data
 """
 
-function extract_stimulus(abfInfo::Dict{String,Any}; sweep::Int64=-1, stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
+function extractStimulus(abfInfo::Dict{String,Any}; stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
     dt = abfInfo["dataSecPerPoint"]
     stimulus_waveform = getWaveform(abfInfo, stimulus_name)
-    if sweep == -1 #We want to extract info about all of the stimuli vs just one
-        Stimuli = StimulusProtocol[]
-        for sweep in axes(abfInfo["data"], 1)
-            idx1 = findfirst(stimulus_waveform[sweep, :] .> stimulus_threshold)
-            idx2 = findlast(stimulus_waveform[sweep, :] .> stimulus_threshold)
-            if !isnothing(idx1) && !isnothing(idx2)
-                push!(Stimuli, StimulusProtocol(:test, sweep, stimulus_name, (idx1, idx2), (idx1 * dt, (idx2 + 1) * dt)))
-            end
-        end
-        return Stimuli
-    else
-        
-        idx1 = findfirst(stimulus_waveform[sweep, :] .> stimulus_threshold)
-        idx2 = findlast(stimulus_waveform[sweep, :] .> stimulus_threshold)
-        if !isnothing(idx1) && !isnothing(idx2)
-            return StimulusProtocol(:test, sweep, stimulus_name, (idx1, idx2), (idx1 * dt, (idx2 + 1) * dt))
-        else
-            return StimulusProtocol()
-        end
+    #instantiate stimulus item
+    stimuli = StimulusProtocol(stimulus_name, (size(abfInfo["data"], 1)))
+    for swp in axes(abfInfo["data"], 1)
+        stim_wave = stimulus_waveform[swp, :, 1] .> stimulus_threshold
+        t1 = findfirst(stim_wave) * dt
+        t2 = (findlast(stim_wave)+1) * dt
+        stimuli[swp] = (t1,t2)
     end
+    return stimuli
 end
 
-extract_stimulus(abf_path::String; kwargs...) = extract_stimulus(readABFInfo(abf_path); kwargs...)
+extractStimulus(abf_path::String; kwargs...) = extractStimulus(readABFInfo(abf_path); kwargs...)

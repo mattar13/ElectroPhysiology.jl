@@ -20,7 +20,7 @@ mutable struct Experiment{T}
     chNames::Vector{String}
     chUnits::Vector{String}
     chTelegraph::Vector{T}
-    stim_protocol::Vector{StimulusProtocol{T}}
+    stim_protocol::StimulusProtocol{T}
 end
 
 #Make a basic constructor for the experiment
@@ -33,7 +33,7 @@ function Experiment(data_array::AbstractArray; data_idx = 2)
         ["Channel 1"],
         ["mV"],
         [1.0], 
-        [StimulusProtocol()]
+        StimulusProtocol(size(data_array,1))
     )
 end
 
@@ -47,7 +47,7 @@ function Experiment(time::Vector, data_array::Array{T, 3}) where T <: Real
         ["Channel 1"],
         ["mV"],
         [1.0], 
-        [StimulusProtocol()]
+        StimulusProtocol(size(data_array,1))
     )
 end
 
