@@ -104,8 +104,11 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     end
 
     #This section we will rework to include getting analog and digital inputs
-    stimulus_protocol = extractStimulus(HeaderDict; stimulus_name = stimulus_name, stimulus_threshold = stimulus_threshold)
-    println(stimulus_protocol)
+    if isnothing(stimulus_name)
+        stimulus_protocol = StimulusProtocol("Nothing")
+    else
+        stimulus_protocol = extractStimulus(HeaderDict; stimulus_name = stimulus_name, stimulus_threshold = stimulus_threshold)
+    end
     if average_sweeps
         data = sum(data, dims=1) / size(data, 1)
         #here we have to adjust the stimulus protocol
