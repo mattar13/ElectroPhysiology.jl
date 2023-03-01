@@ -112,9 +112,6 @@ function scaleby(data::Experiment{T}, val) where T<:Real
     return data_copy
 end
 
-import Base: size, axes, length, getindex, setindex, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax
-import Statistics.std
-
 #Extending for Experiment
 size(exp::Experiment) = size(exp.data_array)
 size(exp::Experiment, dim::Int64) = size(exp.data_array, dim)
