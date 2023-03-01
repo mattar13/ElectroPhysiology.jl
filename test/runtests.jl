@@ -94,6 +94,8 @@ end
     @test size(data_drop_ch, 3) == size(data,3)-1
 
     println("Testing truncate functions")
+    data_trunc = truncate_data(data)
+    @test size(data_trunc, 2) == 100001
 end
 
 @testset "Testing ABF reader" begin
