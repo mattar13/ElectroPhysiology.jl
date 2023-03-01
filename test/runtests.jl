@@ -1,6 +1,21 @@
 using ElectroPhysiology
 using Test
 
+testfile = raw"to_filter.abf"
+data = readABF(testfile)
+@testset "Testing stimulus protocols" begin
+    @test !isnothing(StimulusProtocol())
+    @test !isnothing(StimulusProtocol("TEST NAME"))
+    @test !isnothing(StimulusProtocol(10))
+
+    stim = StimulusProtocol("DAC1", 10)
+    @test stim[1] == (0.0, 0.0)
+    stim[1] = (0.0, 1.0)
+    @test stim[1] == (0.0, 1.0)
+    stim = extractStimulus(testfile)
+    @test stim[1,1] == (3.65635, 3.65735)
+end
+
 @testset "Testing Experiement struct" begin
     time = collect(1:0.01:1000) #Create some time range
     data = rand(5, length(time), 1) #Create some dummy data
@@ -12,9 +27,8 @@ using Test
     @test !isnothing(exp_w_time)
 end
 
-testfile = raw"to_filter.abf"
+
 @testset "Testing ABF reader" begin
-    data = readABF(testfile)
     @test !isnothing(data)
 
     @test size(data) == (1, 200000, 2)
@@ -45,6 +59,43 @@ testfile = raw"to_filter.abf"
     @test size(data_push, 1) == 2
 end
 
+@testset "Testing stimulus making" begin
+    println("Instantiate a empty stimulus protocol")
+    stim = StimulusProtocol()
+
+end
+
 @testset "Testing modification of individual experiments" begin
-    data = readABF(testfile)
+    println("Testing scaling functions")
+    data_modify = deepcopy(data)
+    scaleby!(data_modify, 10.0) #Test the inplace function
+    data_scaled = scaleby(data, 10.0) #Test the copy function
+    @test data_modify[1,1,1] == 10*data[1,1,1]
+    @test data_scaled[1,1,1] == 10*data[1,1,1]
+
+    println("Testing padding functions")
+    data_modify = deepcopy(data)
+    pad!(data_modify, 10)
+    data_padded = pad(data, 10)
+    @test size(data_padded, 2) == 10 + size(data, 2)
+    @test size(data_modify, 2) == 10 + size(data, 2)
+
+    println("Testing chopping functions")
+    data_modify = deepcopy(data)
+    chop!(data_modify, 10)
+    data_chopped = chop(data, 10)
+    @test size(data_chopped, 2) == size(data, 2) - 10
+    @test size(data_modify, 2) == size(data, 2) - 10
+
+    println("Testing drop functions")
+    data_drop_swp = drop(data, dim = 1)
+    data_drop_ch = drop(data, dim = 3)
+    @test size(data_drop_swp, 1) == size(data,1)-1
+    @test size(data_drop_ch, 3) == size(data,3)-1
+
+    println("Testing truncate functions")
+end
+
+@testset "Testing ABF reader" begin
+    include("testABFReader.jl")
 end
