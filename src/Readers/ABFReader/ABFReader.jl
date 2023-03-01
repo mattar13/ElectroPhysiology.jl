@@ -103,20 +103,21 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
         t .*= 1000
     end
 
-    stim_protocol_by_sweep = StimulusProtocol{Float64}[]
-    if !isnothing(stimulus_name)
-        for swp = 1:size(data, 1)
-            push!(stim_protocol_by_sweep, extract_stimulus(HeaderDict; sweep=swp, stimulus_name=stimulus_name, stimulus_threshold=stimulus_threshold))
-        end
-    end
     #This section we will rework to include getting analog and digital inputs
-
+    stimulus_protocol = extractStimulus(HeaderDict; stimulus_name = stimulus_name, stimulus_threshold = stimulus_threshold)
+    println(stimulus_protocol)
     if average_sweeps
         data = sum(data, dims=1) / size(data, 1)
-        stim_protocol_by_sweep = Vector{StimulusProtocol{Float64}}([stim_protocol_by_sweep[1]])
+        #here we have to adjust the stimulus protocol
+        stimulus_protocol_first_vals = stim_protocol[1] 
+        println(stimulus_protocol_first_vals)     
+        stimulus_protocol = StimulusProtocol(stimulus_name) 
+        println(stimulus_protocol)
+        stimulus_protocol[1] = stim_protocol_first_vals
+        println(stimulus_protocol)
     end
     #With our new file structure we probably need to reorganize this a bit
-    return Experiment(HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stim_protocol_by_sweep)
+    return Experiment(HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)
 end
 
 readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, abf_path; kwargs...)
