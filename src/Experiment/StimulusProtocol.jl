@@ -55,3 +55,13 @@ function extractStimulus(abfInfo::Dict{String,Any}; stimulus_name::String="IN 7"
 end
 
 extractStimulus(abf_path::String; kwargs...) = extractStimulus(readABFInfo(abf_path); kwargs...)
+
+size(stimulus::StimulusProtocol) = size(stimulus.timestamps)
+
+size(stimulus::StimulusProtocol, dim::Int64) = size(stimulus.timestamps, dim)
+
+length(stimulus::StimulusProtocol) = size(stimulus, 1)
+
+push!(stimulus::StimulusProtocol, ts) = push!(stimulus.timestamps, ts)
+
+push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol) = push!(stimulusA, stimulusB.timestamps...)
