@@ -111,6 +111,13 @@ end
 
     data_avg = average_sweeps(data)
     @test size(data_avg, 1) == 1
+
+    data_downsample = downsample(data, 1000.0)
+    @test size(data_downsample, 2) == 10_000.0
+    @test getSampleFreq(data_downsample) == 1000.0
+    
+    data_dyad = dyadic_downsample(data)
+    @test size(data_dyad, 2) == 131072
 end
 
 

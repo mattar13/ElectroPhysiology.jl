@@ -185,3 +185,5 @@ end
 function reverse!(exp::Experiment; kwargs...)
     exp.data_array = reverse(exp.data_array; kwargs...)
 end
+
+getSampleFreq(exp::Experiment) = 1/exp.dt

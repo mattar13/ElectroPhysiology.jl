@@ -13,7 +13,7 @@ export setindex!, getindex
 export extractStimulus
 
 include("Experiment/Experiments.jl") #This file contains the Experiment structure. 
-export std
+export std, getSampleFreq
 
 import Base: chop
 include("Experiment/ModifyExperiments.jl") #These functions modify individual experiments
@@ -22,6 +22,8 @@ export pad, pad!, chop, chop!
 export drop, drop!
 export truncate_data, truncate_data!
 export average_sweeps, average_sweeps!
+export downsample, downsample!
+export dyadic_downsample, dyadic_downsample!
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
 export concat, concat!

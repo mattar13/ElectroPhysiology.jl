@@ -196,3 +196,33 @@ function average_sweeps(trace::Experiment{T}) where {T<:Real}
 end
 
 average_sweeps!(trace::Experiment{T}) where {T<:Real} = trace.data_array = sum(trace, dims=1) / size(trace, 1)
+
+function downsample(trace::Experiment{T}, sample_rate::T) where {T<:Real}
+    data = deepcopy(trace)
+    downsample!(data, sample_rate)
+    return data
+end
+
+function downsample!(trace::Experiment{T}, sample_rate::T) where {T<:Real}
+    old_sample_rate = 1/trace.dt
+    new_dt = 1 / sample_rate
+    trace.dt = new_dt #set the new dt
+    trace.t = trace.t[1]:new_dt:trace.t[end] #Set the new time array
+    sample_idxs = 1:round(Int64, old_sample_rate/sample_rate):size(trace, 2)
+    trace.data_array = trace.data_array[:, sample_idxs, :]
+end
+
+function dyadic_downsample!(trace::Experiment{T}) where {T<:Real}
+    n_data = length(trace.t)
+    n_dyad = 2^(trunc(log2(n_data))) |> Int64
+    dyad_idxs = round.(Int64, LinRange(1, length(trace.t), n_dyad)) |> collect
+    trace.t = LinRange(trace.t[1], trace.t[end], n_dyad) |> collect
+    trace.dt = abs(trace.t[3] - trace.t[2])
+    trace.data_array = trace.data_array[:, dyad_idxs, :]
+end
+
+function dyadic_downsample(trace::Experiment{T}) where T<:Real
+    data = deepcopy(trace)
+    dyadic_downsample!(data)
+    return data
+end
