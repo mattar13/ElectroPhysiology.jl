@@ -118,6 +118,8 @@ end
     
     data_dyad = dyadic_downsample(data)
     @test size(data_dyad, 2) == 131072
+
+    data_baseline = baseline_adjust(data)
 end
 
 
