@@ -107,7 +107,21 @@ end
     @test size(data_trunc, 2) == 100001
 
     data_concat = concat(data, data)
-    @test size(data_concat,2) == size(data,2) * 2
+    @test size(data_concat,1) == size(data,1) * 2
+end
+
+
+@testset "Testing Experiment iterator" begin
+    testfile = raw"to_analyze.abf"
+    data = readABF(testfile)
+    data_get = getdata(data, 1, 1, 1)
+    @test size(data_get) == (1,1,1)
+    data_ch1 = getchannel(data, 1)
+    @test size(data_ch1, 3) == 1
+    data_each_sweep = collect(eachsweep(data))
+    @test length(data_each_sweep) == 12
+    data_each_ch= collect(eachchannel(data))
+    @test length(data_each_ch) == 2
 end
 
 @testset "Testing ABF reader" begin
