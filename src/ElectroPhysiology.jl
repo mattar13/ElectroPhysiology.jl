@@ -22,6 +22,8 @@ export pad, pad!, chop, chop!
 export drop, drop!
 export truncate_data, truncate_data!
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
+export concat, concat!
+
 include("Experiment/IterateExperiments.jl")
 
 #=Import all readers======================#
