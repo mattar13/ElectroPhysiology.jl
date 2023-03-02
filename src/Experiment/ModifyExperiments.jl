@@ -105,18 +105,18 @@ function truncate_data!(trace::Experiment;
     size_of_array = 0
     overrun_time = 0 #This is for if t_pre is set too far before the stimulus
     if truncate_based_on == :time_range || !isnothing(t_begin) && !isnothing(t_end)
-        println("running here")
+        #println("running here")
         #Use this if there is no stimulus, but rather you want to truncate according to time
         start_rng = round(Int64, t_begin / dt)
         end_rng = round(Int64, t_end / dt)
-        println(start_rng)
-        println(end_rng)
+        #println(start_rng)
+        #println(end_rng)
         #println(start_rng)
         #println(end_rng)
         trace.data_array = trace.data_array[:, start_rng:end_rng, :]
         trace.t = trace.t[start_rng:end_rng] .- trace.t[start_rng]
     elseif trace.stimulus_protocol.channelName == "Nothing"
-        println("No explicit stimulus has been set")
+        #println("No explicit stimulus has been set")
         size_of_array = round(Int64, t_post / dt)
         trace.data_array = trace.data_array[:, 1:size_of_array, :] #remake the array with only the truncated data
         trace.t = range(0.0, t_post, length=size_of_array)
@@ -124,7 +124,6 @@ function truncate_data!(trace::Experiment;
         for swp = axes(trace, 1)
             tstamps = trace.stimulus_protocol[swp]
             idx_range = round.(Int64, tstamps ./ dt)
-            println(idx_range)
             if truncate_based_on == :stimulus_beginning
                 #This will set the beginning of the stimulus as the truncation location
                 #tstamps = stimulus_protocol[swp]
@@ -137,7 +136,6 @@ function truncate_data!(trace::Experiment;
                 t_begin_adjust = tstamps[1] - tstamps[2]
                 t_end_adjust = 0.0
             end
-            println(truncate_loc)
             #println((t_begin_adjust, t_end_adjust))
             trace.stimulus_protocol[swp] = (t_begin_adjust, t_end_adjust)
             
@@ -150,14 +148,14 @@ function truncate_data!(trace::Experiment;
             have_after = size(trace, 2) - truncate_loc
             #println("We have $have_before and $have_after indexes before and after")
             if needed_before > have_before
-                println("Not enough indexes preceed the stimulus point")
+                #println("Not enough indexes preceed the stimulus point")
                 extra_indexes = needed_before - have_before
                 overrun_time = extra_indexes * dt
                 #println("t_pre goes $extra_indexes indexes too far")
                 idxs_begin = 1
                 stim_begin_adjust = idx_range[1]
             else
-                println("Enough indexes preceed the stimulus point")
+                #println("Enough indexes preceed the stimulus point")
                 idxs_begin = truncate_loc - round(Int, t_pre / dt) +1
                 stim_begin_adjust = round(Int, t_pre / dt) 
             end
