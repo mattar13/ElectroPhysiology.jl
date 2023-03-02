@@ -108,6 +108,9 @@ end
 
     data_concat = concat(data, data)
     @test size(data_concat,1) == size(data,1) * 2
+
+    data_avg = average_sweeps(data)
+    @test size(data_avg, 1) == 1
 end
 
 
