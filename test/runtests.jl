@@ -14,6 +14,15 @@ data = readABF(testfile)
     @test stim[1] == (0.0, 1.0)
     stim = extractStimulus(testfile)
     @test stim[1,1] == (3.65635, 3.65735)
+
+    a = StimulusProtocol()
+    test = (0.0, 1.0)
+    push!(a, test)
+    @test length(a) == 2
+
+    b = StimulusProtocol()
+    push!(a, b)
+    @test length(a) == 3
 end
 
 @testset "Testing Experiement struct" begin
@@ -96,6 +105,9 @@ end
     println("Testing truncate functions")
     data_trunc = truncate_data(data)
     @test size(data_trunc, 2) == 100001
+
+    data_concat = concat(data, data)
+    @test size(data_concat,2) == size(data,2) * 2
 end
 
 @testset "Testing ABF reader" begin
