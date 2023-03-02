@@ -111,13 +111,9 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     end
     if average_sweeps
         data = sum(data, dims=1) / size(data, 1)
-        #here we have to adjust the stimulus protocol
-        stimulus_protocol_first_vals = stim_protocol[1] 
-        println(stimulus_protocol_first_vals)     
+        stimulus_protocol_first_vals = stimulus_protocol[1] 
         stimulus_protocol = StimulusProtocol(stimulus_name) 
-        println(stimulus_protocol)
-        stimulus_protocol[1] = stim_protocol_first_vals
-        println(stimulus_protocol)
+        stimulus_protocol[1] = stimulus_protocol_first_vals
     end
     #With our new file structure we probably need to reorganize this a bit
     return Experiment(HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)
