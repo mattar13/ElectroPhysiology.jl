@@ -105,6 +105,8 @@ end
     println("Testing truncate functions")
     data_trunc = truncate_data(data)
     @test size(data_trunc, 2) == 100001
+    @test data.t[1] == 0.0
+    @test data_trunc.t[1] == -1.0
 
     data_concat = concat(data, data)
     @test size(data_concat,1) == size(data,1) * 2
@@ -120,6 +122,7 @@ end
     @test size(data_dyad, 2) == 131072
 
     data_baseline = baseline_adjust(data)
+    @test round(sum(data_baseline[:, 1, 1]), digits = 1) == 0.0 #Checks to make sure the baseline is nearly 0.0
 end
 
 

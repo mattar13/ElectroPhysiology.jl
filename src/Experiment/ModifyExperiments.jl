@@ -256,7 +256,7 @@ function baseline_adjust!(trace::Experiment{T};
                 rng_end = length(trace)
             elseif region == :prestim
                 rng_begin = 1
-                rng_end = idx_range[1] #Get the first stimulus index
+                rng_end = findfirst(trace.t .>= tstamps[1]) #Get the first stimulus index
             end
             for ch in axes(trace, 3)
                 if mode == :mean
