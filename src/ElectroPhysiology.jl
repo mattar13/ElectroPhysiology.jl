@@ -21,6 +21,8 @@ export scaleby, scaleby!
 export pad, pad!, chop, chop!
 export drop, drop!
 export truncate_data, truncate_data!
+export average_sweeps, average_sweeps!
+
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
 export concat, concat!
 

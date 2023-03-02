@@ -186,3 +186,13 @@ function truncate_data(trace::Experiment; kwargs...)
     truncate_data!(data)
     return data
 end
+
+"""
+"""
+function average_sweeps(trace::Experiment{T}) where {T<:Real}
+    data = deepcopy(trace)
+    average_sweeps!(data)
+    return data
+end
+
+average_sweeps!(trace::Experiment{T}) where {T<:Real} = trace.data_array = sum(trace, dims=1) / size(trace, 1)
