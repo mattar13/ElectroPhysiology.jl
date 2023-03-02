@@ -25,7 +25,7 @@ include("Experiment/JoiningExperiments.jl") #These files join multiple experimen
 export concat, concat!
 
 include("Experiment/IterateExperiments.jl")
-
+export getdata, getchannel, eachchannel, eachsweep
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl")
 export readABF
