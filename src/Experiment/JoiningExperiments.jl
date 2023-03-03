@@ -36,18 +36,16 @@ function concat!(data::Experiment{T}, data_add::Experiment{T};
         #We want to remove channels that are hanging. 
         ch1in2 = indexin(data.chNames, data_add.chNames)
         ch2in1 = indexin(data_add.chNames, data.chNames)
-        println(ch2in1)
-        println(ch1in2)
         if any(isnothing.(ch1in2))
             hanging_channels = findall(isnothing.(ch1in2))
             data_dropped = drop(data, dim = 3, drop_idx = hanging_channels[1])
             push!(data_dropped, data_add)
-            push!(data_dropped.stimulus_protocol, data_add.stimulus_protocol...)
+            push!(data_dropped.stimulus_protocol, data_add.stimulus_protocol)
         elseif any(isnothing.(ch2in1))
             hanging_channels = findall(isnothing.(ch2in1))
             data_dropped = drop(data_add, dim = 3, drop_idx = hanging_channels[1])
             push!(data, data_dropped)
-            push!(data.stimulus_protocol, data_dropped.stimulus_protocol...)
+            push!(data.stimulus_protocol, data_dropped.stimulus_protocol)
         end
     else
         push!(data, data_add)
