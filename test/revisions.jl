@@ -1,5 +1,8 @@
-#None at this time
-using Revise, ElectroPhysiology
+#Fixing some documentation using chatGPT and GPT4
+using Revise
+using ElectroPhysiology
+
+readABF("test/to")
 
 #%% Section 1, Opening Matlab IRIS files
 PhysiologyAnalysis.__init__()
