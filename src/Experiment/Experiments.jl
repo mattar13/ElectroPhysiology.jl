@@ -1,16 +1,23 @@
 """
-The experiment data object. 
-This contains all the data for the sweep. 
-    ### DataType is defined by {T}
-    ## The options are: 
-        1) HeaderDict::Dict{String,Any} -> The information object that contains all the ABF info extracted from the binary file
-        2) dt::T -> The time differential for the y axis. This is the inverse of the sampling rate collected by the digitizers
-        3) t::Vector{T} -> The y axis and timestamps for each data point.
-        4) data_array::Array{T,3} -> The data collected by the digitization process. The data array is sized by {sweeps, datapoints, channels}
-        5) chNames::Vector{String} -> The names of each channel in string format
-        6) chUnits::Vector{String} -> The units the data collected is in labeled by channel
-        7) chTelegraph::Vector{T} -> The gain on each channel.
-        8) stim_protocol::Vector{StimulusProtocol{T}} -> The stimulus protocols for each sweep. 
+    Experiment{T}
+
+A mutable struct representing a physiological experiment.
+
+## Fields
+
+- `HeaderDict`: A dictionary containing header information for the experiment.
+- `dt`: A `Real` value representing the time step between data points.
+- `t`: A vector containing the time points of the experiment.
+- `data_array`: A 3-dimensional array containing the experimental data.
+- `chNames`: A vector of strings representing the names of the channels.
+- `chUnits`: A vector of strings representing the units of the channels.
+- `chTelegraph`: A vector of `Real` values representing the telegraph values of the channels.
+- `stimulus_protocol`: A `StimulusProtocol{T}` object containing the stimulus protocol information.
+
+## Constructors
+
+- `Experiment(data_array::AbstractArray; data_idx = 2)`: Create an `Experiment` object from an input data array with an optional data index.
+- `Experiment(time::Vector, data_array::Array{T, 3}) where T <: Real`: Create an `Experiment` object from an input time vector and data array.
 """
 mutable struct Experiment{T}
     HeaderDict::Dict{String,Any}
