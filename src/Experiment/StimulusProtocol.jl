@@ -80,14 +80,14 @@ Extract the stimulus information from the given `abfInfo` dictionary and returns
 - A `StimulusProtocol` object containing the stimulus timestamps for each sweep.
 
 # Examples
-    ```julia
-    abfInfo = loadABF("path/to/abf/file")
-    stimuli = extractStimulus(abfInfo)
-    ```
+```julia
+abfInfo = loadABF("path/to/abf/file")
+stimuli = extractStimulus(abfInfo)
+```
 
-    ```julia
-    stimuli = extractStimulus("path/to/abf/file")
-    ```
+```julia
+stimuli = extractStimulus("path/to/abf/file")
+```
 """
 function extractStimulus(abfInfo::Dict{String,Any};
     stimulus_name::String="IN 7",
