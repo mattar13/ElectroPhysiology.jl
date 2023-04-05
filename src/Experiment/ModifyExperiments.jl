@@ -1,8 +1,20 @@
 #This is our inplace function for scaling. Division is done by multiplying by a fraction
 """
-    scaleby!(data::Experiment{T}, val::T)
+    scaleby!(data::Experiment{T}, val::T) where T <: Real
+    scaleby!(data::Experiment{T}, val::Vector{T}) where T <: Real
+Scale the data elements in the given `Experiment` object by a scalar value `val` in-place. 
+If val is a vector of values, The length of the vector should match either the number of channels or the number of sweeps in the experiment.
 
-Inplace scaling of the data experiment that scales the entire dataset by a value
+# Arguments
+- `data`: An `Experiment{T}` object containing the experimental data.
+- `val`: A scalar value by which to scale the data.
+
+# Example
+```julia
+exp = Experiment(data_array)
+scaleby!(exp, 2.0)
+```
+
 """
 scaleby!(data::Experiment{T}, val::T) where T <: Real = data.data_array = data.data_array .* val 
 
@@ -26,6 +38,22 @@ function scaleby(data::Experiment{T}, val) where T<:Real
 end
 
 """
+    pad(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {T <: Real}
+    pad!(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {T <: Real}
+Pad the data in a given `Experiment` object by adding elements with a specified value `val` either before or after the existing data. 
+This function returns a new `Experiment` object with the padded data. pad! is the inplace version, while pad creates a new experiment
+
+# Arguments
+- `trace`: An `Experiment{T}` object containing the experimental data.
+- `n_add`: The number of elements to add.
+- `position`: (Optional) A symbol specifying where to add the elements. Can be `:pre` (before) or `:post` (after). Default is `:post`.
+- `val`: (Optional) The value to use for padding. Default is 0.0.
+
+# Example
+```julia
+exp = Experiment(data_array)
+padded_exp = pad(exp, 100, position=:pre, val=0.0)
+```
 """
 function pad(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {T<:Real}
     data = deepcopy(trace)
@@ -52,9 +80,20 @@ function pad!(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T
 end
 
 """
-    chop(data, n_chop)
+    chop(trace::Experiment, n_chop::Int64; position::Symbol=:post)
+    chop!(trace::Experiment, n_chop::Int64; position::Symbol=:post)
+Chop a specified number of elements from the data in a given `Experiment` object, either from the beginning or the end. This function returns a new `Experiment` object with the modified data.
 
-Removes datapoints
+# Arguments
+- `trace`: An `Experiment` object containing the experimental data.
+- `n_chop`: The number of elements to remove.
+- `position`: (Optional) A symbol specifying where to remove the elements. Can be `:pre` (from the beginning) or `:post` (from the end). Default is `:post`.
+
+# Example
+```julia
+exp = Experiment(data_array)
+chopped_exp = chop(exp, 100, position=:pre)
+```
 """
 function chop(trace::Experiment, n_chop::Int64; position::Symbol=:post)
     data = copy(trace)
@@ -93,9 +132,30 @@ function drop(trace::Experiment; kwargs...)
 end
 
 """
-    truncate_data
-"""
+    truncate_data!(trace::Experiment; t_pre=1.0, t_post=4.0, t_begin=nothing, t_end=nothing, truncate_based_on=:stimulus_beginning)
+    truncate_data(trace::Experiment; kwargs...)
 
+Truncate data in the `Experiment` object, in-place, either based on the stimulus position or a specified time range.
+
+# Arguments
+- `trace`: An `Experiment` object containing the experimental data.
+- `t_pre`: (Optional) Time before the stimulus to truncate the data. Default is 1.0.
+- `t_post`: (Optional) Time after the stimulus to truncate the data. Default is 4.0.
+- `t_begin`: (Optional) Start time of the time range for truncation.
+- `t_end`: (Optional) End time of the time range for truncation.
+- `truncate_based_on`: (Optional) A symbol specifying the truncation method. Can be `:stimulus_beginning`, `:stimulus_end`, or `:time_range`. Default is `:stimulus_beginning`.
+
+# Example
+```julia
+exp = Experiment(data_array)
+truncate_data!(exp, t_pre=0.5, t_post=2.5)
+```
+
+```julia
+exp = Experiment(data_array)
+truncated_exp = truncate_data(exp, t_pre=0.5, t_post=2.5)
+```
+"""
 function truncate_data!(trace::Experiment; 
     t_pre=1.0, t_post=4.0, 
     t_begin = nothing, t_end = nothing, 
@@ -188,6 +248,23 @@ function truncate_data(trace::Experiment; kwargs...)
 end
 
 """
+    average_sweeps(trace::Experiment)
+    average_sweeps!(trace::Experiment)
+
+Return a new `Experiment` object with the average of all sweeps of the input `Experiment` object.
+
+# Arguments
+- `trace`: An `Experiment` object containing the experimental data.
+
+# Example
+```julia
+exp = Experiment(data_array)
+averaged_exp = average_sweeps(exp)
+```
+```julia
+exp = Experiment(data_array)
+average_sweeps!(exp)
+```
 """
 function average_sweeps(trace::Experiment{T}) where {T<:Real}
     data = deepcopy(trace)
@@ -197,6 +274,29 @@ end
 
 average_sweeps!(trace::Experiment{T}) where {T<:Real} = trace.data_array = sum(trace, dims=1) / size(trace, 1)
 
+"""
+    downsample(trace::Experiment, sample_rate::T) where {T<:Real}
+
+Return a new `Experiment` object with the data downsampled to the specified `sample_rate`.
+
+# Arguments
+- `trace`: An `Experiment` object containing the experimental data.
+- `sample_rate`: The desired new sample rate.
+
+# Example
+```julia
+exp = Experiment(data_array)
+downsampled_exp = downsample(exp, 1000.0)
+
+```julia
+exp = Experiment(data_array)
+downsample!(exp, 1000.0)
+```
+```julia
+exp = Experiment(data_array)
+downsample!(exp, 1000.0)
+```
+"""
 function downsample(trace::Experiment{T}, sample_rate::T) where {T<:Real}
     data = deepcopy(trace)
     downsample!(data, sample_rate)
@@ -212,6 +312,25 @@ function downsample!(trace::Experiment{T}, sample_rate::T) where {T<:Real}
     trace.data_array = trace.data_array[:, sample_idxs, :]
 end
 
+"""
+    dyadic_downsample(trace::Experiment{T}) where {T<:Real}
+    dyadic_downsample!(trace::Experiment{T}) where {T<:Real}
+
+Return a new `Experiment` object with the data downsampled to the nearest dyadic length.
+
+# Arguments
+- `trace`: An `Experiment` object containing the experimental data.
+
+# Example
+```julia
+exp = Experiment(data_array)
+dyadic_downsampled_exp = dyadic_downsample(exp)
+```
+```julia
+exp = Experiment(data_array)
+dyadic_downsample!(exp)
+```
+"""
 function dyadic_downsample!(trace::Experiment{T}) where {T<:Real}
     n_data = length(trace.t)
     n_dyad = 2^(trunc(log2(n_data))) |> Int64
@@ -227,6 +346,30 @@ function dyadic_downsample(trace::Experiment{T}) where T<:Real
     return data
 end
 
+"""
+    baseline_adjust(trace::Experiment{T}; kwargs...) where {T<:Real}
+    baseline_adjust!(trace::Experiment{T}; kwargs...) where {T<:Real}
+
+Return a new `Experiment` object with the baseline adjusted according to the specified mode and region.
+
+# Arguments
+- `trace`: An `Experiment` object containing the experimental data.
+
+# Keyword Arguments
+- `mode`: Baseline adjustment mode, either `:mean` or `:slope` (default: `:slope`).
+- `polyN`: Polynomial order for the baseline fit (default: 1).
+- `region`: Range for baseline adjustment, either `:prestim`, `:whole`, a tuple of time values or a tuple of indices.
+
+# Example
+```julia
+exp = Experiment(data_array)
+baseline_adjusted_exp = baseline_adjust(exp, mode=:mean, region=:prestim)
+```
+```julia
+exp = Experiment(data_array)
+baseline_adjust!(exp, mode=:mean, region=:prestim)
+```
+"""
 function baseline_adjust(trace::Experiment{T}; kwargs...) where {T<:Real}
     data = deepcopy(trace)
     baseline_adjust!(data; kwargs...)
