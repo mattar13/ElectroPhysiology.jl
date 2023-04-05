@@ -1,26 +1,55 @@
+"""
+    Stimulus
 
+An abstract type representing a stimulus in a physiological experiment.
+
+Subtypes of `Stimulus` should implement specific stimulus types and their corresponding parameters.
+"""
 abstract type Stimulus end
 
+"""
+    Flash <: Stimulus
+
+A `Flash` is a subtype of `Stimulus` representing a flash stimulus in a physiological experiment.
+
+## Fields
+
+- `intensity`: A `Real` value indicating the intensity of the flash.
+
+## Constructors
+
+- `Flash()`: Creates a default `Flash` object with an intensity of 0.0.
+- `Flash(intensity::Real)`: Creates a `Flash` object with the specified `intensity`.
+
+"""
 struct Flash <: Stimulus
     intensity::Real #The flash intensity of the flash
 end
 Flash() = Flash(0.0)
 
 """
-A stimulus protocol contains information about the stimulus. 
-    ### T <: Real The type declaration is the type of floating point numbers
-    ## Options are: 
-        1) type::Symbol - This is the label or type of stimulus. TODO: This will be defined in stimulus types
-        2) sweep::Int64 - The sweep number the stimulus is contained on
-        3) channel::Union{String, Int64} - The channel name or number which contains stimulus data
-        4) index_range::Tuple{Int64, Int64} - The indexes that thew stimulus starts at and the ends at
-        5) timestamps::Tuple{T, T} - The timestamps which the stimulus starts at and ends at. 
+    StimulusProtocol{T}
+
+A mutable struct representing a stimulus protocol for physiological data.
+
+## Fields
+
+- `type`: A `Stimulus` object describing the type of stimulus applied during the experiment.
+- `channelName`: A `Union{String, Int64}` representing the name or number of the channel where the stimulus is applied.
+- `timestamps`: A `Vector{Tuple{T, T}}` storing the start and end timestamps of the stimulus events.
+
+## Constructors
+
+- `StimulusProtocol()`: Creates a default `StimulusProtocol` object with `Flash()` stimulus, "Nothing" channel, and a single (0.0, 0.0) timestamp.
+- `StimulusProtocol(stimulus_channel::String)`: Creates a `StimulusProtocol` object with `Flash()` stimulus, the provided `stimulus_channel`, and a single (0.0, 0.0) timestamp.
+- `StimulusProtocol(swp::Int64)`: Creates a `StimulusProtocol` object with `Flash()` stimulus, "Nothing" channel, and `swp` number of (0.0, 0.0) timestamps.
+- `StimulusProtocol(stimulus_channel::String, swp::Int64)`: Creates a `StimulusProtocol` object with `Flash()` stimulus, the provided `stimulus_channel`, and `swp` number of (0.0, 0.0) timestamps.
+
 """
 mutable struct StimulusProtocol{T}
     type::Stimulus
     channelName::Union{String,Int64}
     timestamps::Vector{Tuple{T,T}}
-    #index_range::Tuple{Int64,Int64}
 end
 
 StimulusProtocol() = StimulusProtocol(Flash(), "Nothing", [(0.0, 0.0)])
@@ -37,20 +66,55 @@ end
 #Initialize an empty stimulus protocol
 
 """
-this function utilizes all julia to extract ABF file data
-"""
+    extractStimulus(abfInfo::Dict{String, Any}; stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
+    extractStimulus(abf_path::String; kwargs...)
 
-function extractStimulus(abfInfo::Dict{String,Any}; stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
+Extract the stimulus information from the given `abfInfo` dictionary and returns a `StimulusProtocol` object containing stimulus timestamps.
+
+# Arguments
+- `abfInfo`: A dictionary containing information about the physiological data.
+- `stimulus_name`: (Optional) The name of the stimulus channel. Default is "IN 7".
+- `stimulus_threshold`: (Optional) The threshold for detecting stimulus events in the waveform. Default is 2.5.
+
+# Returns
+- A `StimulusProtocol` object containing the stimulus timestamps for each sweep.
+
+# Examples
+    ```julia
+    abfInfo = loadABF("path/to/abf/file")
+    stimuli = extractStimulus(abfInfo)
+    ```
+
+    ```julia
+    stimuli = extractStimulus("path/to/abf/file")
+    ```
+"""
+function extractStimulus(abfInfo::Dict{String,Any};
+    stimulus_name::String="IN 7",
+    stimulus_threshold::Float64=2.5)
+    # Get the time interval between data points
     dt = abfInfo["dataSecPerPoint"]
+
+    # Get the stimulus waveform for the given stimulus_name
     stimulus_waveform = getWaveform(abfInfo, stimulus_name)
-    #instantiate stimulus item
-    stimuli = StimulusProtocol(stimulus_name, (size(abfInfo["data"], 1)))
+
+    # Instantiate a StimulusProtocol object with the provided stimulus_name and the number of sweeps
+    num_sweeps = size(abfInfo["data"], 1)
+    stimuli = StimulusProtocol(stimulus_name, num_sweeps)
+
+    # Iterate over the sweeps
     for swp in axes(abfInfo["data"], 1)
+        # Get the stimulus waveform for the current sweep and apply the threshold
         stim_wave = stimulus_waveform[swp, :, 1] .> stimulus_threshold
-        t1 = findfirst(stim_wave) * dt
-        t2 = (findlast(stim_wave)+1) * dt
-        stimuli[swp] = (t1,t2)
+
+        # Find the start and end timestamps of the stimulus event in the current sweep
+        start_time = findfirst(stim_wave) * dt
+        end_time = (findlast(stim_wave) + 1) * dt
+
+        # Update the StimulusProtocol object with the timestamps for the current sweep
+        stimuli[swp] = (start_time, end_time)
     end
+
     return stimuli
 end
 
