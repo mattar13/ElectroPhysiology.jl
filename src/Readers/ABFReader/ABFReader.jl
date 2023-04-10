@@ -165,41 +165,54 @@ end
 
 
 """
-==================================================================
-Parsing Function
+    parseABF(super_folder::String; extension::String=".abf")
 
-This function finds all files with the suffix .abf 
-==================================================================
-    [abf_files] = parseABF(filename; KWARGS)
+Search for files with a specific extension (default is ".abf") in a given directory
+and its subdirectories. Returns a list of file paths for all matching files.
 
+# Arguments
+- `super_folder`: A string representing the path to the root directory to search for files.
+- `extension`: (Optional) A string representing the file extension to search for (default is ".abf").
 
-ARGS:
-type::Type = The type in which all data will be converted to. Defaults to Float64. 
-filename::String = The filename that will be read
+# Returns
+- `file_list`: An array of strings representing the file paths of all matching files.
 
-KWARGS:
-extenstion::String
-    [DEFAULT, ".abf"]
-    The name of the extension.
+# Throws
+- `ArgumentError`: If no matching files are found in the given directory.
 
+# Examples
+```julia
+file_list = parseABF("path/to/folder")
+file_list = parseABF("path/to/folder", extension=".txt")
+```
 """
 function parseABF(super_folder::String; extension::String=".abf")
+    # Initialize an empty array to store the matching file paths
     file_list = String[]
+    # Iterate through the directories and files in super_folder and its subdirectories
     for (root, dirs, files) in walkdir(super_folder)
         for file in files
+            # Check if the file extension matches the desired extension
             if file[end-3:end] == extension
+                # If it matches, join the root path and the file name to create the full path
                 path = joinpath(root, file)
                 try
+                    # Add the file path to the file_list array
                     push!(file_list, path)
                 catch
+                    # Print the path in case of any errors while adding it to the file_list
                     println(path)
                 end
             end
         end
     end
+
+    # Check if the file_list is empty
     if isempty(file_list)
+        # If it is empty, throw an error indicating no files were found
         throw(ArgumentError("No files found in directory $super_folder matching extension $extension"))
     else
+        # If it is not empty, return the file_list
         return file_list
     end
 end
