@@ -197,7 +197,11 @@ function parseABF(super_folder::String; extension::String=".abf")
             end
         end
     end
-    file_list
+    if isempty(file_list)
+        throw(ArgumentError("No files found in directory $super_folder matching extension $extension"))
+    else
+        return file_list
+    end
 end
 
 const BLOCKSIZE = 512
