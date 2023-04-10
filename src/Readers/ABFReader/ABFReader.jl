@@ -1,6 +1,8 @@
 function extract_channel_indices(channels, HeaderDict)
     if isa(channels, Vector{String})
          return findall(ch -> ch ∈ channels, HeaderDict["adcNames"])
+    elseif isa(channels, String)
+        return findall(ch -> ch == channels, HeaderDict["adcNames"])
     elseif isa(channels, Vector{Int64})
          return channels
     elseif channels == -1
@@ -106,7 +108,7 @@ exp = readABF(Float32, "path/to/abf_file.abf")
 """
 function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     sweeps::Union{Int64,Vector{Int64}}=-1,
-    channels::Union{Int64, Vector{String}}=["Vm_prime", "Vm_prime4"],
+    channels::Union{Int64, String, Vector{String}}=["Vm_prime", "Vm_prime4"],
     average_sweeps::Bool=false,
     stimulus_name::Union{String, Vector{String}, Nothing}="IN 7",  #One of the best places to store digital stimuli
     stimulus_threshold::T=2.5, #This is the normal voltage rating on digital stimuli
