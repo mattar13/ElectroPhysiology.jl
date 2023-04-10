@@ -2,8 +2,6 @@
 using Revise
 using ElectroPhysiology
 
-readABF("test/to")
-
 #%% Section 1, Opening Matlab IRIS files
 PhysiologyAnalysis.__init__()
 using DataFrames, Query, XLSX
