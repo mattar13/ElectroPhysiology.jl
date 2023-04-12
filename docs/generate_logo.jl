@@ -51,13 +51,14 @@ ys = map(x -> x[2], res)
 vs = action_potential.(mod.(t, 2pi))./70.0# 2 * piaction potential values
 logo = plot(xs, ys, vs,#+randn(size(vs))*0.5, 
     line_z = vs, 
-    c = :julia_colorscheme, legend=false, lw = 10, 
+    c = :julia_colorscheme, legend=false, lw = 5, 
     camera =(0,80), 
-    showaxis = false, grid = false, size = (500.0, 500.0), 
-    margin = -200.0mm, dpi = 600
+    showaxis = false, grid = false, size = (200.0, 200.0), 
+    margin = -10.0mm, dpi = 600, 
+    background=nothing
     )
 #plot!(xs, ys, zeros(length(xs)).-70.0, c = :black, lw = 2.0)
-title!("ElectroPhysiology.jl", titlefontsize = 20, titlefontfamily = "MN Latin", )
-savefig(logo, raw"docs\src\assets\ElectroPhysiologyLogo.png")
+title!("ElectroPhysiology.jl", titlefontsize = 10, titlefontcolor = :White, titlefontfamily = "DejaVu Sans")
+savefig(logo, raw"docs\src\assets\logo.png")
 #zlabel!("ElectroPhysiology.jl")
 #ylabel!("A Julia package for electrophysiology")
