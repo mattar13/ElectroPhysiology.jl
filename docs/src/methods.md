@@ -2,6 +2,13 @@
 
 ## ElectroPhysiology Methods
 
+These methods only become available after 
+```
+using ElectroPhysiology
+```
+is run.
+
+
 ### Structs
 ```@docs
 Experiment{T}
@@ -13,3 +20,9 @@ pad(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T=0.0) wher
 ```
 
 ## PhysiologyAnalysis Methods
+
+These methods only become available after 
+```
+using PhysiologyAnalysis
+```
+is run.
