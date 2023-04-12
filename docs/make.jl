@@ -13,7 +13,7 @@ makedocs(
           "Introduction" => "index.md",
           "Installation" => "installation.md",
           "Tutorial" => "tutorial.md",
-          "Methods" => "Methods.md", 
+          "Methods" => "methods.md", 
      ],
      #=
      modules = [ElectroPhysiology, PhysiologyAnalysis],
