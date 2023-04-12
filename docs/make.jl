@@ -15,10 +15,6 @@ makedocs(
           "Tutorial" => "tutorial.md",
           "Functions" => "functions.md"
      ],
-     format = Documenter.HTML(
-          assets = ["assets/logo.png"]
-
-     )
      #=
      modules = [ElectroPhysiology, PhysiologyAnalysis],
      =#
