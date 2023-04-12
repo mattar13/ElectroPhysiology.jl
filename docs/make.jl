@@ -2,7 +2,7 @@ push!(LOAD_PATH, "../src/")
 using Pkg; Pkg.activate("docs")
 using Documenter 
 using ElectroPhysiology 
-#using PhysiologyAnalysis #Comment this out because it uses pyimport which I still haven't configured yet
+using PhysiologyAnalysis #Comment this out because it uses pyimport which I still haven't configured yet
 import ElectroPhysiology: Experiment
 
 makedocs(
@@ -15,9 +15,6 @@ makedocs(
           "Tutorial" => "tutorial.md",
           "Methods" => "methods.md", 
      ],
-     #=
-     modules = [ElectroPhysiology, PhysiologyAnalysis],
-     =#
 )
 
 deploydocs(

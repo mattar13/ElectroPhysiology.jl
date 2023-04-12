@@ -16,9 +16,7 @@ Each time you run julia you will need to run this line first.
 using Pkg; Pkg.add("ElectroPhysiology")
 ```
 
-
 ## Installing the PhysiologyAnalysis toolkit
 ```
 using Pkg; Pkg.add("PhysiologyAnalysis")
 ```
-
