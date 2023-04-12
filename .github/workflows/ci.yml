@@ -57,11 +57,11 @@ jobs:
             using Pkg
             Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
+      #we will need to look more into this section
       - run: |
           julia --project=docs -e '
-            #using Documenter: doctest
             using ElectroPhysiology
-            #doctest(ElectroPhysiology)' # change MYPACKAGE to the name of your package
+            
       - run: julia --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
