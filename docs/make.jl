@@ -1,5 +1,9 @@
 push!(LOAD_PATH, "../src/")
 using Pkg; Pkg.activate("docs")
+#We need to build PyCall before using this to properly use
+ENV["PYTHON"]=""
+Pkg.build("PyCall")
+
 using Documenter 
 using ElectroPhysiology 
 using PhysiologyAnalysis #Comment this out because it uses pyimport which I still haven't configured yet
