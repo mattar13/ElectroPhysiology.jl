@@ -157,7 +157,7 @@ truncated_exp = truncate_data(exp, t_pre=0.5, t_post=2.5)
 ```
 """
 function truncate_data!(trace::Experiment; 
-    t_pre=1.0, t_post=4.0, 
+    t_pre=1.0, t_post=5.0, 
     t_begin = nothing, t_end = nothing, 
     truncate_based_on=:stimulus_beginning
 )
