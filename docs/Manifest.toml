@@ -830,9 +830,9 @@ version = "2.5.8"
 
 [[deps.PhysiologyAnalysis]]
 deps = ["DSP", "DataFrames", "Dates", "Distributions", "ElectroPhysiology", "HypothesisTests", "LsqFit", "Polynomials", "PyCall", "PyPlot", "Query", "Statistics", "StatsBase", "StatsPlots", "Test", "XLSX"]
-git-tree-sha1 = "f9be8283eb7e362a558a6b033eb35fc598a850be"
+git-tree-sha1 = "0cd98cb393e0e5edf95cf42861c712328c1fdaee"
 uuid = "69cbc4a0-077e-48a7-9b45-fa8b7014b5ca"
-version = "0.4.4"
+version = "0.4.5"
 
 [[deps.Pipe]]
 git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
