@@ -1,6 +1,5 @@
 # Installation
-```@contents
-```
+
 ## Making an analysis environment (OPTIONAL)
 While it is not necessary to create a seperate environment, this helps to isolate packages and prevent cross-contamination of packages. 
 
