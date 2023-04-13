@@ -10,13 +10,13 @@ using Pkg; Pkg.activate("Analysis")
 
 Each time you run julia you will need to run this line first. 
 
-## Installing Basic ElectroPhysiology
+## Installing ElectroPhysiology.jl
 
 ```
 using Pkg; Pkg.add("ElectroPhysiology")
 ```
 
-## Installing the PhysiologyAnalysis toolkit
+## Installing the PhysiologyAnalysis.jl toolkit
 ```
 using Pkg; Pkg.add("PhysiologyAnalysis")
 ```
