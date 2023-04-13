@@ -14,5 +14,6 @@ makedocs(
           "Installation" => "installation.md",
           "Tutorial" => "tutorial.md",
           "Methods" => "methods.md", 
-     ],
+          "Roadmap" => "roadmap.md"
+     ]
 )
