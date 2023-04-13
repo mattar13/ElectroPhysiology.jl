@@ -52,13 +52,13 @@ end
 
 function extract_stimulus_protocol(HeaderDict, stimulus_name, stimulus_threshold)
     if isnothing(stimulus_name)
-         return StimulusProtocol("Nothing")
+        return StimulusProtocol("Nothing")
     else
-         return extractStimulus(HeaderDict; stimulus_name = stimulus_name, stimulus_threshold = stimulus_threshold)
+        return extractStimulus(HeaderDict; stimulus_name = stimulus_name, stimulus_threshold = stimulus_threshold)
     end
 end
 
-function average_data_and_protocol(data, stimulus_protocol)
+function average_data_and_protocol(data, stimulus_protocol, stimulus_name)
     data = sum(data, dims=1) / size(data, 1)
     stimulus_protocol_first_vals = stimulus_protocol[1]
     stimulus_protocol = StimulusProtocol(stimulus_name)
@@ -140,7 +140,7 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
 
     # Average sweeps if requested
     if average_sweeps
-        data, stimulus_protocol = average_data_and_protocol(data, stimulus_protocol)
+        data, stimulus_protocol = average_data_and_protocol(data, stimulus_protocol, stimulus_name)
     end
     
     # Return Experiment object

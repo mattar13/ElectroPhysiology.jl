@@ -2,6 +2,11 @@
 using Revise
 using ElectroPhysiology
 
+paths = "C:\\Users\\mtarc\\OneDrive - The University of Akron\\Data\\ERG\\Retinoschisis\\2022_04_21_a13MelCreAdult\\Mouse2_Adult_WT\\BaCl_LAP4\\Rods" |> parseABF
+data_WT30A = readABF(paths)
+
+
+
 #%% Section 1, Opening Matlab IRIS files
 PhysiologyAnalysis.__init__()
 using DataFrames, Query, XLSX
