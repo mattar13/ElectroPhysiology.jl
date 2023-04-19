@@ -11,7 +11,6 @@ import Statistics.std
 #=3) Modifies experiment objects =#
 using DSP #Used for lowpass, highpass, EI, and notch filtering
 
-
 include("Experiment/StimulusProtocol.jl")
 export StimulusProtocol
 export setindex!, getindex
@@ -46,6 +45,8 @@ export normalize, normalize!
 
 include("Filtering/filteringPipelines.jl")
 export data_filter!, data_filter
+
+#using ContinuousWavelets, Wavelets
 
 #include("Filtering/make_spectrum.jl")
 #include("Filtering/wavelet_filtering.jl")
