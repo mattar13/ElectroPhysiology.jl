@@ -20,3 +20,8 @@ using Pkg; Pkg.add("ElectroPhysiology")
 ```
 using Pkg; Pkg.add("PhysiologyAnalysis")
 ```
+
+## Installing the PhysiologyPlotting.jl toolkit
+```
+using Pkg; Pkg.add("PhysiologyPlotting")
+```
