@@ -26,3 +26,5 @@ These methods only become available after
 using PhysiologyAnalysis
 ```
 is run.
+
+## PhysiologyPlotting Methods

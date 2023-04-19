@@ -6,12 +6,12 @@ Electrophysiology is defined the study of the electrical nature of cells in an o
 
 This module is composed of several different modules. You can load some or all of the modules based on what you need. 
 
-
 - ElectroPhysiology.jl provides the basic reading and access to electrophysiology data
-[ElectroPhysiology Methods](@ref)
+     - [ElectroPhysiology Methods](@ref)
 - PhysiologyAnalysis.jl provides some analysis tools and plotting tools for analysis
-[PhysiologyAnalysis Methods](@ref)
-- PhysiologyModeling.jl provides some simulation tools. 
+     - [PhysiologyAnalysis Methods](@ref)
+- PhysiologyPlotting.jl provides plotting and visualization tools. 
+     - [PhysiologyPlotting Methods](@ref)
 
 In general, if exporting PhysiologyAnalysis.jl or PhysiologyModeling.jl, ElectroPhysiology.jl doesn't need to be exported, and many of the things exported with ElectroPhysiology.jl will be left "under the hood". However if some of the tools included in ElectroPhysiology.jl are needed (see ElectroPhysiology tools), then it may be best to import both. 
 
