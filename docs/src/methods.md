@@ -28,3 +28,9 @@ using PhysiologyAnalysis
 is run.
 
 ## PhysiologyPlotting Methods
+
+These methods only become available after 
+```
+using PhysiologyPlotting
+```
+is run.
