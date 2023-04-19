@@ -8,6 +8,9 @@ using Dates
 import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax
 import Statistics.std
 
+using DSP #Used for lowpass, highpass, EI, and notch filtering
+
+
 include("Experiment/StimulusProtocol.jl")
 export StimulusProtocol
 export setindex!, getindex
@@ -33,6 +36,21 @@ export concat, concat!
 
 include("Experiment/IterateExperiments.jl")
 export getdata, getchannel, eachchannel, eachsweep
+
+#1)Filter ====================================================================================#
+include("Filtering/filtering.jl")
+export filter_data, filter_data!
+export rolling_mean
+export normalize, normalize!
+
+include("Filtering/filteringPipelines.jl")
+export data_filter!, data_filter
+
+#include("Filtering/make_spectrum.jl")
+#include("Filtering/wavelet_filtering.jl")
+#export cwt_filter!, cwt_filter
+#export dwt_filter!, dwt_filter
+
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl")
 export readABF
