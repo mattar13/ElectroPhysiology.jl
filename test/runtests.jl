@@ -143,3 +143,7 @@ end
 @testset "Testing ABF reader" begin
     include("testABFReader.jl")
 end
+
+@testset "Testing filtering of data" begin
+    filter_data!(data)
+end

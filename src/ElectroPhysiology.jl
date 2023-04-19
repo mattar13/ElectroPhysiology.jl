@@ -1,13 +1,14 @@
 module ElectroPhysiology
 
-#retriggering ci
-# Write your package code here.
-## 1) Basic usage starts with the experiment Readers
 #=Import all experiment objects=======================#
 using Dates
 import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax
 import Statistics.std
 
+#This code does several things
+#=1) Creates several objects used in the analysis of ElectroPhysiology data=#
+#=2) Reads =#
+#=3) Modifies experiment objects =#
 using DSP #Used for lowpass, highpass, EI, and notch filtering
 
 
