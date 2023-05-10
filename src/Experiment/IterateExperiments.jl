@@ -1,13 +1,13 @@
 """
-    getdata(trace::Experiment, sweeps, timepoints, channels::Union{String,Vector{String}})
-    getdata(trace::Experiment, sweeps, timepoints, channels; verbose=false)
+    getdata(trace::Experiment, trials, timepoints, channels::Union{String,Vector{String}})
+    getdata(trace::Experiment, trials, timepoints, channels; verbose=false)
 
 Return a new `Experiment` object with a specified subset of data extracted from the input `trace` based on 
-`sweeps`, `timepoints`, and `channels`.
+`trials`, `timepoints`, and `channels`.
 
 # Arguments
 - `trace`: An `Experiment` object containing the experimental data.
-- `sweeps`: A selection of sweeps to include in the new data.
+- `trials`: A selection of trials to include in the new data.
 - `timepoints`: A selection of timepoints to include in the new data.
 - `channels`: A `String` or `Vector{String}` specifying the channels to include in the new data.
 
@@ -19,17 +19,17 @@ Return a new `Experiment` object with a specified subset of data extracted from 
 data = getdata(trace, 1:5, 100:200, ["Ch1", "Ch2"])
 ```
 """
-function getdata(trace::Experiment, sweeps, timepoints, channels::Union{String,Vector{String}})
+function getdata(trace::Experiment, trials, timepoints, channels::Union{String,Vector{String}})
     data = deepcopy(trace) #this copies the entire 
-    data.data_array = trace[sweeps, timepoints, channels]
+    data.data_array = trace[trials, timepoints, channels]
     data.chNames = channels
     return data
 end
 
-function getdata(trace::Experiment, sweeps, timepoints, channels; verbose=false) #I don't have an idea as to why this works differently
+function getdata(trace::Experiment, trials, timepoints, channels; verbose=false) #I don't have an idea as to why this works differently
      data = deepcopy(trace)
-     if isa(sweeps, Int64)
-          sweeps = [sweeps]
+     if isa(trials, Int64)
+          trials = [trials]
      end
      if isa(timepoints, Int64)
           timepoints = [timepoints]
@@ -37,7 +37,7 @@ function getdata(trace::Experiment, sweeps, timepoints, channels; verbose=false)
      if isa(channels, Int64)
           channels = [channels]
      end     
-     data.data_array = trace[sweeps, timepoints, channels]
+     data.data_array = trace[trials, timepoints, channels]
      data.chNames = trace.chNames[channels]
      return data
 end
@@ -81,22 +81,22 @@ end
 eachchannel(trace::Experiment; verbose=false) = Iterators.map(idx -> getchannel(trace, idx; verbose=verbose), 1:size(trace, 3))
 
 """
-    eachsweep(trace::Experiment)
+    eachtrial(trace::Experiment)
 
-Return an iterator that iterates over each sweep of the input `trace` as an `Experiment` object.
+Return an iterator that iterates over each trial of the input `trace` as an `Experiment` object.
 
 # Arguments
 - `trace`: An `Experiment` object containing the experimental data.
 
 # Returns
-- An iterator that yields an `Experiment` object for each sweep in the input `trace`.
+- An iterator that yields an `Experiment` object for each trial in the input `trace`.
 
 # Example
 ```julia
-sweep_iter = eachsweep(trace)
-for sweep in sweep_iter
-    # Process each sweep
+trial_iter = eachtrial(trace)
+for trial in trial_iter
+    # Process each trial
 end
 ```
 """
-eachsweep(trace::Experiment) = Iterators.map(idx -> getdata(trace, idx, :, :), 1:size(trace, 1))
+eachtrial(trace::Experiment) = Iterators.map(idx -> getdata(trace, idx, :, :), 1:size(trace, 1))

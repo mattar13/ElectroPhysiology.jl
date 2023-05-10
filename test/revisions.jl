@@ -1,11 +1,22 @@
-#Fixing some documentation using chatGPT and GPT4
 using Revise
 using ElectroPhysiology
+using DataFrame
+#%% Add the ability to extract csv files from the data
+
+#open test data
+test_data = "test/to_analyze.abf"
+data = readABF(test_data)
+data.data_array
+
+for ch in eachchannel(data)
+     println(ch.chNames)
+end
 
 #%% 
 paths = "C:\\Users\\mtarc\\OneDrive - The University of Akron\\Data\\ERG\\Retinoschisis\\2022_04_21_a13MelCreAdult\\Mouse2_Adult_WT\\BaCl_LAP4\\Rods" |> parseABF
 data_WT30A = readABF(paths) |> truncate_data
 baseline_adjust(data_WT30A)
+
 #%% Section 1, Opening Matlab IRIS files
 PhysiologyAnalysis.__init__()
 using DataFrames, Query, XLSX

@@ -2,7 +2,7 @@
     concat(data::Experiment{T}, data_add::Experiment{T}; kwargs...) where {T}
     concat!(data::Experiment{T}, data_add::Experiment{T}; kwargs...) where {T}
 
-Return a new `Experiment` object with `data` concatenated with `data_add` along the sweeps dimension.
+Return a new `Experiment` object with `data` concatenated with `data_add` along the trials dimension.
 
 # Arguments
 - `data`: An `Experiment` object containing the experimental data.

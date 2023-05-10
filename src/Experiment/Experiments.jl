@@ -88,10 +88,10 @@ end
 #if the value provided is different
 function /(exp::Experiment{T}, vals::Matrix{T}) where {T<:Real}
     #This function has not been worked out yet
-    if size(exp, 1) == size(vals, 1) && size(exp, 3) == size(vals, 2) #Sweeps and channels of divisor match
-        println("Both Sweeps and channels")
+    if size(exp, 1) == size(vals, 1) && size(exp, 3) == size(vals, 2) #trials and channels of divisor match
+        println("Both trials and channels")
     elseif size(exp, 1) == size(vals, 1) && !(size(exp, 3) == size(vals, 2))# only channels match
-        println("Only sweeps match")
+        println("Only trials match")
     elseif !(size(exp, 1) == size(vals, 1)) && size(exp, 3) == size(vals, 2)# only channels match
         println("O")
     end
@@ -105,11 +105,11 @@ axes(exp::Experiment, dim::Int64) = axes(exp.data_array, dim)
 length(exp::Experiment) = size(exp, 2)
 
 #This is the basic functionality of getindex of experiments
-getindex(exp::Experiment, sweeps::Union{Int64,UnitRange{Int64}}, timepoints::Union{Int64,UnitRange{Int64}}, channels::Union{Int64,UnitRange{Int64}}) = exp.data_array[sweeps, timepoints, channels]
-#getindex(exp::Experiment, sweeps::StepRangeLen{Int64}, timepoints::StepRangeLen{Int64}, channels::StepRangeLen{Int64}) = exp[sweeps, timepoints, channels]
+getindex(exp::Experiment, trials::Union{Int64,UnitRange{Int64}}, timepoints::Union{Int64,UnitRange{Int64}}, channels::Union{Int64,UnitRange{Int64}}) = exp.data_array[trials, timepoints, channels]
+#getindex(exp::Experiment, trials::StepRangeLen{Int64}, timepoints::StepRangeLen{Int64}, channels::StepRangeLen{Int64}) = exp[trials, timepoints, channels]
 
 #This function allows you to enter in a timestamp and get the data value relating to it
-function getindex(exp::Experiment, sweeps, timestamps::Union{Float64,StepRangeLen{Float64}}, channels)
+function getindex(exp::Experiment, trials, timestamps::Union{Float64,StepRangeLen{Float64}}, channels)
     @assert timestamps[end] .< exp.t[end] "Highest timestamp too high"
     @assert timestamps[1] .>= exp.t[1] "Lowest timestamp too low"
 
@@ -120,17 +120,17 @@ function getindex(exp::Experiment, sweeps, timestamps::Union{Float64,StepRangeLe
     timepoints = (timestamps ./ exp.dt) .+ 1
     timepoints = (round.(Int64, timepoints))
     timepoints .+= offset
-    exp[sweeps, timepoints, channels]
+    exp[trials, timepoints, channels]
 end
 
-function getindex(exp::Experiment, sweeps, timestamps, channel::String)
+function getindex(exp::Experiment, trials, timestamps, channel::String)
     ch_idx = findall(exp.chNames .== channel)
-    exp[sweeps, timestamps, ch_idx]
+    exp[trials, timestamps, ch_idx]
 end
 
-function getindex(exp::Experiment, sweeps, timestamps, channels::Vector{String})
+function getindex(exp::Experiment, trials, timestamps, channels::Vector{String})
     ch_idxs = map(channel -> findall(exp.chNames .== channel)[1], channels)
-    exp[sweeps, timestamps, ch_idxs]
+    exp[trials, timestamps, ch_idxs]
 end
 
 #Extending get index for Experiment
@@ -157,16 +157,16 @@ argmax(exp::Experiment; dims=2) = argmax(exp.data_array, dims=dims)
 function push!(nt::Experiment{T}, item::AbstractArray{T}; new_name="Unnamed") where {T<:Real}
     #All of these options assume the new data point length matches the old one
     if size(item, 2) == size(nt, 2) && size(item, 3) == size(nt, 3)
-        #item = (new_sweep, datapoints, channels)
+        #item = (new_trial, datapoints, channels)
         nt.data_array = cat(nt.data_array, item, dims=1)
 
     elseif size(item, 1) == size(nt, 2) && size(item, 2) == size(nt, 3)
-        #item = (datapoints, channels) aka a single sweep
+        #item = (datapoints, channels) aka a single trial
         item = reshape(item, 1, size(item, 1), size(item, 2))
         nt.data_array = cat(nt.data_array, item, dims=1)
 
     elseif size(item, 1) == size(nt, 1) && size(item, 2) == size(nt, 2)
-        #item = (sweeps, datapoints, new_channels) 
+        #item = (trials, datapoints, new_channels) 
         nt.data_array = cat(nt.data_array, item, dims=3)
         #Because we are adding in a new channel, add the channel name
         push!(nt.chNames, new_name)
@@ -194,3 +194,7 @@ function reverse!(exp::Experiment; kwargs...)
 end
 
 getSampleFreq(exp::Experiment) = 1/exp.dt
+
+function getChannelName(exp::Experiment)
+    if size(exp,2)
+end

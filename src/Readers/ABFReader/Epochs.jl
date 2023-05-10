@@ -13,9 +13,9 @@ For Julia this can be Float64, but for older files this may be Float32.
     3) 'dacNum::T' -> The Digital to Analog channel that contains the stimulus. 
     4) 'epochNumber::T' -> The number ID related to the Epoch
     5) 'level::T' -> The holding level of the Epoch. The value related to the command is found in the "dacUnits"
-    6) 'levelDelta::T' -> The change in level for each sweep. 
+    6) 'levelDelta::T' -> The change in level for each trial. 
     7) 'duration::T' -> How long the DAC will be held at a certai level
-    8) 'durationDelta::T' -> From sweep to sweep the change in the duration
+    8) 'durationDelta::T' -> From trial to trial the change in the duration
     9) 'digitalPattern::Vector'{T} -> If a digital channel is used, a digital bit pattern will be used (8 bits)
     10) 'pulsePeriod::T' -> The periodicity of the pulse (Sine Wave)
     11) 'pulseWidth::T' -> The width of the pulse (Sine Wave)
@@ -39,7 +39,7 @@ end
 Epoch() = Epoch(" ", "Off", 0, 0, 0.0, 0.0, 0.0, 0.0, zeros(Int64, 8), 0.0, 0.0)
 #EpochTable will be instantiated last
 
-mutable struct EpochSweepWaveform
+mutable struct EpochtrialWaveform
     p1s::Vector
     p2s::Vector
     levels::Vector
@@ -52,16 +52,16 @@ end
 mutable struct EpochTable
     sampleRateHz
     holdingLevel
-    sweepPointCount
+    trialPointCount
     channel
     epochs::Vector{Epoch}
-    epochWaveformBySweep::Vector{EpochSweepWaveform}
+    epochWaveformBytrial::Vector{EpochtrialWaveform}
 end
 
 
-EpochSweepWaveform() = EpochSweepWaveform([], [], [], [], [], [], [])
+EpochtrialWaveform() = EpochtrialWaveform([], [], [], [], [], [], [])
 
-function addEpoch(e::EpochSweepWaveform, pt1, pt2, level, type, pulseWidth, pulsePeriod, digitalState)
+function addEpoch(e::EpochtrialWaveform, pt1, pt2, level, type, pulseWidth, pulsePeriod, digitalState)
     push!(e.p1s, round(Int64, pt1))
     push!(e.p2s, round(Int64, pt2))
     push!(e.levels, level)
@@ -76,7 +76,7 @@ function EpochTable(abf::Dict{String,Any}, channel::Int64)
     #channel has to be a channel number in this case
     sampleRateHz = abf["dataRate"]
     holdingLevel = abf["holdingCommand"][channel]
-    sweepPointCount = abf["sweepPointCount"]
+    trialPointCount = abf["trialPointCount"]
     epochs = Epoch[]
 
     returnToHold = false
@@ -127,39 +127,39 @@ function EpochTable(abf::Dict{String,Any}, channel::Int64)
         returnToHold = abf["DACSection"]["nInterEpisodeLevel"][channel] == 1
     end
 
-    epochWaveformsBySweep = []
-    #Create a list of waveform objects by sweep    
-    lastSweepLastLevel = holdingLevel
-    for sweep in abf["sweepList"]
-        ep = EpochSweepWaveform()
+    epochWaveformsBytrial = []
+    #Create a list of waveform objects by trial    
+    lasttrialLastLevel = holdingLevel
+    for trial in abf["trialList"]
+        ep = EpochtrialWaveform()
         #Add pre epoch values
-        preEpochEndPoint = abf["sweepPointCount"] / 64.0
+        preEpochEndPoint = abf["trialPointCount"] / 64.0
         pt2 = preEpochEndPoint
-        addEpoch(ep, 0.0, preEpochEndPoint, lastSweepLastLevel, "Step", 0, 0, zeros(Int64, 8))
+        addEpoch(ep, 0.0, preEpochEndPoint, lasttrialLastLevel, "Step", 0, 0, zeros(Int64, 8))
 
         position = preEpochEndPoint
         level = holdingLevel
         for epoch in epochs
-            duration = epoch.duration + epoch.durationDelta * sweep
+            duration = epoch.duration + epoch.durationDelta * trial
             pt1, pt2 = (position, position + duration)
-            level = epoch.level + epoch.levelDelta * sweep
+            level = epoch.level + epoch.levelDelta * trial
             addEpoch(ep, pt1, pt2, level, epoch.epochType, epoch.pulseWidth, epoch.pulsePeriod, epoch.digitalPattern)
             position = pt2
         end
         if returnToHold
-            lastSweepLastLevel = level |> Float64
+            lasttrialLastLevel = level |> Float64
         else
-            lastSweepLastLevel = holdingLevel |> Float64
+            lasttrialLastLevel = holdingLevel |> Float64
         end
-        addEpoch(ep, pt2, abf["sweepPointCount"], lastSweepLastLevel, "Step", 0, 0, zeros(8))
-        push!(epochWaveformsBySweep, ep)
+        addEpoch(ep, pt2, abf["trialPointCount"], lasttrialLastLevel, "Step", 0, 0, zeros(8))
+        push!(epochWaveformsBytrial, ep)
     end
 
-    return EpochTable(sampleRateHz, holdingLevel, sweepPointCount, channel, epochs, epochWaveformsBySweep)
+    return EpochTable(sampleRateHz, holdingLevel, trialPointCount, channel, epochs, epochWaveformsBytrial)
 end
 
-function getAnalogWaveform(e::EpochSweepWaveform)
-    sweepC = zeros(e.p2s[end])
+function getAnalogWaveform(e::EpochtrialWaveform)
+    trialC = zeros(e.p2s[end])
     for i = 1:length(e.levels)
         #Easier access to epoch
         epochType = e.types[i]
@@ -194,20 +194,20 @@ function getAnalogWaveform(e::EpochSweepWaveform)
             println("to be implemented")
         end
         #digitalStateForChannel = digitalState[channel]
-        #add the chunk to the sweep
-        sweepC[(e.p1s[i]+1):(e.p2s[i])]
+        #add the chunk to the trial
+        trialC[(e.p1s[i]+1):(e.p2s[i])]
     end
-    return sweepC
+    return trialC
 end
 
-function getDigitalWaveform(e::EpochSweepWaveform, channel)
-    sweepD = zeros(e.p2s[end])
+function getDigitalWaveform(e::EpochtrialWaveform, channel)
+    trialD = zeros(e.p2s[end])
     for i = 1:length(e.levels)-1
         digitalState = e.digitalStates[i]
         digitalStateForChannel = digitalState[channel] * 5 #for voltage output
         #println(e.p1s[i])
         #println(e.p2s[i])
-        sweepD[(e.p1s[i]+1):(e.p2s[i]+1)] .= digitalStateForChannel
+        trialD[(e.p1s[i]+1):(e.p2s[i]+1)] .= digitalStateForChannel
     end
-    return sweepD
+    return trialD
 end

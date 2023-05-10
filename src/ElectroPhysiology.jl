@@ -26,7 +26,7 @@ export scaleby, scaleby!
 export pad, pad!, chop, chop!
 export drop, drop!
 export truncate_data, truncate_data!
-export average_sweeps, average_sweeps!
+export average_trials, average_trials!
 export downsample, downsample!
 export dyadic_downsample, dyadic_downsample!
 export baseline_adjust, baseline_adjust!
@@ -35,7 +35,7 @@ include("Experiment/JoiningExperiments.jl") #These files join multiple experimen
 export concat, concat!
 
 include("Experiment/IterateExperiments.jl")
-export getdata, getchannel, eachchannel, eachsweep
+export getdata, getchannel, eachchannel, eachtrial
 
 #1)Filter ====================================================================================#
 include("Filtering/filtering.jl")

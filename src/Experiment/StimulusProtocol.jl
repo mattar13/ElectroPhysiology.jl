@@ -77,7 +77,7 @@ Extract the stimulus information from the given `abfInfo` dictionary and returns
 - `stimulus_threshold`: (Optional) The threshold for detecting stimulus events in the waveform. Default is 2.5.
 
 # Returns
-- A `StimulusProtocol` object containing the stimulus timestamps for each sweep.
+- A `StimulusProtocol` object containing the stimulus timestamps for each trial.
 
 # Examples
 ```julia
@@ -98,20 +98,20 @@ function extractStimulus(abfInfo::Dict{String,Any};
     # Get the stimulus waveform for the given stimulus_name
     stimulus_waveform = getWaveform(abfInfo, stimulus_name)
 
-    # Instantiate a StimulusProtocol object with the provided stimulus_name and the number of sweeps
-    num_sweeps = size(abfInfo["data"], 1)
-    stimuli = StimulusProtocol(stimulus_name, num_sweeps)
+    # Instantiate a StimulusProtocol object with the provided stimulus_name and the number of trials
+    num_trials = size(abfInfo["data"], 1)
+    stimuli = StimulusProtocol(stimulus_name, num_trials)
 
-    # Iterate over the sweeps
+    # Iterate over the trials
     for swp in axes(abfInfo["data"], 1)
-        # Get the stimulus waveform for the current sweep and apply the threshold
+        # Get the stimulus waveform for the current trial and apply the threshold
         stim_wave = stimulus_waveform[swp, :, 1] .> stimulus_threshold
 
-        # Find the start and end timestamps of the stimulus event in the current sweep
+        # Find the start and end timestamps of the stimulus event in the current trial
         start_time = findfirst(stim_wave) * dt
         end_time = (findlast(stim_wave) + 1) * dt
 
-        # Update the StimulusProtocol object with the timestamps for the current sweep
+        # Update the StimulusProtocol object with the timestamps for the current trial
         stimuli[swp] = (start_time, end_time)
     end
 

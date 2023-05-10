@@ -11,8 +11,8 @@ function readABFInfo(::Type{T}, binary_file::Vector{UInt8};
     dataByteStart = headerSection["dataByteStart"]
     dataPointCount = headerSection["dataPointCount"]
     nDataPoints = headerSection["nDataPoints"]
-    sweepPointCount = headerSection["sweepPointCount"]
-    sweepCount = headerSection["sweepCount"]
+    trialPointCount = headerSection["trialPointCount"]
+    trialCount = headerSection["trialCount"]
     channelCount = headerSection["channelCount"]
     dataType = headerSection["dataType"]
     dataGain = headerSection["dataGain"]
@@ -27,8 +27,8 @@ function readABFInfo(::Type{T}, binary_file::Vector{UInt8};
             raw = raw .* dataGain #Multiply the data by the gain
             raw = raw .+ dataOffset #Scale the data by the offset
         end
-        #We can try to convert the data into a array of shape [sweeps, data, channels]
-        raw = reshape(raw, (channelCount, sweepPointCount, sweepCount)) #Reshape the data
+        #We can try to convert the data into a array of shape [trials, data, channels]
+        raw = reshape(raw, (channelCount, trialPointCount, trialCount)) #Reshape the data
         raw = permutedims(raw, data_format) #permute the dims
         headerSection["data"] = Array{T}(raw)
     end
@@ -45,7 +45,7 @@ This scans the axon binary and extracts all the most useful header information
 For datashape
     1 -> channels
     2 -> dataspan
-    3 -> Sweeps
+    3 -> trials
 """
 function readABFInfo(::Type{T}, filename::String; loadData=true, data_format=[3, 2, 1]) where {T<:Real}
     #Can we go through and convert anything before loading
@@ -58,8 +58,8 @@ function readABFInfo(::Type{T}, filename::String; loadData=true, data_format=[3,
         dataByteStart = headerSection["dataByteStart"]
         dataPointCount = headerSection["dataPointCount"]
         nDataPoints = headerSection["nDataPoints"]
-        sweepPointCount = headerSection["sweepPointCount"]
-        sweepCount = headerSection["sweepCount"]
+        trialPointCount = headerSection["trialPointCount"]
+        trialCount = headerSection["trialCount"]
         channelCount = headerSection["channelCount"]
         dataType = headerSection["dataType"]
         dataGain = headerSection["dataGain"]
@@ -74,8 +74,8 @@ function readABFInfo(::Type{T}, filename::String; loadData=true, data_format=[3,
                 raw = raw .* dataGain #Multiply the data by the gain
                 raw = raw .+ dataOffset #Scale the data by the offset
             end
-            #We can try to convert the data into a array of shape [sweeps, data, channels]
-            raw = reshape(raw, (channelCount, sweepPointCount, sweepCount)) #Reshape the data
+            #We can try to convert the data into a array of shape [trials, data, channels]
+            raw = reshape(raw, (channelCount, trialPointCount, trialCount)) #Reshape the data
             raw = permutedims(raw, data_format) #permute the dims
             headerSection["data"] = Array{T}(raw)
         end
@@ -202,7 +202,7 @@ function readHeaderSection(f::IO; bytemap = header_bytemap, check_bit_pos = fals
     
         # GROUP 10 - DAC Output File (98 bytes)
         # missing entries
-        # GROUP 11 - Presweep (conditioning) pulse train (44 bytes)
+        # GROUP 11 - Pretrial (conditioning) pulse train (44 bytes)
         # missing entries
         # GROUP 13 - Autopeak measurement (36 bytes)
         # missing entries
@@ -241,7 +241,7 @@ function readHeaderSection(f::IO; bytemap = header_bytemap, check_bit_pos = fals
         headerSection["lDACFileEpisodeNum"] = readStruct(f, "2i", 2724)
         headerSection["nDACFileADCNum"] = readStruct(f, "2h", 2732)
         headerSection["sDACFilePath"] = readStruct(f, "256s", 2736, repeat = 2)
-        # EXTENDED GROUP 11 - Presweep (conditioning) pulse train (100 bytes)
+        # EXTENDED GROUP 11 - Pretrial (conditioning) pulse train (100 bytes)
         # missing entries
         # EXTENDED GROUP 12 - Variable parameter user list (1096 bytes)
         if headerSection["fFileVersionNumber"][1] > Float32(1.6)
@@ -324,12 +324,12 @@ function readHeaderSection(f::IO; bytemap = header_bytemap, check_bit_pos = fals
         headerSection["dataPointCount"] = dataPointCount = headerSection["lActualAcqLength"][1] |> Int64
         headerSection["channelCount"] = channelCount = headerSection["nADCNumChannels"][1] |> Int64
         headerSection["nDataPoints"] = Int64(dataPointCount / channelCount)
-        if headerSection["nOperationMode"][1] |> Int64 == 3 #This means that sweeps are gap-free
-            headerSection["sweepCount"] = sweepCount = 1
+        if headerSection["nOperationMode"][1] |> Int64 == 3 #This means that trials are gap-free
+            headerSection["trialCount"] = trialCount = 1
         else
-            headerSection["sweepCount"] = sweepCount = headerSection["lActualEpisodes"][1] |> Int64
+            headerSection["trialCount"] = trialCount = headerSection["lActualEpisodes"][1] |> Int64
         end
-        headerSection["sweepPointCount"] = Int64(dataPointCount / sweepCount / channelCount)
+        headerSection["trialPointCount"] = Int64(dataPointCount / trialCount / channelCount)
     
         headerSection["dataRate"] = dataRate = (1e6 / headerSection["fADCSampleInterval"][1])
         headerSection["dataRate"] = dataRate / channelCount
@@ -455,9 +455,9 @@ function readHeaderSection(f::IO; bytemap = header_bytemap, check_bit_pos = fals
         headerSection["channelList"] = ADCSection["channelList"]
     
         if ProtocolSection["nOperationMode"][1] |> Int64 == 3
-            headerSection["sweepCount"] = sweepCount = 1 #This is gap-free mode
+            headerSection["trialCount"] = trialCount = 1 #This is gap-free mode
         else
-            headerSection["sweepCount"] = sweepCount = headerSection["lActualEpisodes"][1]
+            headerSection["trialCount"] = trialCount = headerSection["lActualEpisodes"][1]
         end
     
         if headerSection["nDataFormat"][1] == 0
@@ -489,15 +489,15 @@ function readHeaderSection(f::IO; bytemap = header_bytemap, check_bit_pos = fals
         headerSection["dacUnits"] = map(i -> StringSection[i+1], DACSection["lDACChannelUnitsIndex"])
         #get the holding command section
         headerSection["holdingCommand"] = DACSection["fDACHoldingLevel"]
-        if sweepCount == 0 || channelCount == 0
+        if trialCount == 0 || channelCount == 0
             println("There is something going on here")
-            println(sweepCount)
+            println(trialCount)
             println(channelCount)
             throw("Divide By Zero error")
         end
-        headerSection["sweepPointCount"] = sweepPointCount = Int64(dataPointCount / sweepCount / channelCount)
-        headerSection["sweepLengthSec"] = sweepPointCount / dataRate
-        headerSection["sweepList"] = collect(1:sweepCount)
+        headerSection["trialPointCount"] = trialPointCount = Int64(dataPointCount / trialCount / channelCount)
+        headerSection["trialLengthSec"] = trialPointCount / dataRate
+        headerSection["trialList"] = collect(1:trialCount)
         #Once we have both adc info and dac info as well as data, we can start actually parsing data
         headerSection["nDataPoints"] = Int64(dataPointCount / channelCount)
         dataGain = zeros(channelCount)

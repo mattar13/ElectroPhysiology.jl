@@ -19,16 +19,16 @@ function extract_channel_info(ch_idxs, HeaderDict)
     return ch_names, ch_units, ch_telegraph
 end
 
-function extract_data(sweeps, channels, ch_names, HeaderDict, warn_bad_channel)
-    if sweeps == -1 && channels == -1
+function extract_data(trials, channels, ch_names, HeaderDict, warn_bad_channel)
+    if trials == -1 && channels == -1
          return HeaderDict["data"]
-    elseif sweeps == -1 && channels != -1
+    elseif trials == -1 && channels != -1
          return getWaveform(HeaderDict, ch_names; warn_bad_channel=warn_bad_channel)
-    elseif sweeps != -1 && channels == -1
-         return HeaderDict["data"][sweeps, :, :]
-    elseif sweeps != -1 && channels != -1
+    elseif trials != -1 && channels == -1
+         return HeaderDict["data"][trials, :, :]
+    elseif trials != -1 && channels != -1
     data = getWaveform(HeaderDict, ch_names; warn_bad_channel=warn_bad_channel)
-         return data[sweeps, :, :]
+         return data[trials, :, :]
     end
 end
 
@@ -74,9 +74,9 @@ include("ReadHeaders.jl")
 #println("ABF utilites imported")
 """
     readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
-        sweeps::Union{Int64,Vector{Int64}}=-1,
+        trials::Union{Int64,Vector{Int64}}=-1,
         channels::Union{Int64, Vector{String}}=["Vm_prime", "Vm_prime4"],
-        average_sweeps::Bool=false,
+        average_trials::Bool=false,
         stimulus_name::Union{String, Vector{String}, Nothing}="IN 7",
         stimulus_threshold::T=2.5,
         warn_bad_channel=false,
@@ -85,13 +85,13 @@ include("ReadHeaders.jl")
     ) where {T<:Real}
 
 Read an Axon Binary File (ABF) and return an `Experiment` object. The function extracts data
-for the specified sweeps and channels, and optionally averages sweeps or flattens episodic data.
+for the specified trials and channels, and optionally averages trials or flattens episodic data.
 
 # Arguments
 - `abf_data`: A `String` representing the ABF file path or a `Vector{UInt8}` containing the ABF file content.
-- `sweeps`: An `Int64` or a `Vector{Int64}` specifying the sweeps to extract. Default is -1 (all sweeps).
+- `trials`: An `Int64` or a `Vector{Int64}` specifying the trials to extract. Default is -1 (all trials).
 - `channels`: An `Int64` or a `Vector{String}` specifying the channels to extract. Default is ["Vm_prime", "Vm_prime4"].
-- `average_sweeps`: A `Bool` specifying whether to average the sweeps. Default is `false`.
+- `average_trials`: A `Bool` specifying whether to average the trials. Default is `false`.
 - `stimulus_name`: A `String`, `Vector{String}`, or `Nothing` specifying the stimulus name(s). Default is "IN 7".
 - `stimulus_threshold`: A threshold value of type `T` for the stimulus. Default is 2.5.
 - `warn_bad_channel`: A `Bool` specifying whether to warn if a channel is improper. Default is `false`.
@@ -107,9 +107,9 @@ exp = readABF(Float32, "path/to/abf_file.abf")
 ```
 """
 function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
-    sweeps::Union{Int64,Vector{Int64}}=-1,
+    trials::Union{Int64,Vector{Int64}}=-1,
     channels::Union{Int64, String, Vector{String}}=["Vm_prime", "Vm_prime4"],
-    average_sweeps::Bool=false,
+    average_trials::Bool=false,
     stimulus_name::Union{String, Vector{String}, Nothing}="IN 7",  #One of the best places to store digital stimuli
     stimulus_threshold::T=2.5, #This is the normal voltage rating on digital stimuli
     warn_bad_channel=false, #This will warn if a channel is improper
@@ -125,8 +125,8 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     # Extract channel information
     ch_names, ch_units, ch_telegraph = extract_channel_info(ch_idxs, HeaderDict)
 
-    # Extract data based on the specified sweeps and channels
-    data = extract_data(sweeps, channels, ch_names, HeaderDict, warn_bad_channel)
+    # Extract data based on the specified trials and channels
+    data = extract_data(trials, channels, ch_names, HeaderDict, warn_bad_channel)
 
     # Flatten episodic data if requested
     if flatten_episodic
@@ -138,8 +138,8 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
 
     stimulus_protocol = extract_stimulus_protocol(HeaderDict, stimulus_name, stimulus_threshold)
 
-    # Average sweeps if requested
-    if average_sweeps
+    # Average trials if requested
+    if average_trials
         data, stimulus_protocol = average_data_and_protocol(data, stimulus_protocol, stimulus_name)
     end
     
@@ -148,13 +148,13 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
 
 readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, abf_path; kwargs...)
 
-function readABF(filenames::AbstractArray{String}; average_sweeps_inner=true, kwargs...)
+function readABF(filenames::AbstractArray{String}; average_trials_inner=true, kwargs...)
     #println("Currently stable")
     #println("Data length is $(size(filenames, 1))")
-    data = readABF(filenames[1]; average_sweeps=average_sweeps_inner, kwargs...)
+    data = readABF(filenames[1]; average_trials=average_trials_inner, kwargs...)
     #IN this case we want to ensure that the stim_protocol is only 1 stimulus longer
     for filename in filenames[2:end]
-        data_add = readABF(filename; average_sweeps=average_sweeps_inner, kwargs...)
+        data_add = readABF(filename; average_trials=average_trials_inner, kwargs...)
         #println(size(data_add))
         concat!(data, data_add; kwargs...)
         #println(size(data, 1))

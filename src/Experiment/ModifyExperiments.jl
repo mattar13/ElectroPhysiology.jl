@@ -3,7 +3,7 @@
     scaleby!(data::Experiment{T}, val::T) where T <: Real
     scaleby!(data::Experiment{T}, val::Vector{T}) where T <: Real
 Scale the data elements in the given `Experiment` object by a scalar value `val` in-place. 
-If val is a vector of values, The length of the vector should match either the number of channels or the number of sweeps in the experiment.
+If val is a vector of values, The length of the vector should match either the number of channels or the number of trials in the experiment.
 
 # Arguments
 - `data`: An `Experiment{T}` object containing the experimental data.
@@ -23,7 +23,7 @@ function scaleby!(data::Experiment{T}, val::Vector{T}) where T <: Real
     if length(val) == size(data, 3) #Scale by the channel
         scale = reshape(val, 1,1,size(data,3))
         data.data_array = data.data_array .* scale 
-    elseif length(val) == size(data,1) #Scale by sweep
+    elseif length(val) == size(data,1) #Scale by trial
         scale = reshape(val, size(data,1),1,1)
         data.data_array = data.data_array .* scale
     else
@@ -114,7 +114,7 @@ end
 """
     drop!(data, dim = 3)
 
-Removes a channel or sweep
+Removes a channel or trial
 """
 function drop!(trace::Experiment; dim=3, drop_idx=1)
     n_dims = collect(1:length(size(trace)))
@@ -248,10 +248,10 @@ function truncate_data(trace::Experiment; kwargs...)
 end
 
 """
-    average_sweeps(trace::Experiment)
-    average_sweeps!(trace::Experiment)
+    average_trials(trace::Experiment)
+    average_trials!(trace::Experiment)
 
-Return a new `Experiment` object with the average of all sweeps of the input `Experiment` object.
+Return a new `Experiment` object with the average of all trials of the input `Experiment` object.
 
 # Arguments
 - `trace`: An `Experiment` object containing the experimental data.
@@ -259,20 +259,20 @@ Return a new `Experiment` object with the average of all sweeps of the input `Ex
 # Example
 ```julia
 exp = Experiment(data_array)
-averaged_exp = average_sweeps(exp)
+averaged_exp = average_trials(exp)
 ```
 ```julia
 exp = Experiment(data_array)
-average_sweeps!(exp)
+average_trials!(exp)
 ```
 """
-function average_sweeps(trace::Experiment{T}) where {T<:Real}
+function average_trials(trace::Experiment{T}) where {T<:Real}
     data = deepcopy(trace)
-    average_sweeps!(data)
+    average_trials!(data)
     return data
 end
 
-average_sweeps!(trace::Experiment{T}) where {T<:Real} = trace.data_array = sum(trace, dims=1) / size(trace, 1)
+average_trials!(trace::Experiment{T}) where {T<:Real} = trace.data_array = sum(trace, dims=1) / size(trace, 1)
 
 """
     downsample(trace::Experiment, sample_rate::T) where {T<:Real}

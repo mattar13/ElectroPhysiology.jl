@@ -21,7 +21,7 @@ function data_filter!(data::Experiment;
      #change from mV to uV
      scaleby!(data, scale) #scale the data by the scale number (usually is conversion from mV to μV
      if avg_swp
-          average_sweeps!(data)
+          average_trials!(data)
      end
      # This filters the data based on the settings casette
      #println(maximum(data))
