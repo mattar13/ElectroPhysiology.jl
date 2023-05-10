@@ -112,7 +112,7 @@ end
     data_concat = concat(data, data)
     @test size(data_concat,1) == size(data,1) * 2
 
-    data_avg = average_sweeps(data)
+    data_avg = average_trials(data)
     @test size(data_avg, 1) == 1
 
     data_downsample = downsample(data, 1000.0)
@@ -134,8 +134,8 @@ end
     @test size(data_get) == (1,1,1)
     data_ch1 = getchannel(data, 1)
     @test size(data_ch1, 3) == 1
-    data_each_sweep = collect(eachsweep(data))
-    @test length(data_each_sweep) == 12
+    data_each_trial = collect(eachtrial(data))
+    @test length(data_each_trial) == 12
     data_each_ch= collect(eachchannel(data))
     @test length(data_each_ch) == 2
 end
