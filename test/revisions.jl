@@ -17,6 +17,8 @@ paths = "C:\\Users\\mtarc\\OneDrive - The University of Akron\\Data\\ERG\\Retino
 data_WT30A = readABF(paths) |> truncate_data
 baseline_adjust(data_WT30A)
 
+data |> typeof |> fieldnames
+
 #%% Section 1, Opening Matlab IRIS files
 PhysiologyAnalysis.__init__()
 using DataFrames, Query, XLSX
