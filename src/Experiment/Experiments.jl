@@ -20,6 +20,7 @@ A mutable struct representing a physiological experiment.
 - `Experiment(time::Vector, data_array::Array{T, 3}) where T <: Real`: Create an `Experiment` object from an input time vector and data array.
 """
 mutable struct Experiment{T}
+    format::Symbol
     HeaderDict::Dict{String,Any}
     dt::T
     t::Vector{T}
@@ -193,8 +194,13 @@ function reverse!(exp::Experiment; kwargs...)
     exp.data_array = reverse(exp.data_array; kwargs...)
 end
 
+# These items all come from the channel properties
 getSampleFreq(exp::Experiment) = 1/exp.dt
 
-function getChannelName(exp::Experiment)
-    if size(exp,2)
-end
+getChannelNames(exp::Experiment) = exp.chNames
+
+getChannelUnite(exp::Experiment) = exp.chUnits
+
+getTelegraph(exp::Experiment) = exp.chTelegraph
+
+#these things can be found in the experiment header data if the data is in the .abf format
