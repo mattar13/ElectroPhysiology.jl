@@ -34,6 +34,7 @@ end
 #Make a basic constructor for the experiment
 function Experiment(data_array::AbstractArray; data_idx = 2)
     Experiment(
+        :Julia,
         Dict{String, Any}(), #Pass an empty header info
         1.0, 
         collect(1.0:size(data_array, data_idx)),
@@ -48,6 +49,7 @@ end
 function Experiment(time::Vector, data_array::Array{T, 3}) where T <: Real
     dt = time[2]-time[2]
     Experiment(
+        :Julia,
         Dict{String, Any}(), #Pass an empty header info
         dt, 
         time,

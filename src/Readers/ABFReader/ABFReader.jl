@@ -144,7 +144,7 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     end
     
     # Return Experiment object
-    return Experiment(HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)end
+    return Experiment(:ABF, HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)end
 
 readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, abf_path; kwargs...)
 
