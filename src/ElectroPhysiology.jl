@@ -10,7 +10,7 @@ import Statistics.std
 #=2) Reads =#
 #=3) Modifies experiment objects =#
 using DSP #Used for lowpass, highpass, EI, and notch filtering
-using CSVFiles, ExcelFiles
+using CSVFiles
 
 include("Experiment/StimulusProtocol.jl")
 export StimulusProtocol
