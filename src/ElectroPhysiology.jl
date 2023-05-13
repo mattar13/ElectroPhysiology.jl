@@ -10,7 +10,7 @@ import Statistics.std
 #=2) Reads =#
 #=3) Modifies experiment objects =#
 using DSP #Used for lowpass, highpass, EI, and notch filtering
-using CSVFiles
+using DelimitedFiles
 
 include("Experiment/StimulusProtocol.jl")
 export StimulusProtocol
@@ -19,6 +19,9 @@ export extractStimulus
 
 include("Experiment/Experiments.jl") #This file contains the Experiment structure. 
 export std, getSampleFreq
+
+include("Experiment/IterateExperiments.jl")
+export getdata, getchannel, eachchannel, eachtrial
 
 import Base: chop
 import Polynomials as PN
@@ -35,9 +38,8 @@ export baseline_adjust, baseline_adjust!
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
 export concat, concat!
 
-include("Experiment/IterateExperiments.jl")
-export getdata, getchannel, eachchannel, eachtrial
-
+include("Experiment/ExportingExperiments.jl")
+export writeCSV
 #1)Filter ====================================================================================#
 include("Filtering/filtering.jl")
 export filter_data, filter_data!
