@@ -1,0 +1,5 @@
+[deps]
+ElectroPhysiology = "da7a9670-f599-43ac-b818-143f8bf87d45"
+PhysiologyAnalysis = "69cbc4a0-077e-48a7-9b45-fa8b7014b5ca"
+PhysiologyPlotting = "d5a2a81f-3167-4eb5-8f67-b1ebe6a4430d"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
