@@ -2,7 +2,7 @@
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "862149b7e4816770e9e365668327fdca0ce56cbc"
+project_hash = "6ea21b94e2308dcdda9d1f0a09619f023a9de985"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -833,6 +833,12 @@ deps = ["DSP", "DataFrames", "Dates", "Distributions", "ElectroPhysiology", "Hyp
 git-tree-sha1 = "0cd98cb393e0e5edf95cf42861c712328c1fdaee"
 uuid = "69cbc4a0-077e-48a7-9b45-fa8b7014b5ca"
 version = "0.4.5"
+
+[[deps.PhysiologyPlotting]]
+deps = ["ElectroPhysiology", "Plots", "PyCall", "PyPlot"]
+git-tree-sha1 = "124abc92045729552abbb4d79258859ddd0dc0f1"
+uuid = "d5a2a81f-3167-4eb5-8f67-b1ebe6a4430d"
+version = "0.1.0"
 
 [[deps.Pipe]]
 git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
