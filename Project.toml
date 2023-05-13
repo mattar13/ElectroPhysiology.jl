@@ -16,7 +16,6 @@ Wavelets = "29a6e085-ba6d-5f35-a997-948ac2efa89a"
 [compat]
 ContinuousWavelets = "1"
 DSP = "0.7"
-DelimitedFiles = "0.3"
 Documenter = "0.27"
 Polynomials = "3"
 Statistics = "1.0"
