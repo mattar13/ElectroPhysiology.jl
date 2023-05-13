@@ -43,6 +43,12 @@ function getdata(trace::Experiment, trials, timepoints, channels; verbose=false)
 end
 
 """
+A quick convienance function that returns the index of the channel that is named
+"""
+findChIdx(exp::Experiment, name::String) = findall(name .== exp.chNames)
+findChIdx(exp::Experiment, names::Vector{String}) = map(n -> findfirst(n .== exp.chNames), names)
+
+"""
      getchannel(trace::Experiment, ch_idx::Int64; verbose=false)
 
 Return a new Experiment object with data from a single channel specified by ch_idx.
@@ -50,6 +56,7 @@ Return a new Experiment object with data from a single channel specified by ch_i
 # Arguments
      trace: An Experiment object containing the experimental data.
      ch_idx: The index of the channel to extract.
+     ch_name: The name of the channel to extract
 # Returns
      data: A new Experiment object containing the data from the specified channel.
 # Examples
@@ -58,6 +65,8 @@ getchannel(trace::Experiment, ch_idx::Int64; verbose=false) = getdata(trace, :, 
 ```
 """
 getchannel(trace::Experiment, ch_idx::Int64; verbose=false) = getdata(trace, :, :, ch_idx; verbose=verbose)
+getchannel(trace::Experiment, ch_idxs::Vector{Int64}; kwargs...) = map(c -> getchannel(trace, c; kwargs...), ch_idxs)
+getchannel(trace::Experiment, ch_name::Union{String, Vector{String}}; kwargs...) = getchannel(trace, findChIdx(trace, ch_name); kwargs...)
 
 """
     eachchannel(trace::Experiment; verbose=false)
