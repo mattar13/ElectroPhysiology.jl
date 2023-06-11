@@ -1,13 +1,16 @@
-using Pkg; Pkg.activate("test")
-Pkg.status()
 using Revise
 using ElectroPhysiology
 import ElectroPhysiology as EP
-
+using DataFrames, XLSX
 #%% Saving a section of the data to a CSV file
 test_data = "test/to_analyze.abf"
-data = readABF(test_data)
-writeCSV(data; loc = "test")
+data = readABF(test_data) |> data_filter
+
+ElectroPhysiology.setIntensity(data.stimulus_protocol[1].type, 100.0)
+#%%
+test = writeXLSX("test.xlsx", data)
+run(`powershell start excel.exe test.xlsx`)
+run(`powershell Stop-Process -Name EXCEL`)
 
 #%% Section 1, Opening Matlab IRIS files
 PhysiologyAnalysis.__init__()

@@ -10,7 +10,7 @@ import Statistics.std
 #=2) Reads =#
 #=3) Modifies experiment objects =#
 using DSP #Used for lowpass, highpass, EI, and notch filtering
-using DelimitedFiles
+using XLSX, DataFrames
 
 include("Experiment/StimulusProtocol.jl")
 export StimulusProtocol
@@ -39,7 +39,7 @@ include("Experiment/JoiningExperiments.jl") #These files join multiple experimen
 export concat, concat!
 
 include("Experiment/ExportingExperiments.jl")
-export writeCSV
+export writeXLSX
 #1)Filter ====================================================================================#
 include("Filtering/filtering.jl")
 export filter_data, filter_data!
