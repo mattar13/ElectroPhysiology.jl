@@ -27,6 +27,9 @@ struct Flash <: Stimulus
 end
 Flash() = Flash(0.0)
 
+import Base.string
+string(flash::Flash) = "Flash Intensity = $(flash.intensity)"
+
 """
     StimulusProtocol{T}
 
@@ -57,7 +60,23 @@ StimulusProtocol(stimulus_channel::String) = StimulusProtocol(Flash(), stimulus_
 StimulusProtocol(swp::Int64) = StimulusProtocol(Flash(), "Nothing", fill((0.0, 0.0), swp))
 StimulusProtocol(stimulus_channel::String, swp::Int64) = StimulusProtocol(Flash(), stimulus_channel, fill((0.0, 0.0), swp))
 
-getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Real = stimulus_protocol.timestamps[inds...]
+function getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Real 
+    tstamps = stimulus_protocol.timestamps[inds...]
+    if isa(tstamps, Vector)
+        return StimulusProtocol(
+            stimulus_protocol.type,
+            stimulus_protocol.channelName,
+            tstamps
+        )
+    elseif isa(tstamps, Tuple{T, T})
+        return StimulusProtocol(
+            stimulus_protocol.type,
+            stimulus_protocol.channelName,
+            [tstamps]
+        )
+    end
+end
+
 function setindex!(stimulus_protocol::StimulusProtocol{T}, X, I...) where T <: Real 
      #println(X)
      stimulus_protocol.timestamps[I...] = X
@@ -129,3 +148,28 @@ length(stimulus::StimulusProtocol) = size(stimulus, 1)
 push!(stimulus::StimulusProtocol, ts) = push!(stimulus.timestamps, ts)
 
 push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol) = push!(stimulusA, stimulusB.timestamps...)
+
+import Base.iterate
+iterate(protocol::StimulusProtocol) = (protocol[1], 1)
+function iterate(protocol::StimulusProtocol, state)
+    if length(protocol) == state-1
+        return nothing
+    else
+        return (protocol[state], state+1)
+    end
+end
+
+import DataFrames.DataFrame
+function DataFrame(protocol::StimulusProtocol{T}) where T <: Real
+    StimulusDF = DataFrame(Type = String[], Channel = String[], TimeStart = T[], TimeEnd = T[])
+    for stimulus in protocol
+        push!(StimulusDF, (
+            Type = string(stimulus.type),
+            Channel = stimulus.channelName, 
+            TimeStart = stimulus.timestamps[1][1], 
+            TimeEnd = stimulus.timestamps[1][2]        
+            )
+        )
+    end
+    return StimulusDF
+end
