@@ -44,7 +44,7 @@ function data_filter!(data::Experiment;
      #return data
 end
 
-function data_filter(data::Experiment; kwargs...)
+        function data_filter(data::Experiment; kwargs...)
      data_copy = deepcopy(data)
      data_filter!(data_copy; kwargs...)
      return data_copy

@@ -182,7 +182,8 @@ function truncate_data!(trace::Experiment;
         trace.t = range(0.0, t_post, length=size_of_array)
     else
         for swp = axes(trace, 1)
-            tstamps = trace.stimulus_protocol[swp]
+            tstamps = trace.stimulus_protocol[swp].timestamps[1]
+            #println(tstamps)
             idx_range = round.(Int64, tstamps ./ dt)
             if truncate_based_on == :stimulus_beginning
                 #This will set the beginning of the stimulus as the truncation location
@@ -383,7 +384,7 @@ function baseline_adjust!(trace::Experiment{T};
         #println("No stim protocol exists")
     else
         for swp in axes(trace, 1)
-            tstamps = trace.stimulus_protocol[swp]
+            tstamps = trace.stimulus_protocol[swp].timestamps[1]
             idx_range = round.(Int64, tstamps ./ trace.dt)
             if isa(region, Tuple{Float64,Float64})
                 rng_begin = round(Int, region[1] / trace.dt) + 1
