@@ -1,25 +1,28 @@
 name = "ElectroPhysiology"
 uuid = "da7a9670-f599-43ac-b818-143f8bf87d45"
 authors = ["mattar13 <mtarchick13@gmail.com> and contributors"]
-version = "0.4.0"
+version = "0.4.1"
 
 [deps]
 ContinuousWavelets = "96eb917e-2868-4417-9cb6-27e7ff17528f"
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
-DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Wavelets = "29a6e085-ba6d-5f35-a997-948ac2efa89a"
+XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 
 [compat]
 ContinuousWavelets = "1"
 DSP = "0.7"
+DataFrames = "1"
 Documenter = "0.27"
 Polynomials = "3"
 Statistics = "1.0"
 Wavelets = "0.9"
+XLSX = "0.9"
 julia = "1"
 
 [extras]
