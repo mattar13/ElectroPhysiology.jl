@@ -22,13 +22,15 @@ A `Flash` is a subtype of `Stimulus` representing a flash stimulus in a physiolo
 - `Flash(intensity::Real)`: Creates a `Flash` object with the specified `intensity`.
 
 """
-struct Flash <: Stimulus
+mutable struct Flash <: Stimulus
     intensity::Real #The flash intensity of the flash
 end
 Flash() = Flash(0.0)
 
 import Base.string
 string(flash::Flash) = "Flash Intensity = $(flash.intensity)"
+
+setIntensity(flash::Flash, val::T) where T <: Real = flash.intensity = val
 
 """
     StimulusProtocol{T}
@@ -150,7 +152,7 @@ push!(stimulus::StimulusProtocol, ts) = push!(stimulus.timestamps, ts)
 push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol) = push!(stimulusA, stimulusB.timestamps...)
 
 import Base.iterate
-iterate(protocol::StimulusProtocol) = (protocol[1], 1)
+iterate(protocol::StimulusProtocol) = (protocol[1], 2)
 function iterate(protocol::StimulusProtocol, state)
     if length(protocol) == state-1
         return nothing
