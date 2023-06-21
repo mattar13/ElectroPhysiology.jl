@@ -57,8 +57,11 @@ export data_filter!, data_filter
 #export dwt_filter!, dwt_filter
 
 #=Import all readers======================#
-include("Readers/ABFReader/ABFReader.jl")
+include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
 export readABF
 export parseABF
+
+include("Readers/XLSReader.jl")
+export readXLSX
 
 end
