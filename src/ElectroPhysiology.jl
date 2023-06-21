@@ -15,7 +15,7 @@ using XLSX, DataFrames
 include("Experiment/StimulusProtocol.jl")
 export StimulusProtocol
 export setindex!, getindex
-export extractStimulus
+export extractStimulus, setIntensity
 
 include("Experiment/Experiments.jl") #This file contains the Experiment structure. 
 export std, getSampleFreq
