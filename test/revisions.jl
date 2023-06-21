@@ -2,15 +2,24 @@ using Revise
 using ElectroPhysiology
 import ElectroPhysiology as EP
 using DataFrames, XLSX
-#%% Saving a section of the data to a CSV file
-test_data = "test/to_analyze.abf"
-data = readABF(test_data) |> data_filter
 
-ElectroPhysiology.setIntensity(data.stimulus_protocol[1].type, 100.0)
-#%%
+#%% Saving a data to an XLSX file
+test_file = "test/to_filter.abf"
+data = readABF(test_file) |> data_filter
 test = writeXLSX("test.xlsx", data)
-run(`powershell start excel.exe test.xlsx`)
-run(`powershell Stop-Process -Name EXCEL`)
+#run(`powershell start excel.exe test.xlsx`) #Autoopen the file in excel
+
+#How do you convert a XLSX file back into a datafile
+readXLSX("test.xlsx")
+
+#Open the dataframe
+XLSX.openxlsx("test.xlsx", mode = "r") do xf
+     println(XLSX.sheetnames(xf))
+     headerSheet = xf["Header"]
+     #get the number of channels
+     headerSheet["A!"]
+end
+
 
 #%% Section 1, Opening Matlab IRIS files
 PhysiologyAnalysis.__init__()
