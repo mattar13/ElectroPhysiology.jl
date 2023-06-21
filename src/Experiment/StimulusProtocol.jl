@@ -60,6 +60,7 @@ StimulusProtocol() = StimulusProtocol([Flash()], ["Nothing"], [(0.0, 0.0)])
 StimulusProtocol(stimulus_channel::String) = StimulusProtocol([Flash()], [stimulus_channel], [(0.0, 0.0)])
 StimulusProtocol(swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill("Nothing",swp), fill((0.0, 0.0), swp))
 StimulusProtocol(stimulus_channel::String, swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill(stimulus_channel, swp), fill((0.0, 0.0), swp))
+StimulusProtocol(timestamps::Tuple) = StimulusProtocol([Flash()], ["Nothing"], [timestamps])
 
 function getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Real 
     stim_type = stimulus_protocol.type[inds...]
@@ -166,9 +167,18 @@ size(stimulus::StimulusProtocol, dim::Int64) = size(stimulus.timestamps, dim)
 
 length(stimulus::StimulusProtocol) = size(stimulus, 1)
 
-push!(stimulus::StimulusProtocol, ts) = push!(stimulus.timestamps, ts)
+function push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol)
+    push!(stimulusA.timestamps, stimulusB.timestamps...)
+    push!(stimulusA.channelName, stimulusB.channelName...)
+    push!(stimulusA.type, stimulusB.type...)
+end
 
-push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol) = push!(stimulusA, stimulusB.timestamps...)
+function push!(stimulus::StimulusProtocol, ts::Tuple)
+    newStim = StimulusProtocol(ts)
+    println(newStim)
+    push!(stimulus, newStim)
+end
+
 
 import Base.iterate
 iterate(protocol::StimulusProtocol) = (protocol[1], 2)
