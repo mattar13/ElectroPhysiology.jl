@@ -61,11 +61,11 @@ end
 function average_data_and_protocol(data, stimulus_protocol, stimulus_name)
     data = sum(data, dims=1) / size(data, 1)
     stimulus_protocol_first_vals = stimulus_protocol[1]
-    println(stimulus_protocol_first_vals)
-    stimulus_protocol = StimulusProtocol(stimulus_name)
-    println(stimulus_protocol)
+    #println(stimulus_protocol_first_vals)
+    #stimulus_protocol = StimulusProtocol(stimulus_name)
+    #println(stimulus_protocol)
     #stimulus_protocol[1] = stimulus_protocol_first_vals
-    return data, stimulus_protocol
+    return data, stimulus_protocol_first_vals
 end     
 
 include("ByteMaps.jl") #These functions deal with the bytemap extractions

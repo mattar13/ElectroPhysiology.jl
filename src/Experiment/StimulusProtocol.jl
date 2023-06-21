@@ -31,7 +31,6 @@ import Base.string
 string(flash::Flash) = "Flash Intensity = $(flash.intensity)"
 
 setIntensity(flash::Flash, val::T) where T <: Real = flash.intensity = val
-
 """
     StimulusProtocol{T}
 
@@ -51,40 +50,60 @@ A mutable struct representing a stimulus protocol for physiological data.
 - `StimulusProtocol(stimulus_channel::String, swp::Int64)`: Creates a `StimulusProtocol` object with `Flash()` stimulus, the provided `stimulus_channel`, and `swp` number of (0.0, 0.0) timestamps.
 
 """
-mutable struct StimulusProtocol{T}
-    type::Stimulus
-    channelName::Union{String,Int64}
+mutable struct StimulusProtocol{T, S}
+    type::Vector{S}
+    channelName::Union{Vector{String},Vector{Int64}} #We might need to change this to a vector
     timestamps::Vector{Tuple{T,T}}
 end
 
-StimulusProtocol() = StimulusProtocol(Flash(), "Nothing", [(0.0, 0.0)])
-StimulusProtocol(stimulus_channel::String) = StimulusProtocol(Flash(), stimulus_channel, [(0.0, 0.0)])
-StimulusProtocol(swp::Int64) = StimulusProtocol(Flash(), "Nothing", fill((0.0, 0.0), swp))
-StimulusProtocol(stimulus_channel::String, swp::Int64) = StimulusProtocol(Flash(), stimulus_channel, fill((0.0, 0.0), swp))
+StimulusProtocol() = StimulusProtocol([Flash()], ["Nothing"], [(0.0, 0.0)])
+StimulusProtocol(stimulus_channel::String) = StimulusProtocol([Flash()], [stimulus_channel], [(0.0, 0.0)])
+StimulusProtocol(swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill("Nothing",swp), fill((0.0, 0.0), swp))
+StimulusProtocol(stimulus_channel::String, swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill(stimulus_channel, swp), fill((0.0, 0.0), swp))
 
 function getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Real 
-    tstamps = stimulus_protocol.timestamps[inds...]
-    if isa(tstamps, Vector)
+    stim_type = stimulus_protocol.type[inds...]
+    stim_channel = stimulus_protocol.channelName[inds...]
+    stim_timestamps = stimulus_protocol.timestamps[inds...]
+    if isa(stim_timestamps, Vector)
         return StimulusProtocol(
-            stimulus_protocol.type,
-            stimulus_protocol.channelName,
-            tstamps
+            stim_type,
+            stim_channel,
+            stim_timestamps
         )
-    elseif isa(tstamps, Tuple{T, T})
+    elseif isa(stim_timestamps, Tuple{T, T})
         return StimulusProtocol(
-            stimulus_protocol.type,
-            stimulus_protocol.channelName,
-            [tstamps]
+            [stim_type],
+            [stim_channel],
+            [stim_timestamps]
         )
     end
 end
 
-function setindex!(stimulus_protocol::StimulusProtocol{T}, X, I...) where T <: Real 
-     #println(X)
+function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Tuple, I...) where T <: Real 
      stimulus_protocol.timestamps[I...] = X
 end
 
-#Initialize an empty stimulus protocol
+function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Union{String, Int64}, I...) where T <: Real 
+    stimulus_protocol.channelName[I...] = X
+end
+
+function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Stimulus, I...) where T <: Real 
+    stimulus_protocol.type[I...] = X
+end
+#If you have a list of photon amounts, you can set the intensity of every stimulus
+
+function setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photons::Vector) where T<:Real
+    @assert size(stimulus_protocols) == size(photons)
+    for (idx, photon) in enumerate(photons)
+        setIntensity(stimulus_protocols.type[idx], photon)
+    end
+end
+
+function setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photon) where T<:Real
+    photons = fill(photon, size(stimulus_protocols))
+    setIntensity(stimulus_protocols, photons)
+end
 
 """
     extractStimulus(abfInfo::Dict{String, Any}; stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
