@@ -58,14 +58,9 @@ function extract_stimulus_protocol(HeaderDict, stimulus_name, stimulus_threshold
     end
 end
 
-function average_data_and_protocol(data, stimulus_protocol, stimulus_name)
+function average_data_and_protocol(data, stimulus_protocol)
     data = sum(data, dims=1) / size(data, 1)
-    stimulus_protocol_first_vals = stimulus_protocol[1]
-    #println(stimulus_protocol_first_vals)
-    #stimulus_protocol = StimulusProtocol(stimulus_name)
-    #println(stimulus_protocol)
-    #stimulus_protocol[1] = stimulus_protocol_first_vals
-    return data, stimulus_protocol_first_vals
+    return data, stimulus_protocol[1]
 end     
 
 include("ByteMaps.jl") #These functions deal with the bytemap extractions
@@ -142,7 +137,7 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
 
     # Average trials if requested
     if average_trials
-        data, stimulus_protocol = average_data_and_protocol(data, stimulus_protocol, stimulus_name)
+        data, stimulus_protocol = average_data_and_protocol(data, stimulus_protocol)
     end
     
     # Return Experiment object
