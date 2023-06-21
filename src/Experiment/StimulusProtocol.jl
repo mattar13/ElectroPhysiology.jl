@@ -106,6 +106,14 @@ function setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photon) wh
     setIntensity(stimulus_protocols, photons)
 end
 
+function getIntensity(stimulus_protocols::StimulusProtocol{T, Flash}) where T<:Real
+    photon_list = T[]
+    for stimulus in stimulus_protocols
+        push!(photon_list, stimulus.type[1].intensity)
+    end
+    return photon_list
+end
+
 """
     extractStimulus(abfInfo::Dict{String, Any}; stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
     extractStimulus(abf_path::String; kwargs...)

@@ -205,4 +205,8 @@ getChannelUnite(exp::Experiment) = exp.chUnits
 
 getTelegraph(exp::Experiment) = exp.chTelegraph
 
+
+setIntensity(exp::Experiment, photons) = setIntensity(exp.stimulus_protocol, photons)
+
+getIntensity(exp::Experiment) = getIntensity(exp.stimulus_protocol)
 #these things can be found in the experiment header data if the data is in the .abf format
