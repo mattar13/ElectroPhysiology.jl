@@ -17,13 +17,15 @@ function writeXLSX(filename::String, data::Experiment;
      save_header = true, skips = ["data", "EpochTableByChannel", "abfFileComment", "StringSection"],
      save_sections = true,
      save_stimulus =  true,
+     auto_open = false,
      verbose = true
-)
-     
+)  
      XLSX.openxlsx(filename, mode = "w") do xf
           sheet = xf[1]
           XLSX.rename!(sheet, "Header")
           #The next sheets have to be the channels
+          timeSheet = XLSX.addsheet!(xf, "Time")
+          XLSX.writetable!(timeSheet, DataFrame(Index = 1:length(data.t), Timestamp = data.t))
           for ch in data.chNames
                XLSX.addsheet!(xf, ch)
           end
@@ -76,7 +78,7 @@ function writeXLSX(filename::String, data::Experiment;
                     else
                          rename!(df, column_names, makeunique=true)
                     end
-                    insertcols!(df, 1, "Time" => channel.t)
+                    #insertcols!(df, 1, "Time" => channel.t)
                     if verbose
                          print("Saving channel")
                          println(sheet_channel)
@@ -84,5 +86,9 @@ function writeXLSX(filename::String, data::Experiment;
                     XLSX.writetable!(sheet_channel, df)
                end
           end
+     end
+
+     if auto_open
+          run(`powershell start excel.exe test.xlsx`);
      end
 end
