@@ -61,8 +61,10 @@ end
 function average_data_and_protocol(data, stimulus_protocol, stimulus_name)
     data = sum(data, dims=1) / size(data, 1)
     stimulus_protocol_first_vals = stimulus_protocol[1]
+    println(stimulus_protocol_first_vals)
     stimulus_protocol = StimulusProtocol(stimulus_name)
-    stimulus_protocol[1] = stimulus_protocol_first_vals
+    println(stimulus_protocol)
+    #stimulus_protocol[1] = stimulus_protocol_first_vals
     return data, stimulus_protocol
 end     
 
@@ -144,7 +146,8 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     end
     
     # Return Experiment object
-    return Experiment(:ABF, HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)end
+    return Experiment(:ABF, HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)
+end
 
 readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, abf_path; kwargs...)
 
