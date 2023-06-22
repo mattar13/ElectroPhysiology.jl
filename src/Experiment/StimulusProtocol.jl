@@ -28,7 +28,7 @@ end
 Flash() = Flash(0.0)
 
 import Base.string
-string(flash::Flash) = "Flash Intensity = $(flash.intensity)"
+string(flash::Flash) = "flash"
 
 setIntensity(flash::Flash, val::T) where T <: Real = flash.intensity = val
 """
@@ -61,6 +61,7 @@ StimulusProtocol(stimulus_channel::String) = StimulusProtocol([Flash()], [stimul
 StimulusProtocol(swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill("Nothing",swp), fill((0.0, 0.0), swp))
 StimulusProtocol(stimulus_channel::String, swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill(stimulus_channel, swp), fill((0.0, 0.0), swp))
 StimulusProtocol(timestamps::Tuple) = StimulusProtocol([Flash()], ["Nothing"], [timestamps])
+StimulusProtocol(type::S, channelName::Union{String,Int64}, timestamps::Tuple{T,T}) where {T<:Real,S} = StimulusProtocol([type], [channelName], [timestamps])
 
 function getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Real 
     stim_type = stimulus_protocol.type[inds...]
@@ -200,11 +201,13 @@ end
 
 import DataFrames.DataFrame
 function DataFrame(protocol::StimulusProtocol{T}) where T <: Real
-    StimulusDF = DataFrame(Type = String[], Channel = String[], TimeStart = T[], TimeEnd = T[])
+    StimulusDF = DataFrame(Type = String[], Intensity = T[], Channel = String[], TimeStart = T[], TimeEnd = T[])
     for stimulus in protocol
+        #println(stimulus)
         push!(StimulusDF, (
-            Type = string(stimulus.type),
-            Channel = stimulus.channelName, 
+            Type = string(stimulus.type[1]),
+            Intensity = stimulus.type[1].intensity,
+            Channel = stimulus.channelName[1], 
             TimeStart = stimulus.timestamps[1][1], 
             TimeEnd = stimulus.timestamps[1][2]        
             )

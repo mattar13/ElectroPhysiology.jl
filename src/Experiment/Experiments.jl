@@ -28,7 +28,7 @@ mutable struct Experiment{T}
     chNames::Vector{String}
     chUnits::Vector{String}
     chTelegraph::Vector{T}
-    stimulus_protocol::StimulusProtocol{T}
+    stimulus_protocol::StimulusProtocol
 end
 
 #Make a basic constructor for the experiment
