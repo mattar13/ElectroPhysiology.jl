@@ -5,9 +5,11 @@ function data_filter!(data::Experiment;
      remove_global_drift = false,
      dwt_periods=false, #dwt_periods = (1,9),
      cwt_periods=false, #cwt_periods = (1,9)
+     sample_rate = 10_000.0,
      kwargs...
 )
      #Truncate first
+     downsample!(data, sample_rate)
      truncate_data!(data, t_pre=t_pre, t_post=t_post)
      baseline_adjust!(data)
 
