@@ -4,13 +4,14 @@ import ElectroPhysiology as EP
 using DataFrames, XLSX
 
 #%% Saving a data to an XLSX file
-test_file = "test/to_filter.abf"
+test_file = "test/to_analyze.abf"
 data = readABF(test_file) |> data_filter
-test = writeXLSX("test.xlsx", data)
+
+test = writeXLSX("test/to_filter.xlsx", data)
 #run(`powershell start excel.exe test.xlsx`) #Autoopen the file in excel
 
-#How do you convert a XLSX file back into a datafile
-readXLSX("test.xlsx")
+#How do you convert a XLSX file back into a datafile?
+data = readXLSX("test/to_filter.xlsx")
 
 #Open the dataframe
 XLSX.openxlsx("test.xlsx", mode = "r") do xf
