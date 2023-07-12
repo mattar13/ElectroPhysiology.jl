@@ -2,7 +2,7 @@ function int_to_letter(num)
      return Char(num + 64) |> string
 end
 
-function extractHeaderInfo(worksheet::XLSX.Worksheet)
+function extractChannelData(worksheet::XLSX.Worksheet)
      channelCount = worksheet["C48"]
      letter = int_to_letter(2+channelCount)
      channelNames =worksheet["C26:$(letter)26"]
@@ -31,11 +31,24 @@ function StimulusProtocol(stimSheet::XLSX.Worksheet)
      return StimulusA
 end
 
+function extractHeaderInfo(headerSheet::XLSX.Worksheet)
+     #println(headerSheet)
+     HeaderDict = Dict()
+     categories = headerSheet["A"][2:end]
+     types = headerSheet["B"][2:end]
+     values = headerSheet["C"][2:end]
+     for (idx, key) in enumerate(categories)
+          HeaderDict[key] = values[idx]
+     end
+     return HeaderDict
+end
+
 function readXLSX(filename::String)
      XLSX.openxlsx(filename, mode = "r") do xf
           snames = XLSX.sheetnames(xf)
           headerSheet = xf["Header"]
-          channelNames, channelTelegraph, channelUnits, dt = extractHeaderInfo(headerSheet)
+          HeaderDict = extractHeaderInfo(headerSheet)
+          channelNames, channelTelegraph, channelUnits, dt = extractChannelData(headerSheet)
           timeSheet = xf["Time"]
           t = timeSheet["B2:$(timeSheet.dimension.stop)"]
           stimulusSheet = xf["Stimulus"]
@@ -48,14 +61,15 @@ function readXLSX(filename::String)
           for channel in snames[match_idxs]
                channelSheet = xf[channel]
                dims = channelSheet.dimension
-               channelArr = Array{Float64}(channelSheet["A2:$(dims.stop)"]')
+               chData = channelSheet["A2:$(dims.stop)"] #Speed this up
+               channelArr = convert(Array{Float64, 2}, chData)'
                push!(data_as_chs, channelArr)
           end
           data = cat(data_as_chs..., dims = 3)
           experiment = Experiment(data)
           experiment.t = t |> vec
           experiment.format = :XLSX
-          experiment.HeaderDict = Dict(("Ready" => "No", "when" => 2))
+          experiment.HeaderDict = HeaderDict
           experiment.chNames = Vector{String}(channelNames[keep_channels]) 
           experiment.chUnits = Vector{String}(channelUnits[keep_channels]) 
           experiment.chTelegraph = Vector{Float64}(channelTelegraph[keep_channels]) 
