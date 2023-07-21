@@ -2,7 +2,7 @@ module ElectroPhysiology
 
 #=Import all experiment objects=======================#
 using Dates
-import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax
+import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax, abs
 import Statistics.std
 
 #This code does several things
@@ -19,6 +19,7 @@ export extractStimulus, setIntensity, getIntensity
 
 include("Experiment/Experiments.jl") #This file contains the Experiment structure. 
 export std, getSampleFreq
+export abs
 
 include("Experiment/IterateExperiments.jl")
 export getdata, getchannel, eachchannel, eachtrial

@@ -86,8 +86,6 @@ function /(exp::Experiment, val::Real)
     return data
 end
 
-
-
 #if the value provided is different
 function /(exp::Experiment{T}, vals::Matrix{T}) where {T<:Real}
     #This function has not been worked out yet
@@ -156,6 +154,12 @@ cumsum(exp::Experiment; kwargs...) = cumsum(exp.data_array; kwargs...)
 argmin(exp::Experiment; dims=2) = argmin(exp.data_array, dims=dims)
 
 argmax(exp::Experiment; dims=2) = argmax(exp.data_array, dims=dims)
+
+function abs(exp::Experiment)
+    data_copy = deepcopy(exp)
+    data_copy.data_array = abs.(exp.data_array) 
+    return data_copy
+end
 
 function push!(nt::Experiment{T}, item::AbstractArray{T}; new_name="Unnamed") where {T<:Real}
     #All of these options assume the new data point length matches the old one
