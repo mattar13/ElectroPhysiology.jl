@@ -168,6 +168,7 @@ function readABF(filenames::AbstractArray{String}; average_trials_inner=true, so
         #println("Sort idxs")
         date_idxs = sortperm(data.HeaderDict["FileStartDateTime"])
         data.data_array = data[date_idxs, :, :]
+        data.stimulus_protocol = data.stimulus_protocol[date_idxs]
     end
     return data
 end
