@@ -146,18 +146,29 @@ end
 
 readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, abf_path; kwargs...)
 
-function readABF(filenames::AbstractArray{String}; average_trials_inner=true, kwargs...)
+function readABF(filenames::AbstractArray{String}; average_trials_inner=true, sort_by_date = true, kwargs...)
     #println("Currently stable")
     #println("Data length is $(size(filenames, 1))")
     data = readABF(filenames[1]; average_trials=average_trials_inner, kwargs...)
+    all_dates = [data.HeaderDict["FileStartDateTime"]]
+    all_paths = [data.HeaderDict["abfPath"]]
     #IN this case we want to ensure that the stim_protocol is only 1 stimulus longer
     for filename in filenames[2:end]
         data_add = readABF(filename; average_trials=average_trials_inner, kwargs...)
         #println(size(data_add))
         concat!(data, data_add; kwargs...)
+        push!(all_dates, data_add.HeaderDict["FileStartDateTime"])
+        push!(all_paths, data_add.HeaderDict["abfPath"])
         #println(size(data, 1))
     end
-
+    #Here we can add some things that might be useful across all experiments
+    data.HeaderDict["FileStartDateTime"] = all_dates
+    data.HeaderDict["abfPath"] = all_paths
+    if sort_by_date
+        #println("Sort idxs")
+        date_idxs = sortperm(data.HeaderDict["FileStartDateTime"])
+        data.data_array = data[date_idxs, :, :]
+    end
     return data
 end
 
