@@ -10,8 +10,7 @@ is run.
 
 ### Stimulus Protocols
 
-```
-@docs
+```@docs
 StimulusProtocol{T, S}
 ```
 
