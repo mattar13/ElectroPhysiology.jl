@@ -2,11 +2,11 @@
 
 ## ElectroPhysiology Methods
 
-These methods only become available after 
+
 ```
 using ElectroPhysiology
 ```
-is run.
+These methods become available after this command is run.
 
 ### Stimulus Protocols
 
