@@ -1,5 +1,10 @@
 # ElectroPhysiology.jl Tutorial
 
+### A tutorial is provided in the github repo
+
+https://github.com/mattar13/PhysiologyInterface.jl
+
+## The experiment is the universal experiment container
 At the base of the ElectroPhysiology.jl package (PhysigologyAnalysis.jl, and PhysiologyModeling.jl). Is the Experiment object: [`Experiment`](@ref). This object contains all relevant information about the data. The easiest way to get your data into an Experiment is to extract it. 
 
 
