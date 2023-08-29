@@ -32,7 +32,7 @@ string(flash::Flash) = "flash"
 
 setIntensity(flash::Flash, val::T) where T <: Real = flash.intensity = val
 """
-    StimulusProtocol{T}
+    StimulusProtocol{T, S}
 
 A mutable struct representing a stimulus protocol for physiological data.
 
