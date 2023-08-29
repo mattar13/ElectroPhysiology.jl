@@ -17,6 +17,15 @@ StimulusProtocol{T, S}
 ```@docs
 extractStimulus
 ```
+
+```@docs
+setIntensity
+```
+
+```@docs
+getIntensity
+```
+
 ### Structs
 ```@docs
 Experiment{T}
