@@ -14,6 +14,9 @@ is run.
 StimulusProtocol{T, S}
 ```
 
+```@docs
+extractStimulus
+```
 ### Structs
 ```@docs
 Experiment{T}
