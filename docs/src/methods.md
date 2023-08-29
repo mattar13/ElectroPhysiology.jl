@@ -8,6 +8,12 @@ using ElectroPhysiology
 ```
 is run.
 
+### Stimulus Protocols
+
+```
+@docs
+StimulusProtocol{T, S}
+```
 
 ### Structs
 ```@docs
