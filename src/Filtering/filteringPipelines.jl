@@ -6,11 +6,12 @@ function data_filter!(data::Experiment;
      dwt_periods=false, #dwt_periods = (1,9),
      cwt_periods=false, #cwt_periods = (1,9)
      sample_rate = 10_000.0,
+     truncate_based_on=:stimulus_beginning,
      kwargs...
 )
      #Truncate first
      downsample!(data, sample_rate)
-     truncate_data!(data, t_pre=t_pre, t_post=t_post)
+     truncate_data!(data, truncate_based_on = truncate_based_on, t_pre=t_pre, t_post=t_post)
      baseline_adjust!(data)
 
      #Add an extra baseline step to remove global drift
