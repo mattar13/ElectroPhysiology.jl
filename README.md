@@ -12,3 +12,12 @@
 
 [GHA-img]: https://github.com/mattar13/ElectroPhysiology.jl/workflows/CI/badge.svg
 [GHA-url]: https://github.com/mattar13/ElectroPhysiology.jl/actions?query=workflows/CI
+
+# Plotting tools
+is really really cool. My Project has a subdir named myLib, see below.
+
+## PhysiologyAnalysis.jl
+see documentation [here](https://github.com/mattar13/PhysiologyAnalysis.jl)
+
+## PhysiologyPlotting.jl
+see documentation [here](https://github.com/mattar13/PhysiologyPlotting.jl)
