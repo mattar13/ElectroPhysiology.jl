@@ -51,3 +51,23 @@ These methods only become available after
 using PhysiologyPlotting
 ```
 is run.
+
+
+To load PyPlot as a backend, export it with 
+```
+using PhysiologyPlotting
+using PyPlot
+```
+
+To load GLMakie or CairoMakie as a backend, export it with 
+```
+using PhysiologyPlotting, 
+using GLMakie
+```
+
+or 
+
+```
+using PhysiologyPlotting, 
+using CairoMakie
+```
