@@ -8,7 +8,8 @@ using Documenter
 using ElectroPhysiology 
 using PhysiologyAnalysis #Comment this out because it uses pyimport which I still haven't configured yet
 using PhysiologyPlotting
-using PyPlot, GLMakie
+using PyPlot#
+#using GLMakie #OpenGL is not available, so this may be left out for now
 import ElectroPhysiology: Experiment
 
 makedocs(
