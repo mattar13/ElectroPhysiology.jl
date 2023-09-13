@@ -67,3 +67,17 @@ add_scalebar(axis, loc::Tuple{T,T}, dloc::Tuple{T,T};
     kwargs...
 ) where {T<:Real}
 ```
+
+```@docs
+add_sig_bar(axes, x::Real, y::Real; 
+    level = "*", color = :black, 
+    pointer = false,
+    pointer_dx = 0.5,
+    pointer_ylims = [2.0, 3.0], 
+    lw = 1.0, fs = 12.0, ls = "solid"
+)   
+```
+
+```@docs
+draw_axes_border(ax; lw = 2.5, color = :black)
+```
