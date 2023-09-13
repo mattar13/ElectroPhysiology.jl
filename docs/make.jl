@@ -19,7 +19,7 @@ makedocs(
           "Installation" => "installation.md",
           "Tutorial" => "tutorial.md",
           "Methods" => "methods.md", 
-          "Roadmap" => "roadmap.md"
+          "Roadmap" => "roadmap.md",
           "API" => "api.md"
      ]
 )
