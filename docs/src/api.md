@@ -56,3 +56,14 @@ plot_experiment(axis::T, exp::Experiment;
     kwargs...
 ) where T
 ```
+
+```@docs
+add_scalebar(axis, loc::Tuple{T,T}, dloc::Tuple{T,T};
+    fontsize=10.0, lw=3.0,
+    xlabeldist=30.0, ylabeldist=15.0,
+    xunits="ms", yunits="μV",
+    xconvert=1000.0, yconvert=1.0, #this converts the units from x and y labels. x should be in ms
+    xround=true, yround=true,
+    kwargs...
+) where {T<:Real}
+```
