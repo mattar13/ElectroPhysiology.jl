@@ -7,6 +7,7 @@ Pkg.build("PyCall")
 using Documenter 
 using ElectroPhysiology 
 using PhysiologyAnalysis #Comment this out because it uses pyimport which I still haven't configured yet
+using PhysiologyPlotting
 import ElectroPhysiology: Experiment
 
 makedocs(
@@ -19,6 +20,7 @@ makedocs(
           "Tutorial" => "tutorial.md",
           "Methods" => "methods.md", 
           "Roadmap" => "roadmap.md"
+          "API" => "api.md"
      ]
 )
 
