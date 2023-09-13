@@ -13,8 +13,10 @@
 [GHA-img]: https://github.com/mattar13/ElectroPhysiology.jl/workflows/CI/badge.svg
 [GHA-url]: https://github.com/mattar13/ElectroPhysiology.jl/actions?query=workflows/CI
 
-# Plotting tools
-is really really cool. My Project has a subdir named myLib, see below.
+# ElectroPhysiology.jl
+
+Is the core package for loading, analyzing and plotting neuroscience and physiology data in Julia. 
+This package comes with several related packages which can be accessed at the links below. 
 
 ## PhysiologyAnalysis.jl
 see documentation [here](https://github.com/mattar13/PhysiologyAnalysis.jl)
