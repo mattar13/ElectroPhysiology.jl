@@ -10,7 +10,7 @@ using PhysiologyAnalysis #Comment this out because it uses pyimport which I stil
 using PhysiologyPlotting
 using PyPlot#
 #using GLMakie #OpenGL is not available, so this may be left out for now
-import ElectroPhysiology: Experiment
+import ElectroPhysiology: Experiment, StimulusProtocol, extractStimulus, setIntensity, getIntensity
 
 makedocs(
      sitename = "ElectroPhysiology.jl", 
@@ -21,8 +21,7 @@ makedocs(
           "Installation" => "installation.md",
           "Tutorial" => "tutorial.md",
           "Methods" => "methods.md", 
-          "Roadmap" => "roadmap.md",
-          "API" => "api.md"
+          "Roadmap" => "roadmap.md"
      ]
 )
 
