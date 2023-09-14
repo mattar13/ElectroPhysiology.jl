@@ -71,7 +71,7 @@ end
 StimulusProtocol() = StimulusProtocol([Flash()], ["Nothing"], [(0.0, 0.0)])
 StimulusProtocol(stimulus_channel::String) = StimulusProtocol([Flash()], [stimulus_channel], [(0.0, 0.0)])
 StimulusProtocol(n_swp::Int64) = StimulusProtocol(fill(Flash(), n_swp), fill("Nothing",n_swp), fill((0.0, 0.0), n_swp))
-StimulusProtocol(stimulus_channel::String, n_swp::Int64) = StimulusProtocol(fill(Flash(), n_swp), fill(stimulus_channel, n_swp), fill((0.0, 0.0), swp))
+StimulusProtocol(stimulus_channel::String, n_swp::Int64) = StimulusProtocol(fill(Flash(), n_swp), fill(stimulus_channel, n_swp), fill((0.0, 0.0), n_swp))
 StimulusProtocol(timestamps::Tuple) = StimulusProtocol([Flash()], ["Nothing"], [timestamps])
 StimulusProtocol(type::S, channelName::Union{String,Int64}, timestamps::Tuple{T,T}) where {T<:Real,S} = StimulusProtocol([type], [channelName], [timestamps])
 
