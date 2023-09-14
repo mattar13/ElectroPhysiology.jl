@@ -31,6 +31,7 @@ import Base.string
 string(flash::Flash) = "flash"
 
 setIntensity(flash::Flash, val::T) where T <: Real = flash.intensity = val
+
 """
     StimulusProtocol{T, S}
 
@@ -49,6 +50,16 @@ A mutable struct representing a stimulus protocol for physiological data.
 - `StimulusProtocol(swp::Int64)`: Creates a `StimulusProtocol` object with `Flash()` stimulus, "Nothing" channel, and `swp` number of (0.0, 0.0) timestamps.
 - `StimulusProtocol(stimulus_channel::String, swp::Int64)`: Creates a `StimulusProtocol` object with `Flash()` stimulus, the provided `stimulus_channel`, and `swp` number of (0.0, 0.0) timestamps.
 
+## Examples
+
+```julia
+stim1 = StimululsProtocol()
+stim_channel = StimulusProtocol("IN 3")
+stim_sweep = StimulusProtocol(3)
+stim_sweep_channel = StimululsProtocol(3, "IN 3")
+stim_tstamp = StimululsProtocol((0.0, 0.01))
+stim_type_time_channel = StimulusProtocol(Flash(), "IN 3", (0.00, 0.01))
+```
 """
 mutable struct StimulusProtocol{T, S}
     type::Vector{S}
@@ -58,8 +69,8 @@ end
 
 StimulusProtocol() = StimulusProtocol([Flash()], ["Nothing"], [(0.0, 0.0)])
 StimulusProtocol(stimulus_channel::String) = StimulusProtocol([Flash()], [stimulus_channel], [(0.0, 0.0)])
-StimulusProtocol(swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill("Nothing",swp), fill((0.0, 0.0), swp))
-StimulusProtocol(stimulus_channel::String, swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill(stimulus_channel, swp), fill((0.0, 0.0), swp))
+StimulusProtocol(n_swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill("Nothing",n_swp), fill((0.0, 0.0), swp))
+StimulusProtocol(stimulus_channel::String, n_swp::Int64) = StimulusProtocol(fill(Flash(), n_swp), fill(stimulus_channel, n_swp), fill((0.0, 0.0), swp))
 StimulusProtocol(timestamps::Tuple) = StimulusProtocol([Flash()], ["Nothing"], [timestamps])
 StimulusProtocol(type::S, channelName::Union{String,Int64}, timestamps::Tuple{T,T}) where {T<:Real,S} = StimulusProtocol([type], [channelName], [timestamps])
 
@@ -94,19 +105,43 @@ function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Stimulus, I...) wh
     stimulus_protocol.type[I...] = X
 end
 #If you have a list of photon amounts, you can set the intensity of every stimulus
+"""
+    setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photons::Vector{T}) where T<:Real
+    setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photon::T) where T<:Real
 
-function setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photons::Vector) where T<:Real
+This allows the intensity of the stimulus protocol (or multiple stimulus protocols be set). 
+
+## Arguments
+
+- `stimulus_protocol::StimulusProtocol{T, S} where S <: Flash`: A stimulus protocol 
+- `photons::Vector`: a vector of numbers representing the photon amount. 
+
+# Examples
+```julia
+
+```
+"""
+function setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photons::Vector{T}) where T<:Real
     @assert size(stimulus_protocols) == size(photons)
     for (idx, photon) in enumerate(photons)
         setIntensity(stimulus_protocols.type[idx], photon)
     end
 end
 
-function setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photon) where T<:Real
+function setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photon::T) where T<:Real
     photons = fill(photon, size(stimulus_protocols))
     setIntensity(stimulus_protocols, photons)
 end
+"""
+    setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photons::Vector)
 
+This allows the intensity of the stimulus protocol (or multiple stimulus protocols be set). 
+
+## Arguments
+
+- `stimulus_protocol::StimulusProtocol{T, S} where S <: Flash`: A stimulus protocol 
+- `photons::Vector`: a vector of numbers representing the photon amount. 
+"""
 function getIntensity(stimulus_protocols::StimulusProtocol{T, Flash}) where T<:Real
     photon_list = T[]
     for stimulus in stimulus_protocols
