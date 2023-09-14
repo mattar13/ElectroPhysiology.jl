@@ -33,7 +33,7 @@ string(flash::Flash) = "flash"
 setIntensity(flash::Flash, val::T) where T <: Real = flash.intensity = val
 
 """
-    StimulusProtocol{T, S}
+    StimulusProtocol{T, S} where {T <: Real, S <: Stimulus}
 
 A mutable struct representing a stimulus protocol for physiological data.
 
@@ -61,6 +61,7 @@ stim_tstamp = StimululsProtocol((0.0, 0.01))
 stim_type_time_channel = StimulusProtocol(Flash(), "IN 3", (0.00, 0.01))
 ```
 """
+
 mutable struct StimulusProtocol{T, S}
     type::Vector{S}
     channelName::Union{Vector{String},Vector{Int64}} #We might need to change this to a vector
@@ -69,7 +70,7 @@ end
 
 StimulusProtocol() = StimulusProtocol([Flash()], ["Nothing"], [(0.0, 0.0)])
 StimulusProtocol(stimulus_channel::String) = StimulusProtocol([Flash()], [stimulus_channel], [(0.0, 0.0)])
-StimulusProtocol(n_swp::Int64) = StimulusProtocol(fill(Flash(), swp), fill("Nothing",n_swp), fill((0.0, 0.0), swp))
+StimulusProtocol(n_swp::Int64) = StimulusProtocol(fill(Flash(), n_swp), fill("Nothing",n_swp), fill((0.0, 0.0), n_swp))
 StimulusProtocol(stimulus_channel::String, n_swp::Int64) = StimulusProtocol(fill(Flash(), n_swp), fill(stimulus_channel, n_swp), fill((0.0, 0.0), swp))
 StimulusProtocol(timestamps::Tuple) = StimulusProtocol([Flash()], ["Nothing"], [timestamps])
 StimulusProtocol(type::S, channelName::Union{String,Int64}, timestamps::Tuple{T,T}) where {T<:Real,S} = StimulusProtocol([type], [channelName], [timestamps])
