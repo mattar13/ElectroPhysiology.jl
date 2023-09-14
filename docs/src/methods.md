@@ -8,8 +8,16 @@ These methods become available after this command is run.
 
 ### Stimulus Protocols
 
+```@docs 
+Stimulus
+```
+
 ```@docs
-StimulusProtocol{T, S}
+Flash
+```
+
+```@docs
+StimulusProtocol{T, S} where {T <: Real, S <: Stimulus}
 ```
 
 ```@docs
