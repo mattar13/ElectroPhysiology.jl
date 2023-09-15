@@ -11,7 +11,7 @@ using PhysiologyPlotting
 using PyPlot #Export this as a dependancy
 #using GLMakie #OpenGL is not available, so this may be left out for now
 import ElectroPhysiology: Experiment, StimulusProtocol, extractStimulus, setIntensity, getIntensity
-import Stimulus, Flash
+import ElectroPhysiology: Stimulus, Flash
 
 makedocs(
      sitename = "ElectroPhysiology.jl", 
