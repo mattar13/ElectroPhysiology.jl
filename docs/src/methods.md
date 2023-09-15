@@ -17,7 +17,7 @@ Flash
 ```
 
 ```@docs
-StimulusProtocol{T, S} where {T <: Real, S <: Stimulus}
+StimulusProtocol
 ```
 
 ```@docs
@@ -34,7 +34,7 @@ getIntensity
 
 ### Structs
 ```@docs
-Experiment{T}
+Experiment
 ```
 
 ### Functions
