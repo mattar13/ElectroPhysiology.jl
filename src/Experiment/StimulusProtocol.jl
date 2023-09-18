@@ -61,7 +61,6 @@ stim_tstamp = StimululsProtocol((0.0, 0.01))
 stim_type_time_channel = StimulusProtocol(Flash(), "IN 3", (0.00, 0.01))
 ```
 """
-
 mutable struct StimulusProtocol{T, S}
     type::Vector{S}
     channelName::Union{Vector{String},Vector{Int64}} #We might need to change this to a vector
