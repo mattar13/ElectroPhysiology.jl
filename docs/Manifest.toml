@@ -1616,9 +1616,9 @@ version = "0.6.19"
 
 [[deps.PhysiologyPlotting]]
 deps = ["CairoMakie", "Conda", "DataFrames", "Dates", "Distributions", "ElectroPhysiology", "GLMakie", "Pkg", "PyCall", "PyPlot", "Query", "Requires", "Statistics"]
-git-tree-sha1 = "9060be63f49107b97d91d5b3daaea8f5de262423"
+git-tree-sha1 = "4acc156b8ac3cc2a9a22133a59a50a67a3819cf3"
 uuid = "d5a2a81f-3167-4eb5-8f67-b1ebe6a4430d"
-version = "0.1.9"
+version = "0.1.10"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "LLVMOpenMP_jll", "Libdl"]
