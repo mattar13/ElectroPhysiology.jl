@@ -105,9 +105,9 @@ exp = readABF(Float32, "path/to/abf_file.abf")
 """
 function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     trials::Union{Int64,Vector{Int64}}=-1,
-    channels::Union{Int64, String, Vector{String}}=["Vm_prime", "Vm_prime4"],
+    channels::Union{Int64, String, Vector{String}, Nothing}=nothing,
     average_trials::Bool=false,
-    stimulus_name::Union{String, Vector{String}, Nothing}="IN 7",  #One of the best places to store digital stimuli
+    stimulus_name::Union{String, Vector{String}, Nothing}=nothing,  #One of the best places to store digital stimuli
     stimulus_threshold::T=2.5, #This is the normal voltage rating on digital stimuli
     warn_bad_channel=false, #This will warn if a channel is improper
     flatten_episodic::Bool=false, #If the stimulation is episodic and you want it to be continuous
@@ -117,7 +117,12 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     HeaderDict = readABFInfo(abf_data)
 
     # Extract channel indices based on the input
-    ch_idxs = extract_channel_indices(channels, HeaderDict)
+    if isa(channels, Vector{String}) || isa(channels, String)
+        ch_idxs = extract_channel_indices(channels, HeaderDict)
+    elseif isnothing(channels)
+        ch_idxs = eachindex(HeaderDict["adcNames"]) |> collect
+    end
+    println(ch_idxs)
 
     # Extract channel information
     ch_names, ch_units, ch_telegraph = extract_channel_info(ch_idxs, HeaderDict)
@@ -133,7 +138,11 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     # Prepare time information
     dt, t = prepare_time_info(data, HeaderDict, time_unit)
 
-    stimulus_protocol = extract_stimulus_protocol(HeaderDict, stimulus_name, stimulus_threshold)
+    if !isnothing(stimulus_name)
+        stimulus_protocol = extract_stimulus_protocol(HeaderDict, stimulus_name, stimulus_threshold)
+    else
+        stimulus_protocol = StimulusProtocol() #I think there should be easier ways to do this but here we are
+    end
 
     # Average trials if requested
     if average_trials
