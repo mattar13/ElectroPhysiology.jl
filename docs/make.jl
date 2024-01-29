@@ -23,7 +23,9 @@ makedocs(
           "Introduction" => "index.md",
           "Installation" => "installation.md",
           "Tutorial" => "tutorial.md",
-          "Methods" => "methods.md", 
+          "ElectroPhysiology Methods" => "ElectroPhysiologyMethods.md", 
+          "PhysiologyAnalysis Methods" => "PhysiologyAnalysisMethods.md", 
+          "PhysiologyPlotting Methods" => "PhysiologyPlottingMethods.md", 
           "Roadmap" => "roadmap.md"
      ]
 )
