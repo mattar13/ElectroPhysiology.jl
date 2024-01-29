@@ -18,19 +18,19 @@ extracts a waveform from the data, digital stimuli, or analog stimuli
         digital -> this is the digital stimulus of the file
 ...
 """
-function getWaveform(abf::Dict{String,Any}, trial::Int64, channel::Int64;
+function getWaveform(abf_info::Dict{String,Any}, trial::Int64, channel::Int64;
     channel_type = :analog
 )
     if channel_type == :data
         #rather than extracting the digital or analog stimuli, we use the actual ADC
-        return abf["data"][trial, :, channel]
+        return abf_info["data"][trial, :, channel]
     elseif channel_type == :analog
-        epochTable = abf["EpochTableByChannel"][channel] #Load the channel
+        epochTable = abf_info["EpochTableByChannel"][channel] #Load the channel
         epoch = epochTable.epochWaveformBytrial[trial] #Load the trial
         return getAnalogWaveform(epoch)
     elseif channel_type == :digital
-        activeDACch = abf["ProtocolSection"]["nActiveDACChannel"] + 1
-        epochTable = abf["EpochTableByChannel"][activeDACch] #Load the location of the digital stim
+        activeDACch = abf_info["ProtocolSection"]["nActiveDACChannel"] + 1
+        epochTable = abf_info["EpochTableByChannel"][activeDACch] #Load the location of the digital stim
         epoch = epochTable.epochWaveformBytrial[trial] #Load the trial
         return getDigitalWaveform(epoch, channel) #Load the digital channel
         #the analog channel containing the data is located here
