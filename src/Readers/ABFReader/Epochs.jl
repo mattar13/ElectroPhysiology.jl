@@ -49,6 +49,11 @@ mutable struct EpochtrialWaveform
     digitalStates::Vector
 end
 
+import Base: length, eachindex
+length(ETW::EpochtrialWaveform) = length(ETW.p1s)
+
+eachindex(ETW::EpochtrialWaveform) = eachindex(ETW.p1s)
+
 mutable struct EpochTable
     sampleRateHz
     holdingLevel
@@ -158,32 +163,40 @@ function EpochTable(abf::Dict{String,Any}, channel::Int64)
     return EpochTable(sampleRateHz, holdingLevel, trialPointCount, channel, epochs, epochWaveformsBytrial)
 end
 
-function getAnalogWaveform(e::EpochtrialWaveform)
+function getAnalogWaveform(e::EpochtrialWaveform; verbose = false)
     trialC = zeros(e.p2s[end])
-    for i = 1:length(e.levels)
+    for i in eachindex(e)
         #Easier access to epoch
         epochType = e.types[i]
         chunkSize = e.p2s[i] - e.p1s[i]
         pulsePeriod = e.pulsePeriods[i]
         pulseWidth = e.pulseWidths[i]
         level = e.levels[i]
-        if i == 1
-            levelBefore = level
-        else
-            levelBefore = e.levels[i]
-        end
-        levelDelta = level - levelBefore
-        if e.pulsePeriods[i] > 0
-            pulseCount = Int64(chunkSize / e.pulsePeriods[i])
-        else
-            pulseCount = 0
+        if verbose
+            println("Accessing epoch $i: ")
+            println("\t A $epochType")
+            println("\t starting at index $(e.p1s[i]) and ending at $(e.p2s[i])")
+            println("\t with the size $chunkSize")
+            println("\t with the level $level")
         end
 
         if epochType == "Step"
             chunk = fill(level, chunkSize)
         elseif epochType == "Ramp"
+            if i == 1
+                levelBefore = level
+            else
+                levelBefore = e.levels[i]
+            end
             chunk = LinRange(levelBefore, level, chunkSize)
         elseif epochType == "Pulse"
+            
+            if e.pulsePeriods[i] > 0
+                pulseCount = Int64(chunkSize / e.pulsePeriods[i])
+            else
+                pulseCount = 0
+            end
+
             chunk = fill(levelBefore, chunkSize)
             for pulse = 1:pulseCount
                 p1 = Int64(pulsePeriod * pulse)
@@ -193,9 +206,8 @@ function getAnalogWaveform(e::EpochtrialWaveform)
         elseif epochType == "Tri"
             println("to be implemented")
         end
-        #digitalStateForChannel = digitalState[channel]
-        #add the chunk to the trial
-        trialC[(e.p1s[i]+1):(e.p2s[i])]
+        trialC[(e.p1s[i]+1):(e.p2s[i])] .= chunk
+
     end
     return trialC
 end
