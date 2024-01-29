@@ -23,3 +23,6 @@ see documentation [here](https://github.com/mattar13/PhysiologyAnalysis.jl)
 
 ## PhysiologyPlotting.jl
 see documentation [here](https://github.com/mattar13/PhysiologyPlotting.jl)
+
+#TODO
+- Stimulus Waveform was useful for ERG, however, we may need to adjust now
