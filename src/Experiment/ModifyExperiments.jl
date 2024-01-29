@@ -79,6 +79,18 @@ function pad!(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T
     end
 end
 
+function pad_arr(arr::AbstractArray, pad_length; dims = 2, pad_val = 0.0)
+    n, m, h = size(arr)
+    if dims == 1
+        pad = fill(pad_val, (pad_length, m, h))
+    elseif dims == 2
+        pad = fill(pad_val, (n, pad_length, h))
+    elseif dims == 3
+        pad = fill(pad_val, (n, m, pad_length))
+    end
+    cat(arr, pad; dims = dims)
+end
+
 """
     chop(trace::Experiment, n_chop::Int64; position::Symbol=:post)
     chop!(trace::Experiment, n_chop::Int64; position::Symbol=:post)
@@ -109,6 +121,17 @@ function chop!(trace::Experiment, n_chop::Int64; position::Symbol=:post)
     resize_size[2] = (size(trace, 2) - n_chop)
     resize_size = map(x -> 1:x, resize_size)
     trace.data_array = trace.data_array[resize_size...]
+end
+
+function chop_arr(arr::AbstractArray, chop_length::Int64; dims = 2)
+    if dims == 1
+        return arr[:, :, 1:chop_length]
+    elseif dims == 2
+        return arr[:, 1:chop_length, :]
+    elseif dims == 3
+        return arr[:, :, 1:chop_length]
+    end
+
 end
 
 """
