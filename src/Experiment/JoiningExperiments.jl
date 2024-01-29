@@ -1,15 +1,13 @@
 import Base: cat, hcat, vcat
-function cat(exp::Experiment, a::AbstractArray; dims = 1)
-    new_exp = deepcopy(exp)
-    new_exp.data_array = cat(exp.data_array, a; dims = dims)
-    new_exp.chNames = [exp.chNames..., "new channel"]
-    new_exp.chUnits = [exp.chUnits..., "new units"]
-    new_exp.chTelegraph = [exp.chTelegraph..., 1.0]
-    return new_exp
+function push!(exp::Experiment, a::AbstractArray; 
+    dims = 1, 
+    newChName = "New channel", newChUnits = "New units", newChTelegraph = 1.0
+)
+    exp.data_array = cat(exp.data_array, a; dims = dims)
+    exp.chNames = [exp.chNames..., newChName]
+    exp.chUnits = [exp.chUnits..., newChUnits]
+    exp.chTelegraph = [exp.chTelegraph..., newChTelegraph]
 end
-
-channelcat(exp::Experiment, a::AbstractArray) = cat(exp, a; dims = 3)
-trialcat(exp::Experiment, a::AbstractArray) = cat(exp, a; dims = 1)
 
 """
     concat(exp::Experiment{T}, exp_add::Experiment{T}; kwargs...) where {T}
@@ -154,6 +152,6 @@ end
 
 function create_signal_waveform!(exp::Experiment, channel::String)
     wvform = getWaveform(exp.HeaderDict, channel)
-    cat_exp = Experiment(exp.t, wvform)
-    concat!(exp, cat_exp)
+    push!(exp, wvform, dims = 3, newChName = channel, newChUnits = "mV")
+    return
 end
