@@ -161,32 +161,7 @@ function abs(exp::Experiment)
     return data_copy
 end
 
-function push!(nt::Experiment{T}, item::AbstractArray{T}; new_name="Unnamed") where {T<:Real}
-    #All of these options assume the new data point length matches the old one
-    if size(item, 2) == size(nt, 2) && size(item, 3) == size(nt, 3)
-        #item = (new_trial, datapoints, channels)
-        nt.data_array = cat(nt.data_array, item, dims=1)
 
-    elseif size(item, 1) == size(nt, 2) && size(item, 2) == size(nt, 3)
-        #item = (datapoints, channels) aka a single trial
-        item = reshape(item, 1, size(item, 1), size(item, 2))
-        nt.data_array = cat(nt.data_array, item, dims=1)
-
-    elseif size(item, 1) == size(nt, 1) && size(item, 2) == size(nt, 2)
-        #item = (trials, datapoints, new_channels) 
-        nt.data_array = cat(nt.data_array, item, dims=3)
-        #Because we are adding in a new channel, add the channel name
-        push!(nt.chNames, new_name)
-
-    else
-        throw(error("File size incompatible with push!"))
-    end
-end
-
-function push!(nt_push_to::Experiment, nt_added::Experiment)
-    #push!(nt_push_to.filename, nt_added.filename...)
-    push!(nt_push_to, nt_added.data_array)
-end
 
 import Base: reverse, reverse!
 
@@ -212,12 +187,3 @@ getTelegraph(exp::Experiment) = exp.chTelegraph
 setIntensity(exp::Experiment, photons) = setIntensity(exp.stimulus_protocol, photons)
 
 getIntensity(exp::Experiment) = getIntensity(exp.stimulus_protocol)
-#these things can be found in the experiment header data if the data is in the .abf format
-
-#= We may or may not need these. I don't know yet
-import Base: sort, sort!, sortperm
-
-function sortperm(exp::Experiment)
-
-end
-=#
