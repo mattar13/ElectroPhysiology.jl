@@ -58,16 +58,16 @@ function getWaveform(abf::Dict{String,Any}, trial::Union{Vector{Int64},Int64}, c
         elseif warn_bad_channel
             @warn begin
                 "
-    Format [$channel] is invalid
-    
-    Please use one of these formats:
+                Format [$channel] is invalid
+                
+                Please use one of these formats:
 
-    1) An ADC name from one of these: [$(map(x -> "$x, ", abf["adcNames"]) |>join)]   
-    2) Analog: [A, An , Ana  , Analog ]
-    3) A DAC name from one of these: [$(map(x -> "$x, ", abf["dacNames"]) |>join)]
-    4) Digital: [D , Dig , Digital]
+                1) An ADC name from one of these: [$(map(x -> "$x, ", abf["adcNames"]) |>join)]   
+                2) Analog: [A, An , Ana  , Analog ]
+                3) A DAC name from one of these: [$(map(x -> "$x, ", abf["dacNames"]) |>join)]
+                4) Digital: [D , Dig , Digital]
 
-    "
+                "
             end
             #throw("Improper channel ID")
             return nothing #This may be because of a bad channel
