@@ -1,7 +1,7 @@
 name = "ElectroPhysiology"
 uuid = "da7a9670-f599-43ac-b818-143f8bf87d45"
 authors = ["mattar13 <mtarchick13@gmail.com> and contributors"]
-version = "0.4.12"
+version = "0.4.13"
 
 [deps]
 ContinuousWavelets = "96eb917e-2868-4417-9cb6-27e7ff17528f"
