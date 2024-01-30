@@ -66,4 +66,8 @@ export parseABF
 include("Readers/XLSReader.jl")
 export readXLSX
 
+function __init__()
+     
+end
+
 end
