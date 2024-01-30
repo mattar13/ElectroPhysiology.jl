@@ -38,7 +38,7 @@ export baseline_adjust, baseline_adjust!
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
 export concat, concat!
-export trialcat, channelcat
+export create_signal_waveform!
 
 include("Experiment/ExportingExperiments.jl")
 export writeXLSX
