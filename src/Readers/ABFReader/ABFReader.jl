@@ -122,8 +122,6 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     elseif isnothing(channels)
         ch_idxs = eachindex(HeaderDict["adcNames"]) |> collect
     end
-    println(ch_idxs)
-
     # Extract channel information
     ch_names, ch_units, ch_telegraph = extract_channel_info(ch_idxs, HeaderDict)
 
