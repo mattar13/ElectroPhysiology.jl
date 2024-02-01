@@ -148,7 +148,7 @@ function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
     end
     
     # Return Experiment object
-    return Experiment(:ABF, HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)
+    return Experiment{FORMAT, T}(HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)
 end
 
 readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, WHOLE_CELL, abf_path; kwargs...)
@@ -271,4 +271,11 @@ function saveABF(exp::Experiment{T}, filename;) where {T<:Real}
     dat[dataStart:dataStart+dataPointCount*bytesPerPoint-1] = dataArray
     write(filename, dat)
     println("Data written")
+end
+
+function create_signal_waveform!(exp::Experiment, channel::String)
+    wvform = getWaveform(exp.HeaderDict, channel)
+    dac_idx = findall(x -> channel == x, exp.HeaderDict["dacNames"])
+    push!(exp, wvform, dims = 3, newChName = channel, newChUnits = exp.HeaderDict["dacUnits"][dac_idx...])
+    return
 end

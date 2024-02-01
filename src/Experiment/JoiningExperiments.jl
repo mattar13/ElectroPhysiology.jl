@@ -149,10 +149,3 @@ function sub_exp(exp1::Experiment, exp2::Experiment)
 end
 
 -(exp1::Experiment, exp2::Experiment) = sub_exp(exp1, exp2)
-
-function create_signal_waveform!(exp::Experiment, channel::String)
-    wvform = getWaveform(exp.HeaderDict, channel)
-    dac_idx = findall(x -> channel == x, exp.HeaderDict["dacNames"])
-    push!(exp, wvform, dims = 3, newChName = channel, newChUnits = exp.HeaderDict["dacUnits"][dac_idx...])
-    return
-end

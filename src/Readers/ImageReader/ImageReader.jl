@@ -7,25 +7,31 @@ function readImage(::Type{T}, filename; sampling_rate = 2.96, chName = "CalBryte
      data_array = load(filename) |> Array{T}
      px_x, px_y, n_frames = size(data_array)
      HeaderDict = Dict( 
-          framesize => (px_x, px_y),
-          detector_wavelength => 594,
-
+          "framesize" => (px_x, px_y),
+          "xrng" => 1:px_x, "y_rng" => 1:px_y,
+          "detector_wavelength" => [594],
      ) #We need to think of other important data aspects
      #Resize the data so that all of the pixels are in single value
-     resize_data_arr = resize(data_array, px_x*px_y, n_frames, 1)
+     resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
      dt = 1/sampling_rate
-     t = 1:n_frames .* dt
+     t = collect(1:n_frames) .* dt
      return Experiment(
-          :Imaging, #Format
+          TWO_PHOTON,
           HeaderDict, #Header and Metadata
           dt, t, 
           resize_data_arr,
-          chName, 
-          chUnit, 
-          1.0 #Gain is always 1.0
-          stimulusProtocol = StimulusProtocol()
+          [chName], 
+          [chUnit], 
+          [chGain], #Gain is always 1.0
+          StimulusProtocol()
      )
-
 end
 
 readImage(filename; kwargs...) = readImage(Float64, filename; kwargs...)
+
+
+function get_frame(exp::Experiment{})
+
+
+
+end
