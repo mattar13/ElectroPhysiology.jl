@@ -38,8 +38,13 @@ end
  
 get_frame(exp::Experiment{TWO_PHOTON, T}, frames::AbstractArray) where T<:Real = cat(map(frame -> get_frame(exp, frame), frames)..., dims = 3)
  
+function get_all_frames(exp::Experiment{TWO_PHOTON, T}) where T <: Real
+     n_frames = size(exp, 2)
+     return get_frame(exp, 1:n_frames)
+end
+
 function recordROI(data, roi_xy)
-     
+
 
 
 end
