@@ -103,7 +103,7 @@ for the specified trials and channels, and optionally averages trials or flatten
 exp = readABF(Float32, "path/to/abf_file.abf")
 ```
 """
-function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
+function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
     trials::Union{Int64,Vector{Int64}}=-1,
     channels::Union{Int64, String, Vector{String}, Nothing}=nothing,
     average_trials::Bool=false,
@@ -151,7 +151,7 @@ function readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     return Experiment(:ABF, HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)
 end
 
-readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, abf_path; kwargs...)
+readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, WHOLE_CELL, abf_path; kwargs...)
 
 function readABF(filenames::AbstractArray{String}; average_trials_inner=true, sort_by_date = true, kwargs...)
     #println("Currently stable")
