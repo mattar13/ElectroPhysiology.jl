@@ -1,5 +1,11 @@
+#Types of experiments
+abstract type ERG end
+abstract type WHOLE_CELL end
+abstract type TWO_PHOTON end
+
+#Types of combination experiments
 """
-    Experiment{T}
+    Experiment{FORMAT, T}
 
 A mutable struct representing a physiological experiment.
 
@@ -19,8 +25,7 @@ A mutable struct representing a physiological experiment.
 - `Experiment(data_array::AbstractArray; data_idx = 2)`: Create an `Experiment` object from an input data array with an optional data index.
 - `Experiment(time::Vector, data_array::Array{T, 3}) where T <: Real`: Create an `Experiment` object from an input time vector and data array.
 """
-mutable struct Experiment{T}
-    format::Symbol
+mutable struct Experiment{FORMAT, T}
     HeaderDict::Dict{String,Any}
     dt::T
     t::Vector{T}
@@ -29,6 +34,15 @@ mutable struct Experiment{T}
     chUnits::Vector{String}
     chGains::Vector{T}
     stimulus_protocol::StimulusProtocol
+end
+
+#This constructor accounts for the new format type
+function Experiment(FORMAT::Type, HeaderDict::Dict{String,Any},
+    dt::T, t::Vector{T}, data_array::Array{T,3},
+    chNames::Vector{String}, chUnits::Vector{String}, chGains::Vector{T},
+    stimulus_protocol::StimulusProtocol
+) where T<: Real
+    return Experiment{FORMAT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains, stimulus_protocol)
 end
 
 #Make a basic constructor for the experiment
