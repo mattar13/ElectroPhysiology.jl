@@ -28,10 +28,3 @@ function readImage(::Type{T}, filename; sampling_rate = 2.96, chName = "CalBryte
 end
 
 readImage(filename; kwargs...) = readImage(Float64, filename; kwargs...)
-
-
-function get_frame(exp::Experiment{})
-
-
-
-end
