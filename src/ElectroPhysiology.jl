@@ -78,10 +78,8 @@ function __init__()
                 using .ImageView
                 include("Readers/ImageReader/ImageReader.jl")
                 export readImage
+                export get_frame, get_all_frames
                 
-                include("Readers/ImageReader/pixel_extractor.jl")
-                export get_frame
-                export z_project
             end
         end
     end
