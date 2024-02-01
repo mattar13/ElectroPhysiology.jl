@@ -73,10 +73,15 @@ export z_project
 function __init__()
     @require FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549" begin
         println("FileIO loaded")
+        using .FileIO
         @require Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0" begin
+            using .Images
             println("Images Loaded")
             @require ImageView = "86fae568-95e7-573e-a6b2-d8a6b900c9ef" begin
+                using .ImageView
                 println("ImageViewer loaded")
+                include("Readers/ImageReader/ImageReader.jl")
+                export readImage
             end
         end
     end
