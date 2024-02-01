@@ -3,23 +3,14 @@ using Revise
 using ElectroPhysiology
 import ElectroPhysiology as EP
 
-#%% I want to try to see if we can add a channel for a stimulus waveform
-
-#The data file exists here
 root = raw"E:\Data\Patching"
-file = "2024_01_25_ChAT-RFP_DSGC/Cell1/24125000.abf"
+file = "2024_01_25_ChAT-RFP_DSGC/Cell1/24125002.abf"
 filename = joinpath(root, file)
-
-#get the abf info first
 data = readABF(filename)
-
-wvform = EP.create_signal_waveform(data, "Analog 0")
-wvform.chNames
-wvform.t
-
-EP.create_signal_waveform!(data, "Analog 0")
+create_signal_waveform!(data, "Cmd 0")
 data.chNames
-data.data_array
-
+data.chUnits
 
 #%% Now we begin a new venture. Opening images as files
+using Pkg; Pkg.activate("test")
+using FileIO, ImageView, Images
