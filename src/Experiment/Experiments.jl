@@ -11,7 +11,7 @@ A mutable struct representing a physiological experiment.
 - `data_array`: A 3-dimensional array containing the experimental data.
 - `chNames`: A vector of strings representing the names of the channels.
 - `chUnits`: A vector of strings representing the units of the channels.
-- `chTelegraph`: A vector of `Real` values representing the telegraph values of the channels.
+- `chGains`: A vector of `Real` values representing the Gains values of the channels.
 - `stimulus_protocol`: A `StimulusProtocol{T}` object containing the stimulus protocol information.
 
 ## Constructors
@@ -27,7 +27,7 @@ mutable struct Experiment{T}
     data_array::Array{T,3}
     chNames::Vector{String}
     chUnits::Vector{String}
-    chTelegraph::Vector{T}
+    chGains::Vector{T}
     stimulus_protocol::StimulusProtocol
 end
 
@@ -182,7 +182,7 @@ getChannelNames(exp::Experiment) = exp.chNames
 
 getChannelUnite(exp::Experiment) = exp.chUnits
 
-getTelegraph(exp::Experiment) = exp.chTelegraph
+getGains(exp::Experiment) = exp.chGains
 
 setIntensity(exp::Experiment, photons) = setIntensity(exp.stimulus_protocol, photons)
 
