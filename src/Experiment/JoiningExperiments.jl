@@ -1,18 +1,17 @@
 import Base: cat, hcat, vcat
 function push!(exp::Experiment, a::AbstractArray; 
     dims = 1, 
-    newChName = "New channel", newChUnits = "New units", newChTelegraph = 1.0
+    newChName = "New channel", newChUnits = "New units", newchGains = 1.0
 )
     exp.data_array = cat(exp.data_array, a; dims = dims)
     exp.chNames = [exp.chNames..., newChName]
     exp.chUnits = [exp.chUnits..., newChUnits]
-    exp.chTelegraph = [exp.chTelegraph..., newChTelegraph]
+    exp.chGains = [exp.chGains..., newchGains]
 end
 
 """
     concat(exp::Experiment{T}, exp_add::Experiment{T}; kwargs...) where {T}
     concat!(exp::Experiment{T}, exp_add::Experiment{T}; kwargs...) where {T}
-
 Return a new `Experiment` object with `exp` concatenated with `exp_add` along the trials dimension.
 
 # Arguments
@@ -64,7 +63,7 @@ function concat!(exp::Experiment, exp2::Experiment;
     exp.data_array = cat(exp.data_array, exp2.data_array, dims = dims)
     exp.chNames = [exp.chNames..., exp2.chNames...]
     exp.chUnits = [exp.chUnits..., exp.chUnits...]
-    exp.chTelegraph = [exp.chTelegraph..., exp.chTelegraph...]
+    exp.chGains = [exp.chGains..., exp.chGains...]
     return 
 end
 
