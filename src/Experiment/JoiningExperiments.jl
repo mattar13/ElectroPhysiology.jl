@@ -152,6 +152,7 @@ end
 
 function create_signal_waveform!(exp::Experiment, channel::String)
     wvform = getWaveform(exp.HeaderDict, channel)
-    push!(exp, wvform, dims = 3, newChName = channel, newChUnits = "mV")
+    dac_idx = findall(x -> channel == x, exp.HeaderDict["dacNames"])
+    push!(exp, wvform, dims = 3, newChName = channel, newChUnits = exp.HeaderDict["dacUnits"][dac_idx...])
     return
 end
