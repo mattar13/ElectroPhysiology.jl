@@ -10,12 +10,12 @@ function readImage(::Type{T}, filename; sampling_rate = 2.96, chName = "CalBryte
           "framesize" => (px_x, px_y),
           "xrng" => 1:px_x, "y_rng" => 1:px_y,
           "detector_wavelength" => [594],
-          "ROIs" => [], #Currently ROIs are empty
+          "ROIs" => zeros(Int64, px_x*px_y), #Currently ROIs are empty
      ) #We need to think of other important data aspects
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
      dt = 1/sampling_rate
-     t = collect(1:n_frames) .* dt
+     t = collect(1:n_frames).-1 .* dt
      return Experiment(
           TWO_PHOTON,
           HeaderDict, #Header and Metadata
@@ -41,10 +41,4 @@ get_frame(exp::Experiment{TWO_PHOTON, T}, frames::AbstractArray) where T<:Real =
 function get_all_frames(exp::Experiment{TWO_PHOTON, T}) where T <: Real
      n_frames = size(exp, 2)
      return get_frame(exp, 1:n_frames)
-end
-
-function recordROI(data, roi_xy)
-
-
-
 end
