@@ -79,6 +79,10 @@ function __init__()
                 include("Readers/ImageReader/ImageReader.jl")
                 export readImage
                 export get_frame, get_all_frames
+
+                include("Readers/ImageReader/ROIReader.jl")
+                export recordROI 
+                export getROIindexes, getROImask, getROIarr
                 
             end
         end
