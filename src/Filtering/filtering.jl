@@ -88,7 +88,7 @@ function filter_data!(exp::Experiment{T};
     end
 end
 
-function normalize!(exp::Experiment; rng=(-1, 0), normalize_by=:channel)
+function normalize!(exp::Experiment; rng=(0, 1), normalize_by=:channel)
     for swp in axes(exp, 1)
         for ch in axes(exp, 3)
             if rng[1] < 0
