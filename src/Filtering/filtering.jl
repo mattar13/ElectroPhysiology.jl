@@ -88,21 +88,14 @@ function filter_data!(exp::Experiment{T};
     end
 end
 
-function normalize!(exp::Experiment; rng=(0, 1), normalize_by=:channel)
-    for swp in axes(exp, 1)
-        for ch in axes(exp, 3)
-            if rng[1] < 0
-                exp.data_array[swp, :, ch] .= (exp[swp, :, ch] ./ minimum(exp[swp, :, ch], dims=2))
-            else
-                exp.data_array[swp, :, ch] .= (exp[swp, :, ch] ./ maximum(exp[swp, :, ch], dims=2))
-            end
-        end
-    end
+function normalize!(exp::Experiment; rng=(0, 1), dims = (1,2))
+    exp.data_array .+= minimum(exp.data_array, dims = dims)
+    exp.data_array ./= maximum(exp.data_array, dims = dims)
 end
 
-function normalize(exp::Experiment; rng=(-1, 0), dims=2)
+function normalize(exp::Experiment; rng=(-1, 0), dims=(1, 2))
     data = deepcopy(exp)
-    normalize!(data)
+    normalize!(data, rng = rng, dims = dims)
     return data
 end
 
