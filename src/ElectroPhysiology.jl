@@ -67,8 +67,6 @@ export parseABF
 include("Readers/XLSReader.jl")
 export readXLSX
 
-
-
 function __init__()
     @require FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549" begin
         using .FileIO
@@ -87,7 +85,6 @@ function __init__()
             end
         end
     end
-
 end
 
 end
