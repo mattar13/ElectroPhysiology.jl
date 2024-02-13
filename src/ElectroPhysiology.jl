@@ -4,7 +4,7 @@ module ElectroPhysiology
 using Requires
 using Dates
 import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax, abs
-import Statistics.std
+import Statistics: std, mean
 
 #This code does several things
 #=1) Creates several objects used in the analysis of ElectroPhysiology data=#
@@ -81,7 +81,7 @@ function __init__()
                 include("Readers/ImageReader/ROIReader.jl")
                 export recordROI 
                 export getROIindexes, getROImask, getROIarr
-                
+                export loadROIfn
             end
         end
     end
