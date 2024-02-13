@@ -3,6 +3,7 @@
 # Zoom level
 # FPS
 #Size
+#TODO: Remember that the images might be misaligned in plotting. Maybe we need to define this in Plotting
 function readImage(::Type{T}, filename; sampling_rate = 2.96, chName = "CalBryte590", chUnit = "px", chGain = 1.0) where T <: Real
      data_array = load(filename) |> Array{T}
      px_x, px_y, n_frames = size(data_array)
