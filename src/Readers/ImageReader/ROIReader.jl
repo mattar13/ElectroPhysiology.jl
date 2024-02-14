@@ -8,9 +8,18 @@ This function gets the ROI label and returns the mask
 function getROImask(exp::Experiment{TWO_PHOTON, T}, label::Int64; reshape_arr = true) where T <: Real
      if reshape_arr
           px_x, px_y = exp.HeaderDict["framesize"]
-          return reshape(exp.HeaderDict["ROIs"] .== label, (px_x, px_y))
+          return reshape(exp.HeaderDict["ROIs"] .== label, (px_x, px_y)) .|> Int64
      else
-          return exp.HeaderDict["ROIs"] .== label
+          return (exp.HeaderDict["ROIs"] .== label) .|> Int64
+     end
+end
+
+function getROImask(exp::Experiment{TWO_PHOTON, T}; reshape_arr = true) where T<:Real
+     if reshape_arr
+          px_x, px_y = exp.HeaderDict["framesize"]
+          return reshape(exp.HeaderDict["ROIs"], (px_x, px_y)) .|> Int64
+     else
+          return (exp.HeaderDict["ROIs"]) .|> Int64
      end
 end
 
@@ -25,13 +34,15 @@ function getROIarr(exp::Experiment{TWO_PHOTON, T}, label::Int64; reshape_arr = t
      end
 end
 
-function getROIarr(data::Experiment{TWO_PHOTON, T}) where T<:Real
-     ROI_exps = Experiment[]
-     for (k, v) in data.HeaderDict["ROIs"]
-          data_ROI = getROIexperiment(data, k)
-          push!(ROI_exps, data_ROI)
+function getROIarr(exp::Experiment{TWO_PHOTON, T}; reshape_arr = true) where T<:Real
+     ROI_mask = exp.HeaderDict["ROIs"] .!= 0
+     ROI_arr = exp.data_array .* ROI_mask
+     if reshape_arr
+          px_x, px_y = exp.HeaderDict["framesize"]
+          return reshape(ROI_arr, (px_x, px_y, size(exp, 2)))
+     else
+          return ROI_arr
      end
-     return ROI_exps
 end
 
 """
@@ -44,7 +55,7 @@ function recordROI(exp::Experiment{TWO_PHOTON, T}, roi_idxs::Vector{Int64}, labe
 end
 
 #Make a new function 
-function loadROIfn(fn::String, exp::Experiment{TWO_PHOTON, T}) where T<:Real
+function loadROIfn!(fn::String, exp::Experiment{TWO_PHOTON, T}) where T<:Real
      ROI_mask_img = load(fn)
      ROI_mask_gray = Gray.(ROI_mask_img)
      ROI_mask_gray = reshape(ROI_mask_gray, length(ROI_mask_gray)) |> vec
