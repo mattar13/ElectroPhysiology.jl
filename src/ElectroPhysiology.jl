@@ -2,6 +2,7 @@ module ElectroPhysiology
 
 #=Import all experiment objects=======================#
 using Requires
+capabilies = Symbol[] #This indicates all the things the package is capable of doing
 using Dates
 import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax, abs
 import Statistics: std, mean
@@ -52,32 +53,28 @@ export normalize, normalize!
 include("Filtering/filteringPipelines.jl")
 export data_filter!, data_filter
 
-#using ContinuousWavelets, Wavelets
-
-#include("Filtering/make_spectrum.jl")
-#include("Filtering/wavelet_filtering.jl")
-#export cwt_filter!, cwt_filter
-#export dwt_filter!, dwt_filter
 
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
 export readABF
 export parseABF
 
-include("Readers/XLSReader.jl")
-export readXLSX
+
 
 function __init__()
     @require FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549" begin
         using .FileIO
+        push!(capabilies, :FileIO)
         @require Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0" begin
             using .Images
+            push!(capabilies, :Images)
             @require ImageView = "86fae568-95e7-573e-a6b2-d8a6b900c9ef" begin
                 using .ImageView
+                push!(capabilies, :ImageView)
                 include("Readers/ImageReader/ImageReader.jl")
                 export readImage
                 export get_frame, get_all_frames
-
+                
                 include("Readers/ImageReader/ROIReader.jl")
                 export recordROI 
                 export getROIindexes, getROImask, getROIarr
@@ -85,6 +82,32 @@ function __init__()
             end
         end
     end
+    
+    @require XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0" begin
+        using .XLSX; push!(capabilies, :XLSX)
+        @require DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0" begin
+            using .DataFrames; push!(capabilies, :DataFrames)
+            include("Readers/XLSReader.jl")
+            export readXLSX
+        end
+    end
+
+
+    @require Wavelets = "29a6e085-ba6d-5f35-a997-948ac2efa89a" begin
+        using .Wavelets; push!(capabilies, :Wavelets)
+
+        @require ContinuousWavelets = "96eb917e-2868-4417-9cb6-27e7ff17528f" begin
+            println("Wavelet utilites added")
+            using .ContinuousWavelets; push!(capabilies, :ContinuousWavelets)
+            
+            include("Filtering/make_spectrum.jl")
+            include("Filtering/wavelet_filtering.jl")
+            export cwt_filter!, cwt_filter
+            export dwt_filter!, dwt_filter
+        
+        end
+    end
 end
 
+export capabilies #Export this, and even append to it when you load a new package
 end
