@@ -92,7 +92,6 @@ function __init__()
         end
     end
 
-
     @require Wavelets = "29a6e085-ba6d-5f35-a997-948ac2efa89a" begin
         using .Wavelets; push!(capabilies, :Wavelets)
 
