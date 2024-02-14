@@ -1,4 +1,7 @@
 #This can be used to test all packages and their compatibilities
+using Revise
+using ElectroPhysiology
+
 using Pkg
 Pkg.test() #Firs test the ElectroPhysiology package
 
