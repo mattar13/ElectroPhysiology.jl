@@ -1,7 +1,7 @@
 name = "ElectroPhysiology"
 uuid = "da7a9670-f599-43ac-b818-143f8bf87d45"
 authors = ["mattar13 <mtarchick13@gmail.com> and contributors"]
-version = "0.5.2"
+version = "0.5.3"
 
 [deps]
 ContinuousWavelets = "96eb917e-2868-4417-9cb6-27e7ff17528f"
@@ -19,12 +19,12 @@ XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 ContinuousWavelets = "1"
 DSP = "0.7"
 DataFrames = "1"
-Documenter = "0.27"
-Polynomials = "3"
+Documenter = "1"
+Polynomials = "4"
 Requires = "1"
 Statistics = "1.0"
-Wavelets = "0.9"
-XLSX = "0.9"
+Wavelets = "0.10"
+XLSX = "0.10"
 julia = "1"
 
 [extras]
