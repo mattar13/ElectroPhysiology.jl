@@ -12,7 +12,6 @@ import Statistics: std, mean
 #=2) Reads =#
 #=3) Modifies experiment objects =#
 using DSP #Used for lowpass, highpass, EI, and notch filtering
-using XLSX, DataFrames
 
 include("Experiment/StimulusProtocol.jl")
 export StimulusProtocol
@@ -59,8 +58,6 @@ include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
 export readABF
 export parseABF
 
-
-
 function __init__()
     @require FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549" begin
         using .FileIO
@@ -89,6 +86,10 @@ function __init__()
             using .DataFrames; push!(capabilies, :DataFrames)
             include("Readers/XLSReader.jl")
             export readXLSX
+
+            import .DataFrames.DataFrame
+            include("Experiment/StimulusToDataFrame.jl")
+            export DataFrame
         end
     end
 
