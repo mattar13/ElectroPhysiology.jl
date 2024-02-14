@@ -81,7 +81,7 @@ function __init__()
                 include("Readers/ImageReader/ROIReader.jl")
                 export recordROI 
                 export getROIindexes, getROImask, getROIarr
-                export loadROIfn
+                export loadROIfn!
             end
         end
     end
