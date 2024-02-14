@@ -1,53 +1,50 @@
 using Revise
 using ElectroPhysiology
 import ElectroPhysiology as EP
-
-#%% Now we begin a new venture. Opening images as files
+ElectroPhysiology.__init__()
 using Pkg; Pkg.activate("test")
 using FileIO, ImageView, Images
 using GLMakie
+using Statistics
 
-#%%
-root = raw"D:\Data\Calcium Images\2024_01_31_FRMD7_Cal590"
-file = "2024_01_31_ROI003.tif"
-filename = joinpath(root, file)
-data = load(filename) |> Array{Float64}
-data = permutedims(data, (2,1,3))
-x_size = 1:size(data,1)
-y_size = 1:size(data,2)
-zavg = z_project(data, dims = 3)
-zproj = z_project(data, dims = (1,2))
+root = raw"F:\Data\Calcium Images\2024_01_31_FRMD7_Cal590"
+file = "2024_01_31_ROI004.tif"
+fn = joinpath(root, file)
+data = readImage(fn)
+mov = get_all_frames(data) #get all frames as a 3D array
+zproj = mean(mov, dims = 3)[:,:,1] #Can we save this directly? 
 
-fig = GLMakie.Figure(size = (1500, 400))
+#%% Figure out how to load a mask image as a ROI array
+fn = raw"C:\Users\mtarc\.julia\dev\ElectroPhysiology\test\2024_02_09_18_06_27.654700test_img_masks.png"
+loadROIfn!(fn, data)
+ROI_mask = getROImask(data)
+
+px_x, px_y = data.HeaderDict["framesize"]
+xlims = 1:px_x
+ylims = 1:px_y
+zlims = 1:size(data,2)
+#%% Lets make a plot that shows a few of the ROIs
+fig = GLMakie.Figure(size = (1000, 500))
+#Plot the projected image and the mask
 ax11 = GLMakie.Axis(fig[1,1])
-ax12 = GLMakie.Axis3(fig[1,2])
+ax12 = GLMakie.Axis(fig[1,2])
+heatmap!(ax11, xlims, ylims, zproj, colormap = Reverse(:algae))
+heatmap!(ax12, xlims, ylims, ROI_mask, colormap = Reverse(:algae))
+
+# Extract the ROI movie array
+ROI1_mov = getROIarr(data, 21)
+ROIall_mov = getROIarr(data)
 ax21 = GLMakie.Axis(fig[2,1])
-ax22 = GLMakie.Axis3(fig[2,2])
-ax3 = GLMakie.Axis(fig[3,1])
+ax22 = GLMakie.Axis(fig[2,2])
+hm1 = heatmap!(ax21, xlims, ylims, mov[:,:,1], colormap = Reverse(:algae), colorrange = (0.0, 0.05))
+hm2 = heatmap!(ax22, xlims, ylims, ROIall_mov[:,:,1], colormap = Reverse(:algae), colorrange = (0.0, 0.05))
 
-heatmap!(ax11, x_size, y_size, zavg, colormap = Reverse(:algae), colorrange = (0.0, 0.05))
-surface!(ax12, x_size, y_size, zavg, colormap = Reverse(:algae), colorrange = (0.0, 0.05))
-hm = heatmap!(ax21, x_size, y_size, data[:,:,1], colormap = Reverse(:algae), colorrange = (0.0, 0.05))
-sf = surface!(ax22, x_size, y_size, data[:,:,1], colormap = Reverse(:algae), colorrange = (0.0, 0.05))
-lines!(ax3, zproj)
-ln_spot = lines!(ax3, fill(0.0, 2), [minimum(zproj), maximum(zproj)], color = :black)
-
-record(fig, "$root/$(file[1:end-4])_ANIMATION.mp4", 2:size(data,3)) do i 
-    println(i)
-    frame = data[:,:,i]
-    ln_spot[1] = fill(i, 2)
-    hm[3] = frame
-    sf[3] = frame
+#Convert the centroid of each cell coordinate to an X,Y coordinate
+display(fig)
+#%%
+record(fig, "ANIMATION.mp4", 2:size(data,2)) do i 
+     println(i)
+     hm1[3] = mov[:,:,i]
+     hm2[3] = ROIall_mov[:,:,i]
 end
 display(fig)
-
-#%% This function just load the command 
-root = raw"E:\Data\Patching"
-file = "2024_01_25_ChAT-RFP_DSGC/Cell1/24125002.abf"
-filename = joinpath(root, file)
-data = readABF(filename)
-create_signal_waveform!(data, "Cmd 0")
-data.chNames
-data.chUnits
-
-
