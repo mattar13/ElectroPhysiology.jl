@@ -56,6 +56,34 @@ function Experiment(HeaderDict::Dict{String,Any},
 end
 
 #Make a basic constructor for the experiment
+function Experiment(FORMAT::Type, data_array::AbstractArray{T}; data_idx = 2) where T <: Real
+    Experiment{FORMAT, T}(
+        Dict{String, Any}(), #Pass an empty header info
+        1.0, 
+        collect(1.0:size(data_array, data_idx)),
+        data_array,
+        ["Channel 1"],
+        ["mV"],
+        [1.0], 
+        StimulusProtocol(size(data_array,1))
+    )
+end
+
+function Experiment(FORMAT::Type, time::Vector, data_array::Array{T, 3}) where T <: Real
+    dt = time[2]-time[2]
+    Experiment{FORMAT, T}(
+        Dict{String, Any}(), #Pass an empty header info
+        dt, 
+        time,
+        data_array,
+        ["Channel 1"],
+        ["mV"],
+        [1.0], 
+        StimulusProtocol(size(data_array,1))
+    )
+end
+
+#Make a basic constructor for the experiment
 function Experiment(data_array::AbstractArray{T}; data_idx = 2) where T <: Real
     Experiment{EXPERIMENT, T}(
         Dict{String, Any}(), #Pass an empty header info
