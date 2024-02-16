@@ -1,4 +1,5 @@
 #Types of experiments
+abstract type EXPERIMENT end
 abstract type ERG end
 abstract type WHOLE_CELL end
 abstract type TWO_PHOTON end
@@ -46,9 +47,8 @@ function Experiment(FORMAT::Type, HeaderDict::Dict{String,Any},
 end
 
 #Make a basic constructor for the experiment
-function Experiment(data_array::AbstractArray; data_idx = 2)
-    Experiment(
-        :Julia,
+function Experiment(data_array::AbstractArray{T}; data_idx = 2) where T <: Real
+    Experiment{EXPERIMENT, T}(
         Dict{String, Any}(), #Pass an empty header info
         1.0, 
         collect(1.0:size(data_array, data_idx)),
@@ -62,8 +62,7 @@ end
 
 function Experiment(time::Vector, data_array::Array{T, 3}) where T <: Real
     dt = time[2]-time[2]
-    Experiment(
-        :Julia,
+    Experiment{EXPERIMENT, T}(
         Dict{String, Any}(), #Pass an empty header info
         dt, 
         time,
