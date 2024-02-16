@@ -46,6 +46,15 @@ function Experiment(FORMAT::Type, HeaderDict::Dict{String,Any},
     return Experiment{FORMAT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains, stimulus_protocol)
 end
 
+#The default behavior
+function Experiment(HeaderDict::Dict{String,Any},
+    dt::T, t::Vector{T}, data_array::Array{T,3},
+    chNames::Vector{String}, chUnits::Vector{String}, chGains::Vector{T},
+    stimulus_protocol::StimulusProtocol
+) where T<: Real
+    return Experiment{EXPERIMENT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains, stimulus_protocol)
+end
+
 #Make a basic constructor for the experiment
 function Experiment(data_array::AbstractArray{T}; data_idx = 2) where T <: Real
     Experiment{EXPERIMENT, T}(
