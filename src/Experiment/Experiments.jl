@@ -34,14 +34,14 @@ mutable struct Experiment{FORMAT, T}
     chNames::Vector{String}
     chUnits::Vector{String}
     chGains::Vector{T}
-    stimulus_protocol::StimulusProtocol
+    stimulus_protocol::Union{Nothing, StimulusProtocol} #We probably want to add this only in specific cases 
 end
 
 #This constructor accounts for the new format type
 function Experiment(FORMAT::Type, HeaderDict::Dict{String,Any},
     dt::T, t::Vector{T}, data_array::Array{T,3},
     chNames::Vector{String}, chUnits::Vector{String}, chGains::Vector{T},
-    stimulus_protocol::StimulusProtocol
+    stimulus_protocol::Union{Nothing, StimulusProtocol}
 ) where T<: Real
     return Experiment{FORMAT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains, stimulus_protocol)
 end
@@ -50,7 +50,7 @@ end
 function Experiment(HeaderDict::Dict{String,Any},
     dt::T, t::Vector{T}, data_array::Array{T,3},
     chNames::Vector{String}, chUnits::Vector{String}, chGains::Vector{T},
-    stimulus_protocol::StimulusProtocol
+    stimulus_protocol::Union{Nothing, StimulusProtocol}
 ) where T<: Real
     return Experiment{EXPERIMENT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains, stimulus_protocol)
 end
@@ -79,7 +79,7 @@ function Experiment(FORMAT::Type, time::Vector, data_array::Array{T, 3}) where T
         ["Channel 1"],
         ["mV"],
         [1.0], 
-        StimulusProtocol(size(data_array,1))
+        nothing#StimulusProtocol(size(data_array,1))
     )
 end
 
@@ -93,7 +93,7 @@ function Experiment(data_array::AbstractArray{T}; data_idx = 2) where T <: Real
         ["Channel 1"],
         ["mV"],
         [1.0], 
-        StimulusProtocol(size(data_array,1))
+        nothing #StimulusProtocol(size(data_array,1))
     )
 end
 
@@ -107,7 +107,7 @@ function Experiment(time::Vector, data_array::Array{T, 3}) where T <: Real
         ["Channel 1"],
         ["mV"],
         [1.0], 
-        StimulusProtocol(size(data_array,1))
+        nothing# StimulusProtocol(size(data_array,1))
     )
 end
 
