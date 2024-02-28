@@ -4,7 +4,7 @@
     Filters data in the `exp` object using a digital filter.
 
     # Parameters
-    - exp : Experiment{T} 
+    - exp : Experiment{F, T} 
         an object containing the data to be filtered
     - freq_start : float (optional) 
         start frequency for the filter, default is 1.0
@@ -33,18 +33,18 @@
     filter_data!(exp, freq_start=5, freq_stop=10, mode=:Bandpass)
     ```
 """
-function filter_data(exp::Experiment{T}; kwargs...) where {T<:Real}
+function filter_data(exp::Experiment{F, T}; kwargs...) where {F, T<:Real}
     data = deepcopy(exp)
     filter_data!(data; kwargs...)
     return data
 end
 
-function filter_data!(exp::Experiment{T};
+function filter_data!(exp::Experiment{F, T};
     freq_start=1.0, freq_stop=55.0, bandwidth=10.0,
     mode=:Lowpass, method=:Chebyshev2,
     pole=4, ripple=50.0, attenuation=100.0,
     filter_channels=-1
-) where {T<:Real}
+) where {F, T<:Real}
 
     #Determine the filter response
     if mode == :Lowpass
@@ -88,18 +88,18 @@ function filter_data!(exp::Experiment{T};
     end
 end
 
-function normalize!(exp::Experiment; rng=(0, 1), dims = (1,2))
+function normalize!(exp::Experiment{F, T}; rng=(0, 1), dims = (1,2)) where {F, T<:Real}
     exp.data_array .+= minimum(exp.data_array, dims = dims)
     exp.data_array ./= maximum(exp.data_array, dims = dims)
 end
 
-function normalize(exp::Experiment; rng=(-1, 0), dims=(1, 2))
+function normalize(exp::Experiment{F, T}; rng=(-1, 0), dims=(1, 2)) where {F, T<:Real}
     data = deepcopy(exp)
     normalize!(data, rng = rng, dims = dims)
     return data
 end
 
-function normalize_channel!(exp::Experiment; rng=(-1, 0))
+function normalize_channel!(exp::Experiment{F, T}; rng=(-1, 0)) where {F, T<:Real}
     if rng[1] < 0.0
         mins = minimum(minimum(data, dims=2), dims=1)
         exp.data_array ./= -mins
@@ -109,13 +109,13 @@ function normalize_channel!(exp::Experiment; rng=(-1, 0))
     end
 end
 
-function normalize_channel(exp::Experiment; rng=(-1, 0))
+function normalize_channel(exp::Experiment{F, T}; rng=(-1, 0)) where {F, T<:Real}
     data = deepcopy(exp)
     normalize_channel!(data)
     return data
 end
 
-function rolling_mean(exp::Experiment; window::Int64=10)
+function rolling_mean(exp::Experiment{F, T}; window::Int64=10) where {F, T<:Real}
     data = deepcopy(exp)
     for swp in axes(exp, 1), ch in axes(exp, 3)
         for i in 1:window:size(data, 2)-window
