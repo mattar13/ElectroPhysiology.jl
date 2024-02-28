@@ -1,12 +1,12 @@
 #This is our inplace function for scaling. Division is done by multiplying by a fraction
 """
-    scaleby!(data::Experiment{T}, val::T) where T <: Real
-    scaleby!(data::Experiment{T}, val::Vector{T}) where T <: Real
+    scaleby!(data::Experiment{F,T}, val::T) where T <: Real
+    scaleby!(data::Experiment{F,T}, val::Vector{T}) where T <: Real
 Scale the data elements in the given `Experiment` object by a scalar value `val` in-place. 
 If val is a vector of values, The length of the vector should match either the number of channels or the number of trials in the experiment.
 
 # Arguments
-- `data`: An `Experiment{T}` object containing the experimental data.
+- `data`: An `Experiment{F,T}` object containing the experimental data.
 - `val`: A scalar value by which to scale the data.
 
 # Example
@@ -16,9 +16,9 @@ scaleby!(exp, 2.0)
 ```
 
 """
-scaleby!(data::Experiment{T}, val::T) where T <: Real = data.data_array = data.data_array .* val 
+scaleby!(data::Experiment{F,T}, val::T) where {F, T <: Real} = data.data_array = data.data_array .* val 
 
-function scaleby!(data::Experiment{T}, val::Vector{T}) where T <: Real
+function scaleby!(data::Experiment{F,T}, val::Vector{T}) where {F, T <: Real}
     #if the val is the same length of the channels then we can 
     if length(val) == size(data, 3) #Scale by the channel
         scale = reshape(val, 1,1,size(data,3))
@@ -31,20 +31,20 @@ function scaleby!(data::Experiment{T}, val::Vector{T}) where T <: Real
     end
 end
 
-function scaleby(data::Experiment{T}, val) where T<:Real
+function scaleby(data::Experiment{F,T}, val) where {F, T<:Real}
     data_copy = deepcopy(data)
     scaleby!(data_copy, val)
     return data_copy
 end
 
 """
-    pad(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {T <: Real}
-    pad!(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {T <: Real}
+    pad(trace::Experiment{F,T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {T <: Real}
+    pad!(trace::Experiment{F,T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {T <: Real}
 Pad the data in a given `Experiment` object by adding elements with a specified value `val` either before or after the existing data. 
 This function returns a new `Experiment` object with the padded data. pad! is the inplace version, while pad creates a new experiment
 
 # Arguments
-- `trace`: An `Experiment{T}` object containing the experimental data.
+- `trace`: An `Experiment{F,T}` object containing the experimental data.
 - `n_add`: The number of elements to add.
 - `position`: (Optional) A symbol specifying where to add the elements. Can be `:pre` (before) or `:post` (after). Default is `:post`.
 - `val`: (Optional) The value to use for padding. Default is 0.0.
@@ -55,7 +55,7 @@ exp = Experiment(data_array)
 padded_exp = pad(exp, 100, position=:pre, val=0.0)
 ```
 """
-function pad(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {T<:Real}
+function pad(trace::Experiment{F,T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {F, T<:Real}
     data = deepcopy(trace)
     addon_size = collect(size(trace))
     addon_size[2] = n_add
@@ -68,7 +68,7 @@ function pad(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T=
     return data
 end
 
-function pad!(trace::Experiment{T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {T<:Real}
+function pad!(trace::Experiment{F,T}, n_add::Int64; position::Symbol=:post, val::T=0.0) where {F, T<:Real}
     addon_size = collect(size(trace))
     addon_size[2] = n_add
     addon = fill(val, addon_size...)
@@ -107,7 +107,7 @@ exp = Experiment(data_array)
 chopped_exp = chop(exp, 100, position=:pre)
 ```
 """
-function chop(trace::Experiment, n_chop::Int64; position::Symbol=:post)
+function chop(trace::Experiment{F, T}, n_chop::Int64; position::Symbol=:post) where {F, T<:Real}
     data = copy(trace)
     resize_size = collect(size(trace))
     resize_size[2] = (size(trace, 2) - n_chop)
@@ -116,7 +116,7 @@ function chop(trace::Experiment, n_chop::Int64; position::Symbol=:post)
     return data
 end
 
-function chop!(trace::Experiment, n_chop::Int64; position::Symbol=:post)
+function chop!(trace::Experiment{F, T}, n_chop::Int64; position::Symbol=:post) where {F, T<:Real}
     resize_size = collect(size(trace))
     resize_size[2] = (size(trace, 2) - n_chop)
     resize_size = map(x -> 1:x, resize_size)
@@ -139,7 +139,7 @@ end
 
 Removes a channel or trial
 """
-function drop!(trace::Experiment; dim=3, drop_idx=1)
+function drop!(trace::Experiment{F, T}; dim=3, drop_idx=1) where {F, T<:Real}
     n_dims = collect(1:length(size(trace)))
     n_dims = [dim, n_dims[n_dims.!=dim]...]
     perm_data = permutedims(trace.data_array, n_dims)
@@ -148,7 +148,7 @@ function drop!(trace::Experiment; dim=3, drop_idx=1)
     trace.data_array = perm_data
 end
 
-function drop(trace::Experiment; kwargs...)
+function drop(trace::Experiment{F, T}; kwargs...) where {F, T<:Real}
     trace_copy = copy(trace)
     drop!(trace_copy; kwargs...)
     return trace_copy
@@ -179,11 +179,11 @@ exp = Experiment(data_array)
 truncated_exp = truncate_data(exp, t_pre=0.5, t_post=2.5)
 ```
 """
-function truncate_data!(trace::Experiment; 
+function truncate_data!(trace::Experiment{F, T}; 
     t_pre=1.0, t_post=5.0, 
     t_begin = nothing, t_end = nothing, 
     truncate_based_on=:stimulus_beginning
-)
+) where {F, T<:Real}
     dt = trace.dt
     size_of_array = 0
     overrun_time = 0 #This is for if t_pre is set too far before the stimulus
@@ -198,7 +198,7 @@ function truncate_data!(trace::Experiment;
         #println(end_rng)
         trace.data_array = trace.data_array[:, start_rng:end_rng, :]
         trace.t = trace.t[start_rng:end_rng] .- trace.t[start_rng]
-    elseif trace.stimulus_protocol.channelName == "Nothing"
+    elseif isnothing(getStimulusProtocol(trace))
         #println("No explicit stimulus has been set")
         size_of_array = round(Int64, t_post / dt)
         trace.data_array = trace.data_array[:, 1:size_of_array, :] #remake the array with only the truncated data
@@ -265,7 +265,7 @@ function truncate_data!(trace::Experiment;
     return trace
 end
 
-function truncate_data(trace::Experiment; kwargs...) 
+function truncate_data(trace::Experiment{F, T}; kwargs...) where {F, T<:Real} 
     data = deepcopy(trace)
     truncate_data!(data)
     return data
@@ -290,13 +290,13 @@ exp = Experiment(data_array)
 average_trials!(exp)
 ```
 """
-function average_trials(trace::Experiment{T}) where {T<:Real}
+function average_trials(trace::Experiment{F,T}) where {F, T<:Real}
     data = deepcopy(trace)
     average_trials!(data)
     return data
 end
 
-average_trials!(trace::Experiment{T}) where {T<:Real} = trace.data_array = sum(trace, dims=1) / size(trace, 1)
+average_trials!(trace::Experiment{F,T}) where {F, T<:Real} = trace.data_array = sum(trace, dims=1) / size(trace, 1)
 
 """
     downsample(trace::Experiment, sample_rate::T) where {T<:Real}
@@ -321,13 +321,13 @@ exp = Experiment(data_array)
 downsample!(exp, 1000.0)
 ```
 """
-function downsample(trace::Experiment{T}, sample_rate::T) where {T<:Real}
+function downsample(trace::Experiment{F,T}, sample_rate::T) where {F, T<:Real}
     data = deepcopy(trace)
     downsample!(data, sample_rate)
     return data
 end
 
-function downsample!(trace::Experiment{T}, sample_rate::T) where {T<:Real}
+function downsample!(trace::Experiment{F,T}, sample_rate::T) where {F, T<:Real}
     old_sample_rate = 1/trace.dt
     new_dt = 1 / sample_rate
     trace.dt = new_dt #set the new dt
@@ -337,8 +337,8 @@ function downsample!(trace::Experiment{T}, sample_rate::T) where {T<:Real}
 end
 
 """
-    dyadic_downsample(trace::Experiment{T}) where {T<:Real}
-    dyadic_downsample!(trace::Experiment{T}) where {T<:Real}
+    dyadic_downsample(trace::Experiment{F,T}) where {T<:Real}
+    dyadic_downsample!(trace::Experiment{F,T}) where {T<:Real}
 
 Return a new `Experiment` object with the data downsampled to the nearest dyadic length.
 
@@ -355,7 +355,7 @@ exp = Experiment(data_array)
 dyadic_downsample!(exp)
 ```
 """
-function dyadic_downsample!(trace::Experiment{T}) where {T<:Real}
+function dyadic_downsample!(trace::Experiment{F,T}) where {F, T<:Real}
     n_data = length(trace.t)
     n_dyad = 2^(trunc(log2(n_data))) |> Int64
     dyad_idxs = round.(Int64, LinRange(1, length(trace.t), n_dyad)) |> collect
@@ -364,15 +364,15 @@ function dyadic_downsample!(trace::Experiment{T}) where {T<:Real}
     trace.data_array = trace.data_array[:, dyad_idxs, :]
 end
 
-function dyadic_downsample(trace::Experiment{T}) where T<:Real
+function dyadic_downsample(trace::Experiment{F,T}) where {F, T<:Real}
     data = deepcopy(trace)
     dyadic_downsample!(data)
     return data
 end
 
 """
-    baseline_adjust(trace::Experiment{T}; kwargs...) where {T<:Real}
-    baseline_adjust!(trace::Experiment{T}; kwargs...) where {T<:Real}
+    baseline_adjust(trace::Experiment{F,T}; kwargs...) where {T<:Real}
+    baseline_adjust!(trace::Experiment{F,T}; kwargs...) where {T<:Real}
 
 Return a new `Experiment` object with the baseline adjusted according to the specified mode and region.
 
@@ -394,15 +394,15 @@ exp = Experiment(data_array)
 baseline_adjust!(exp, mode=:mean, region=:prestim)
 ```
 """
-function baseline_adjust(trace::Experiment{T}; kwargs...) where {T<:Real}
+function baseline_adjust(trace::Experiment{F,T}; kwargs...) where {F, T<:Real}
     data = deepcopy(trace)
     baseline_adjust!(data; kwargs...)
     return data
 end
 
-function baseline_adjust!(trace::Experiment{T};
+function baseline_adjust!(trace::Experiment{F,T};
     mode::Symbol=:slope, polyN=1, region=:prestim
-) where {T<:Real}
+) where {F, T<:Real}
     if trace.stimulus_protocol.channelName == "Nothing"
         #println("No stim protocol exists")
     else
