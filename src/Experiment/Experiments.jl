@@ -207,8 +207,6 @@ function abs(exp::Experiment)
     return data_copy
 end
 
-
-
 import Base: reverse, reverse!
 
 function reverse(exp::Experiment; kwargs...)
@@ -230,6 +228,8 @@ getChannelUnite(exp::Experiment) = exp.chUnits
 
 getGains(exp::Experiment) = exp.chGains
 
-setIntensity(exp::Experiment, photons) = setIntensity(exp.stimulus_protocol, photons)
+setIntensity(exp::Experiment, photons) = setIntensity(exp.HeaderDict["StimululsProtocol"], photons)
 
-getIntensity(exp::Experiment) = getIntensity(exp.stimulus_protocol)
+getIntensity(exp::Experiment) = getIntensity(exp.HeaderDict["StimulusProtocol"])
+
+getStimulusProtocol(exp::Experiment) = exp.HeaderDict["StimulusProtocol"]
