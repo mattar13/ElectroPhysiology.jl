@@ -51,7 +51,6 @@ end
 function Experiment(HeaderDict::Dict{String,Any},
     dt::T, t::Vector{T}, data_array::Array{T,3},
     chNames::Vector{String}, chUnits::Vector{String}, chGains::Vector{T},
-    stimulus_protocol::Union{Nothing, StimulusProtocol}
 ) where T<: Real
     return Experiment{EXPERIMENT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains)
 end
