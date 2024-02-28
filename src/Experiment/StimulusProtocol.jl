@@ -219,7 +219,6 @@ end
 
 function push!(stimulus::StimulusProtocol, ts::Tuple)
     newStim = StimulusProtocol(ts)
-    println(newStim)
     push!(stimulus, newStim)
 end
 
