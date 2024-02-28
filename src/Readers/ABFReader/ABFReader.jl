@@ -137,18 +137,18 @@ function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
     dt, t = prepare_time_info(data, HeaderDict, time_unit)
 
     if !isnothing(stimulus_name)
-        stimulus_protocol = extract_stimulus_protocol(HeaderDict, stimulus_name, stimulus_threshold)
+        HeaderDict["StimulusProtocol"] = stimulus_protocol = extract_stimulus_protocol(HeaderDict, stimulus_name, stimulus_threshold)
     else
-        stimulus_protocol = StimulusProtocol() #I think there should be easier ways to do this but here we are
+        #stimulus_protocol = StimulusProtocol() #I think there should be easier ways to do this but here we are
     end
-
-    # Average trials if requested
+    
     if average_trials
         data, stimulus_protocol = average_data_and_protocol(data, stimulus_protocol)
     end
+    # Average trials if requested
     
     # Return Experiment object
-    return Experiment{FORMAT, T}(HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph, stimulus_protocol)
+    return Experiment{FORMAT, T}(HeaderDict, dt, t, data, ch_names, ch_units, ch_telegraph)
 end
 
 readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, WHOLE_CELL, abf_path; kwargs...)
