@@ -1,3 +1,10 @@
+@testset "Testing data filtering" begin
+     data_filtered = filter_data(data)
+     @test !isnothing(data_filtered)
+ 
+     data_normalized = normalize(data)
+     @test !isnothing(data_normalized)
+end
 println("Testing baseline adjust... ")
 print("Inplace completed: ")
 @time baseline_adjust!(data);

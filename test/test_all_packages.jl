@@ -1,4 +1,5 @@
 #This can be used to test all packages and their compatibilities
+using Revise
 test_workspace_fn = raw"C:\Users\mtarc\.julia\dev\ElectroPhysiology\test"
 using Pkg
 Pkg.activate(test_workspace_fn)
