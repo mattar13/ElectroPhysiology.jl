@@ -1,10 +1,6 @@
 using ElectroPhysiology
 using Test
 
-testfile = raw"to_filter.abf"
-data = readABF(testfile)
-testfile2 = raw"to_analyze.abf"
-data2 = readABF(testfile2)
 @testset "Testing stimulus protocols" begin
     @test !isnothing(StimulusProtocol())
     @test !isnothing(StimulusProtocol("TEST NAME"))
@@ -52,6 +48,11 @@ end
 
 
 @testset "Testing ABF reader" begin
+    testfile = raw"to_filter.abf"
+    data = readABF(testfile)
+    testfile2 = raw"to_analyze.abf"
+    data2 = readABF(testfile2)
+    
     @test !isnothing(data)
 
     @test size(data) == (1, 200000, 2)
