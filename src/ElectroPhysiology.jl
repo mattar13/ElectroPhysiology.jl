@@ -107,6 +107,13 @@ function __init__()
         
         end
     end
+
+    @require MAT = "23992714-dd62-5051-b70f-ba57cb901cac" begin
+        push!(capabilies, :MAT)
+        using .MAT
+        include("Readers/MATReader/MATReader.jl")
+        export readMAT
+    end
 end
 
 export capabilies #Export this, and even append to it when you load a new package
