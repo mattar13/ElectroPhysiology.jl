@@ -232,4 +232,4 @@ setIntensity(exp::Experiment, photons) = setIntensity(exp.HeaderDict["StimululsP
 
 getIntensity(exp::Experiment) = getIntensity(exp.HeaderDict["StimulusProtocol"])
 
-getStimulusProtocol(exp::Experiment) = haskey(data.HeaderDict, "StimulusProtocol") ? exp.HeaderDict["StimulusProtocol"] : nothing
+getStimulusProtocol(exp::Experiment) = haskey(exp.HeaderDict, "StimulusProtocol") ? exp.HeaderDict["StimulusProtocol"] : nothing
