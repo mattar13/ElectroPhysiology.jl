@@ -11,7 +11,7 @@ end
 @testset "Iterating through experiments" begin
      time = collect(1:0.01:1000) #Create some time range     
      data_arr = rand(5, length(time), 5) #Create some dummy data
-     experiment = ElectroPhysiology.Experiment(data_arr)
+     experiment = ElectroPhysiology.Experiment(time, data_arr)
      @test isa(experiment, ElectroPhysiology.Experiment)
 
      println(experiment.chNames)
