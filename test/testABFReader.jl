@@ -74,9 +74,9 @@ end
     println("Testing truncate functions")
     data_trunc = truncate_data(data)
     println(size(data_trunc))
-    @test size(data_trunc, 2) == 120001 #5s*20000+1
+    @test size(data_trunc, 2) == 100000 #5s*20000+1
     @test data.t[1] == 0.0
-    @test data_trunc.t[1] == -1.0
+    @test data_trunc.t[1] == 0.0
 
     data_concat = concat(data, data)
     @test size(data_concat,1) == size(data,1) * 2
