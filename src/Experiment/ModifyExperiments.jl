@@ -403,11 +403,11 @@ end
 function baseline_adjust!(trace::Experiment{F,T};
     mode::Symbol=:slope, polyN=1, region=:prestim
 ) where {F, T<:Real}
-    if trace.stimulus_protocol.channelName == "Nothing"
+    if isnothing(getStimulusProtocol(trace))
         #println("No stim protocol exists")
     else
         for swp in axes(trace, 1)
-            tstamps = trace.stimulus_protocol[swp].timestamps[1]
+            tstamps = getStimulusProtocol(trace)[swp].timestamps[1]
             idx_range = round.(Int64, tstamps ./ trace.dt)
             if isa(region, Tuple{Float64,Float64})
                 rng_begin = round(Int, region[1] / trace.dt) + 1
