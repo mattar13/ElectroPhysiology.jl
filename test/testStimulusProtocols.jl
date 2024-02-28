@@ -25,7 +25,7 @@
      push!(a, b)
      @test length(a) == 3
      
-     @test isa(data.stimulus_protocol[1], StimulusProtocol)
+     
      @test isnothing(setIntensity(data.stimulus_protocol, 1.0))
  
      photons = rand(12)

@@ -5,6 +5,13 @@
      data_normalized = normalize(data)
      @test !isnothing(data_normalized)
 end
+
+@testset "Testing modifying data" begin
+
+
+
+
+end
 println("Testing baseline adjust... ")
 print("Inplace completed: ")
 @time baseline_adjust!(data);
