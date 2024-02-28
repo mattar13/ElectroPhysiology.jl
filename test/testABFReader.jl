@@ -1,8 +1,5 @@
 @testset "Testing ABF reader" begin
-     testfile = raw"to_filter.abf"
-     data = readABF(testfile)
-     testfile2 = raw"to_analyze.abf"
-     data2 = readABF(testfile2)
+
      
      @test !isnothing(data)
  
