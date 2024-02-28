@@ -25,6 +25,9 @@ A mutable struct representing a physiological experiment.
 
 - `Experiment(data_array::AbstractArray; data_idx = 2)`: Create an `Experiment` object from an input data array with an optional data index.
 - `Experiment(time::Vector, data_array::Array{T, 3}) where T <: Real`: Create an `Experiment` object from an input time vector and data array.
+
+
+NOTE stimulus protocols are now going into the HeaderDict Object
 """
 mutable struct Experiment{FORMAT, T}
     HeaderDict::Dict{String,Any}
@@ -34,16 +37,14 @@ mutable struct Experiment{FORMAT, T}
     chNames::Vector{String}
     chUnits::Vector{String}
     chGains::Vector{T}
-    stimulus_protocol::Union{Nothing, StimulusProtocol} #We probably want to add this only in specific cases 
 end
 
 #This constructor accounts for the new format type
 function Experiment(FORMAT::Type, HeaderDict::Dict{String,Any},
     dt::T, t::Vector{T}, data_array::Array{T,3},
     chNames::Vector{String}, chUnits::Vector{String}, chGains::Vector{T},
-    stimulus_protocol::Union{Nothing, StimulusProtocol}
 ) where T<: Real
-    return Experiment{FORMAT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains, stimulus_protocol)
+    return Experiment{FORMAT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains)
 end
 
 #The default behavior
@@ -52,7 +53,7 @@ function Experiment(HeaderDict::Dict{String,Any},
     chNames::Vector{String}, chUnits::Vector{String}, chGains::Vector{T},
     stimulus_protocol::Union{Nothing, StimulusProtocol}
 ) where T<: Real
-    return Experiment{EXPERIMENT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains, stimulus_protocol)
+    return Experiment{EXPERIMENT, T}(HeaderDict, dt, t, data_array, chNames, chUnits, chGains)
 end
 
 #Make a basic constructor for the experiment
@@ -65,7 +66,6 @@ function Experiment(FORMAT::Type, data_array::AbstractArray{T}; data_idx = 2) wh
         ["Channel 1"],
         ["mV"],
         [1.0], 
-        StimulusProtocol(size(data_array,1))
     )
 end
 
@@ -79,7 +79,6 @@ function Experiment(FORMAT::Type, time::Vector, data_array::Array{T, 3}) where T
         ["Channel 1"],
         ["mV"],
         [1.0], 
-        nothing#StimulusProtocol(size(data_array,1))
     )
 end
 
@@ -93,7 +92,6 @@ function Experiment(data_array::AbstractArray{T}; data_idx = 2) where T <: Real
         ["Channel 1"],
         ["mV"],
         [1.0], 
-        nothing #StimulusProtocol(size(data_array,1))
     )
 end
 
@@ -107,7 +105,6 @@ function Experiment(time::Vector, data_array::Array{T, 3}) where T <: Real
         ["Channel 1"],
         ["mV"],
         [1.0], 
-        nothing# StimulusProtocol(size(data_array,1))
     )
 end
 
