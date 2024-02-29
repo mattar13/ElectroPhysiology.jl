@@ -1,26 +1,12 @@
-using Pkg
-#%% Do any revisions to the base package (without Requires) here
 using Revise
 using ElectroPhysiology
-#Change how stimulus protocol
+using Pkg; Pkg.activate("test")
+using FileIO, ImageView, Images
 
+data_root = raw"F:\Data"
+ca_imaging_root = joinpath(data_root, "Calcium Images")
+patching_root = joinpath(data_root, "Patching")
+patch_fn = joinpath(patching_root, "2024_02_12_WT\\Cell1\\24212004.abf")
+ca_img_fn = joinpath(ca_imaging_root, "2024_02_12_WT\\Cell1\\cell1001.tif")
 
-#%% If you want to test packages that are included in Requires (or any other package) test them here (Run above code)
-test_workspace_fn = raw"C:\Users\mtarc\.julia\dev\ElectroPhysiology\test"
-Pkg.activate(test_workspace_fn)
-using MAT
-
-#%% Now we can load the MAT package to look at the data
-ElectroPhysiology.__init__()
-readMAT("test\\eWT_PD.mat")
-
-a = rand(1, 4500)
-b = rand(1, 4500)
-trials = [a, b]
-cat(trials..., dims = 3)
-#%% Now we want to load and run the 
-#%% Run things in the testing environment
-
-
-using GLMakie
-using Statistics
+data2P = readImage(ca_img_fn)

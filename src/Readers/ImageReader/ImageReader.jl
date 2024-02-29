@@ -25,7 +25,6 @@ function readImage(::Type{T}, filename; sampling_rate = 2.96, chName = "CalBryte
           [chName], 
           [chUnit], 
           [chGain], #Gain is always 1.0
-          StimulusProtocol()
      )
 end
 
