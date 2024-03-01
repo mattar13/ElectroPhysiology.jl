@@ -16,7 +16,7 @@ function readImage(::Type{T}, filename; sampling_rate = 2.96, chName = "CalBryte
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
      dt = 1/sampling_rate
-     t = collect(1:n_frames).-1 .* dt
+     t = (collect(1:n_frames).-1) .* dt
      return Experiment(
           TWO_PHOTON,
           HeaderDict, #Header and Metadata
