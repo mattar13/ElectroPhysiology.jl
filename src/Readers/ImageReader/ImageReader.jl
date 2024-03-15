@@ -1,17 +1,29 @@
+objective_calibration = Dict(
+     16 => 850, 
+)
+
 # For now we really don't have this function do anything else other than load
 # We eventually want to load
 # Zoom level
 # FPS
 #Size
 #TODO: Remember that the images might be misaligned in plotting. Maybe we need to define this in Plotting
-function readImage(::Type{T}, filename; sampling_rate = 2.96, chName = "CalBryte590", chUnit = "px", chGain = 1.0) where T <: Real
+function readImage(::Type{T}, filename; 
+     sampling_rate = 2.96, chName = "CalBryte590", chUnit = "px", chGain = 1.0,
+     objective = 16, zoom = 1
+) where T <: Real
      data_array = load(filename) |> Array{T}
      px_x, px_y, n_frames = size(data_array)
+
+     scale = objective_calibration[objective] #this returns the micron scale of one field of view
+     pixels_per_micron = px_x/scale*zoom
+
      HeaderDict = Dict( 
           "framesize" => (px_x, px_y),
-          "xrng" => 1:px_x, "y_rng" => 1:px_y,
+          "xrng" => 1:px_x, "yrng" => 1:px_y,
           "detector_wavelength" => [594],
           "ROIs" => zeros(Int64, px_x*px_y), #Currently ROIs are empty
+          "PixelsPerMicron" => pixels_per_micron
      ) #We need to think of other important data aspects
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
