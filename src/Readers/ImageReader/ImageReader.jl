@@ -16,14 +16,13 @@ function readImage(::Type{T}, filename;
      px_x, px_y, n_frames = size(data_array)
 
      scale = objective_calibration[objective] #this returns the micron scale of one field of view
-     pixels_per_micron = px_x/scale*zoom
 
      HeaderDict = Dict( 
           "framesize" => (px_x, px_y),
           "xrng" => 1:px_x, "yrng" => 1:px_y,
           "detector_wavelength" => [594],
           "ROIs" => zeros(Int64, px_x*px_y), #Currently ROIs are empty
-          "PixelsPerMicron" => pixels_per_micron
+          "PixelsPerMicron" => px_x/scale*zoom
      ) #We need to think of other important data aspects
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
@@ -54,3 +53,5 @@ function get_all_frames(exp::Experiment{TWO_PHOTON, T}) where T <: Real
      n_frames = size(exp, 2)
      return get_frame(exp, 1:n_frames)
 end
+
+setScale(exp::Experiment{TWO_PHOTON, T}, pixels_per_micron) where T <: Real = exp.HeaderDict["PixelsPerMicron"] = pixels_per_micron
