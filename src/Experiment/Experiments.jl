@@ -207,6 +207,10 @@ function abs(exp::Experiment)
     return data_copy
 end
 
+import Statistics: mean
+
+mean(exp::Experiment; dims = 2) = mean(exp.data_array, dims = dims)
+
 import Base: reverse, reverse!
 
 function reverse(exp::Experiment; kwargs...)
