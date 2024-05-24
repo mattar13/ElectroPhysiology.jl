@@ -190,7 +190,7 @@ function truncate_data!(trace::Experiment{F, T};
     if truncate_based_on == :time_range || !isnothing(t_begin) && !isnothing(t_end)
         #println("running here")
         #Use this if there is no stimulus, but rather you want to truncate according to time
-        start_rng = round(Int64, t_begin / dt)
+        start_rng = round(Int64, t_begin / dt)+1
         end_rng = round(Int64, t_end / dt)
         #println(start_rng)
         #println(end_rng)
@@ -445,3 +445,11 @@ function baseline_adjust!(trace::Experiment{F,T};
         end
     end
 end
+
+#I couldn't figure out where to put these functions, 
+#   But I don't think they need to go elsewhere
+function convert_stimulus!(exp::Experiment, channel::String; kwargs...)
+    stimulus_protocol = extractStimulus(exp.HeaderDict; stimulus_name = channel, kwargs...)
+    println(stimulus_protocol)
+end
+convert_stimulus!(exp::Experiment, n_channel::Int64) = convert_stimulus!(exp, exp.chNames[n_channel])

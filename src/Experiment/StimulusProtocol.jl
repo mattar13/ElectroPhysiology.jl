@@ -191,7 +191,7 @@ function extractStimulus(abfInfo::Dict{String,Any};
     for swp in axes(abfInfo["data"], 1)
         # Get the stimulus waveform for the current trial and apply the threshold
         stim_wave = stimulus_waveform[swp, :, 1] .> stimulus_threshold
-
+        
         # Find the start and end timestamps of the stimulus event in the current trial
         start_time = findfirst(stim_wave) * dt
         end_time = (findlast(stim_wave) + 1) * dt
