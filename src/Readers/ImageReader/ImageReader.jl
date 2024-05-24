@@ -9,7 +9,7 @@ objective_calibration = Dict(
 #Size
 #TODO: Remember that the images might be misaligned in plotting. Maybe we need to define this in Plotting
 function readImage(::Type{T}, filename; 
-     sampling_rate = 2.96, chName = "CalBryte590", chUnit = "px", chGain = 1.0,
+     sampling_rate = 1.47, chName = "CalBryte590", chUnit = "px", chGain = 1.0,
      objective = 16, zoom = 1
 ) where T <: Real
      data_array = load(filename) |> Array{T}
