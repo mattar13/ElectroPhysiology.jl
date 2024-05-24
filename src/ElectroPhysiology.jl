@@ -69,6 +69,9 @@ function __init__()
             @require ImageView = "86fae568-95e7-573e-a6b2-d8a6b900c9ef" begin
                 using .ImageView
                 push!(capabilies, :ImageView)
+                include("Readers/ImageReader/ImageUtilities.jl")
+                export deinterleave!
+                
                 include("Readers/ImageReader/ImageReader.jl")
                 export readImage
                 export get_frame, get_all_frames
