@@ -17,3 +17,8 @@ function deinterleave!(exp::Experiment{TWO_PHOTON, T};
     println(size(exp.data_array))
     return exp
 end
+
+function project(exp::Experiment{TWO_PHOTON, T}; dims = 3) where T<:Real
+    img_arr = get_all_frames(exp)
+    project_arr = mean(img_arr, dims = dims)
+end
