@@ -20,8 +20,9 @@ export getStimulusProtocol
 export extractStimulus, setIntensity, getIntensity
 
 include("Experiment/Experiments.jl") #This file contains the Experiment structure. 
-export std, getSampleFreq
-export abs
+export getSampleFreq
+export abs 
+export std,mean
 
 include("Experiment/IterateExperiments.jl")
 export getdata, getchannel, eachchannel, eachtrial
@@ -71,7 +72,8 @@ function __init__()
                 push!(capabilies, :ImageView)
                 include("Readers/ImageReader/ImageUtilities.jl")
                 export deinterleave!
-                
+                export project
+
                 include("Readers/ImageReader/ImageReader.jl")
                 export readImage
                 export get_frame, get_all_frames
