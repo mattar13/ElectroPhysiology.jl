@@ -43,7 +43,7 @@ readImage(filename; kwargs...) = readImage(Float64, filename; kwargs...)
 
 function get_frame(exp::Experiment{TWO_PHOTON, T}, frame::Int64) where T <: Real
      px, py = exp.HeaderDict["framesize"]
-     data_frame = reshape(exp.data_array[:, frame], (px, py, 1))
+     data_frame = reshape(exp.data_array[:, frame, :], (px, py, 1, size(exp, 3)))
      return data_frame
 end
  
