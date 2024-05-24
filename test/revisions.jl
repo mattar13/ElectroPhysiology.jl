@@ -1,12 +1,15 @@
 using Revise
 using ElectroPhysiology
+import ElectroPhysiology.convert_stimulus!
 using Pkg; Pkg.activate("test")
-using FileIO, ImageView, Images
+using ImageView, FileIO, Images
+cell_img_fn = raw"D:\Data\Calcium Imaging\2024_05_23_MORF_ChATCre\ca_img_5011.tif"
 
-data_root = raw"F:\Data"
-ca_imaging_root = joinpath(data_root, "Calcium Images")
-patching_root = joinpath(data_root, "Patching")
-patch_fn = joinpath(patching_root, "2024_02_12_WT\\Cell1\\24212004.abf")
-ca_img_fn = joinpath(ca_imaging_root, "2024_02_12_WT\\Cell1\\cell1001.tif")
+data = readImage(cell_img_fn)
+deinterleave!(data) #This seperates the movies into two seperate movies
+ElectroPhysiology.__init__()
 
-data2P = readImage(ca_img_fn)
+img_arr = get_all_frames(data)
+green_ch = project(data, dims = 3)[:,:,1,1]
+green_ch = project(data, dims = 3)[:,:,1,2]
+fluo_project = project(data, dims = (1,2))[1,1,:,1]
