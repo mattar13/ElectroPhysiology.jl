@@ -71,6 +71,7 @@ function __init__()
                 using .ImageView
                 @require ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1" begin
                     using .ImageMagick
+                    import .ImageMagick.magickinfo
                     push!(capabilies, :ImageView)
                     include("Readers/ImageReader/ImageUtilities.jl")
                     export deinterleave!
