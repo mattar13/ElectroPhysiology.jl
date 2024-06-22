@@ -1,5 +1,6 @@
 objective_calibration = Dict(
      16 => 850, 
+     60 => 350,
 )
 
 # For now we really don't have this function do anything else other than load
@@ -13,6 +14,10 @@ function readImage(::Type{T}, filename;
      objective = 16, zoom = 1
 ) where T <: Real
      data_array = load(filename) |> Array{T}
+
+     properties = ImageMagick.magickinfo(filename)
+     meta_dict = ImageMagick.magickinfo(filename, properties)
+
      px_x, px_y, n_frames = size(data_array)
 
      scale = objective_calibration[objective] #this returns the micron scale of one field of view
@@ -24,6 +29,12 @@ function readImage(::Type{T}, filename;
           "ROIs" => zeros(Int64, px_x*px_y), #Currently ROIs are empty
           "PixelsPerMicron" => px_x/scale*zoom
      ) #We need to think of other important data aspects
+
+     #Convert to date time
+     merge!(HeaderDict, meta_dict)
+     HeaderDict["date:create"] = DateTime(HeaderDict["date:create"][1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
+     HeaderDict["date:modify"] = DateTime(HeaderDict["date:modify"][1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
+
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
      dt = 1/sampling_rate
