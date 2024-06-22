@@ -6,11 +6,12 @@ using ImageView, FileIO, Images, ImageMagick
 cell_img_fn = raw"D:\Data\Calcium Imaging\2024_05_23_MORF_ChATCre\ca_img_5011.tif"
 
 ElectroPhysiology.__init__()
-ca_img_exp = readImage(cell_img_fn)
+@time ca_img_exp = readImage(cell_img_fn);
+@time getIMG_datetime(cell_img_fn);
 ca_img_exp.HeaderDict
 ca_img_exp.HeaderDict["date:create"]
 
-
+getIMG_datetime(cell_img_fn)
 for (k,v) in ca_img_exp.HeaderDict
     if k != "ROI"
         println("$k -> $v")
