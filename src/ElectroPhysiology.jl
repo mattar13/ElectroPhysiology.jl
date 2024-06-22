@@ -69,19 +69,22 @@ function __init__()
             push!(capabilies, :Images)
             @require ImageView = "86fae568-95e7-573e-a6b2-d8a6b900c9ef" begin
                 using .ImageView
-                push!(capabilies, :ImageView)
-                include("Readers/ImageReader/ImageUtilities.jl")
-                export deinterleave!
-                export project
+                @require ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1" begin
+                    using .ImageMagick
+                    push!(capabilies, :ImageView)
+                    include("Readers/ImageReader/ImageUtilities.jl")
+                    export deinterleave!
+                    export project
 
-                include("Readers/ImageReader/ImageReader.jl")
-                export readImage
-                export get_frame, get_all_frames
-                
-                include("Readers/ImageReader/ROIReader.jl")
-                export recordROI 
-                export getROIindexes, getROImask, getROIarr
-                export loadROIfn!
+                    include("Readers/ImageReader/ImageReader.jl")
+                    export readImage
+                    export get_frame, get_all_frames
+                    
+                    include("Readers/ImageReader/ROIReader.jl")
+                    export recordROI 
+                    export getROIindexes, getROImask, getROIarr
+                    export loadROIfn!
+                end
             end
         end
     end
