@@ -79,3 +79,10 @@ function get_all_frames(exp::Experiment{TWO_PHOTON, T}) where T <: Real
 end
 
 setScale(exp::Experiment{TWO_PHOTON, T}, pixels_per_micron) where T <: Real = exp.HeaderDict["PixelsPerMicron"] = pixels_per_micron
+
+function getIMG_datetime(filename; timestamp_key = "date:create", fmt = dateformat"yyyy-mm-ddTHH:MM:SS") 
+     properties = magickinfo(filename)
+     HeaderDict = magickinfo(filename, properties)
+     HeaderDict[timestamp_key] = DateTime(HeaderDict[timestamp_key][1:end-6], fmt)
+     return HeaderDict[timestamp_key]
+end

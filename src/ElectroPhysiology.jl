@@ -59,6 +59,7 @@ export data_filter!, data_filter
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
 export readABF
 export parseABF
+export getABF_datetime #Eventually these should go elsewhere
 
 function __init__()
     @require FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549" begin
@@ -80,7 +81,7 @@ function __init__()
                     include("Readers/ImageReader/ImageReader.jl")
                     export readImage
                     export get_frame, get_all_frames
-                    
+                    export getIMG_datetime
                     include("Readers/ImageReader/ROIReader.jl")
                     export recordROI 
                     export getROIindexes, getROImask, getROIarr

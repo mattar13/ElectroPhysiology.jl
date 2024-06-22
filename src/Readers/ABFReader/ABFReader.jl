@@ -279,3 +279,5 @@ function create_signal_waveform!(exp::Experiment, channel::String)
     push!(exp, wvform, dims = 3, newChName = channel, newChUnits = exp.HeaderDict["dacUnits"][dac_idx...])
     return
 end
+
+getABF_datetime(filename) = readABFInfo(filename)["FileStartDateTime"]
