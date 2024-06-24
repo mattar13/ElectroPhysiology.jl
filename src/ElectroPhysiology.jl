@@ -3,7 +3,7 @@ module ElectroPhysiology
 #=Import all experiment objects=======================#
 using Requires
 capabilies = Symbol[] #This indicates all the things the package is capable of doing
-using Dates
+using Dates, TimeZones
 import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax, abs
 import Statistics: std, mean
 

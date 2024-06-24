@@ -20,9 +20,9 @@ function readImage(::Type{T}, filename;
 
      HeaderDict["date:create"] = DateTime(HeaderDict["date:create"][1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
      HeaderDict["date:modify"] = DateTime(HeaderDict["date:modify"][1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
-
+     
      px_x, px_y, n_frames = size(data_array)
-
+     
      scale = objective_calibration[objective] #this returns the micron scale of one field of view
      HeaderDict["framesize"] = (px_x, px_y)
      HeaderDict["xrng"] = 1:px_x 
@@ -30,7 +30,7 @@ function readImage(::Type{T}, filename;
      HeaderDict["detector_wavelength"] = [594]
      #HeaderDict["ROIs"] = zeros(Int64, px_x*px_y) #Currently ROIs are empty
      HeaderDict["PixelsPerMicron"] = px_x/scale*zoom
-
+     
      #Extract and split the two photon information
      comment_string = HeaderDict["comment"]
      comment_substrings = split(comment_string, "\r")[1:end-1]
@@ -46,7 +46,8 @@ function readImage(::Type{T}, filename;
                HeaderDict[further_substr[1]] = further_substr[2] |> String
           end
      end
-
+     HeaderDict["FileStartDateTime"] = DateTime(HeaderDict["state.internal.triggerTimeString"], "'m/d/Y H:M:S.s'")
+     
      sampling_rate = HeaderDict["state.acq.frameRate"]
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
