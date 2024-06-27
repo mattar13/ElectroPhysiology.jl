@@ -61,6 +61,23 @@ export readABF
 export parseABF
 export getABF_datetime #Eventually these should go elsewhere
 
+#=[Image reading utilities]=#
+using FileIO, Images, ImageView, ImageMagick
+import ImageMagick.magickinfo
+include("Readers/ImageReader/ImageUtilities.jl")
+export deinterleave!
+export project
+
+include("Readers/ImageReader/ImageReader.jl")
+export readImage
+export get_frame, get_all_frames
+export getIMG_datetime
+include("Readers/ImageReader/ROIReader.jl")
+export recordROI 
+export getROIindexes, getROImask, getROIarr
+export loadROIfn!
+
+
 function __init__()
     @require FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549" begin
         using .FileIO
@@ -72,20 +89,9 @@ function __init__()
                 using .ImageView
                 @require ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1" begin
                     using .ImageMagick
-                    import .ImageMagick.magickinfo
+                    
                     push!(capabilies, :ImageView)
-                    include("Readers/ImageReader/ImageUtilities.jl")
-                    export deinterleave!
-                    export project
 
-                    include("Readers/ImageReader/ImageReader.jl")
-                    export readImage
-                    export get_frame, get_all_frames
-                    export getIMG_datetime
-                    include("Readers/ImageReader/ROIReader.jl")
-                    export recordROI 
-                    export getROIindexes, getROImask, getROIarr
-                    export loadROIfn!
                 end
             end
         end
