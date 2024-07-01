@@ -1,5 +1,5 @@
-using ElectroPhysiology
 using Test
+using ElectroPhysiology
 testfile = "to_filter.abf"
 testfile2 = "to_analyze.abf"
 
@@ -9,5 +9,7 @@ include("testExperiments.jl")
 include("testStimulusProtocols.jl")
 
 include("testABFReader.jl")
+
+include("testImages.jl")
 
 include("testFilters.jl")

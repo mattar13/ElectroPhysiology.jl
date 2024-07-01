@@ -8,8 +8,10 @@ Pkg.status(outdated = true)
 #Test the ElectroPhysiology package
 using ElectroPhysiology
 
-#Test the requires packages for ca imaging
-using FileIO, Images, ImageView
+using PhysiologyAnalysis
+using XLSX, Query, DataFrames
+
+using PhysiologyPlotting, GLMakie
 
 #Test the requires packages for 
 using Wavelets, ContinuousWavelets
