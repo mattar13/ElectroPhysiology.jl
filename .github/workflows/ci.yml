@@ -25,10 +25,10 @@ jobs:
           - macos-latest
           - windows-latest
         arch:
-            - x64
-        include: #This seems to be something needed for the gtk files to run properly
-          - os: ubuntu-latest
-            prefix: xvfb-run #This seems to be needed for 
+          - x64
+        #include: #This seems to be something needed for the gtk files to run properly
+        #  - os: ubuntu-latest
+        #    prefix: xvfb-run #This seems to be needed for 
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
