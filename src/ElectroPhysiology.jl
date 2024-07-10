@@ -62,7 +62,8 @@ export parseABF
 export getABF_datetime #Eventually these should go elsewhere
 
 #=[Image reading utilities]=#
-using FileIO, Images, ImageView, ImageMagick
+using FileIO, Images
+using ImageMagick #This package is for getting metadata of .tif files
 import ImageMagick.magickinfo
 include("Readers/ImageReader/ImageUtilities.jl")
 export deinterleave!
@@ -78,25 +79,7 @@ export getROIindexes, getROImask, getROIarr
 export loadROIfn!
 
 
-function __init__()
-    @require FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549" begin
-        using .FileIO
-        push!(capabilies, :FileIO)
-        @require Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0" begin
-            using .Images
-            push!(capabilies, :Images)
-            @require ImageView = "86fae568-95e7-573e-a6b2-d8a6b900c9ef" begin
-                using .ImageView
-                @require ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1" begin
-                    using .ImageMagick
-                    
-                    push!(capabilies, :ImageView)
-
-                end
-            end
-        end
-    end
-    
+function __init__()    
     @require XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0" begin
         using .XLSX; push!(capabilies, :XLSX)
         @require DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0" begin
