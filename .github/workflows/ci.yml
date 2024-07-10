@@ -21,12 +21,14 @@ jobs:
           - '1' # Leave this line unchanged. '1' will automatically expand to the latest stable 1.x release of Julia.
           #- 'nightly' #We may have problems on nightly testing
         os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        arch:
+            - x64
+        include: #This seems to be something needed for the gtk files to run properly
           - os: ubuntu-latest
             prefix: xvfb-run #This seems to be needed for 
-          - os: macos-latest
-            arch: x64
-          - os: windows-latest
-            arch: x64
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
