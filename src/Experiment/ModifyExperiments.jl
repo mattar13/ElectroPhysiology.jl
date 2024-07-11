@@ -188,14 +188,9 @@ function truncate_data!(trace::Experiment{F, T};
     size_of_array = 0
     overrun_time = 0 #This is for if t_pre is set too far before the stimulus
     if truncate_based_on == :time_range || !isnothing(t_begin) && !isnothing(t_end)
-        #println("running here")
         #Use this if there is no stimulus, but rather you want to truncate according to time
         start_rng = round(Int64, t_begin / dt)+1
         end_rng = round(Int64, t_end / dt)
-        println(start_rng)
-        println(end_rng)
-        println(start_rng)
-        println(end_rng)
         trace.data_array = trace.data_array[:, start_rng:end_rng, :]
         trace.t = trace.t[start_rng:end_rng] .- trace.t[start_rng]
     elseif isnothing(getStimulusProtocol(trace))
