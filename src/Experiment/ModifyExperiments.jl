@@ -401,45 +401,47 @@ function baseline_adjust(trace::Experiment{F,T}; kwargs...) where {F, T<:Real}
 end
 
 function baseline_adjust!(trace::Experiment{F,T};
-    mode::Symbol=:slope, polyN=1, region=:prestim
+    mode::Symbol=:slope, polyN=1, region=:whole
 ) where {F, T<:Real}
-    if isnothing(getStimulusProtocol(trace))
-        #println("No stim protocol exists")
-    else
-        for swp in axes(trace, 1)
-            tstamps = getStimulusProtocol(trace)[swp].timestamps[1]
-            idx_range = round.(Int64, tstamps ./ trace.dt)
-            if isa(region, Tuple{Float64,Float64})
-                rng_begin = round(Int, region[1] / trace.dt) + 1
-                if region[2] > trace.t[end]
-                    rng_end = length(trace.t)
-                else
-                    rng_end = round(Int, region[2] / trace.dt) + 1
-                end
-            elseif isa(region, Tuple{Int64,Int64})
-                rng_begin, rng_end = region
-            elseif region == :whole
-                rng_begin = 1
-                rng_end = length(trace)
-            elseif region == :prestim
-                rng_begin = 1
-                rng_end = findfirst(trace.t .>= tstamps[1]) #Get the first stimulus index
+
+    for swp in axes(trace, 1)
+        #if isnothing(getStimulusProtocol(trace))
+
+        #else
+        #idx_range = round.(Int64, tstamps ./ trace.dt)
+        if isa(region, Tuple{Float64,Float64})
+            rng_begin = round(Int, region[1] / trace.dt) + 1
+            if region[2] > trace.t[end]
+                rng_end = length(trace.t)
+            else
+                rng_end = round(Int, region[2] / trace.dt) + 1
             end
-            for ch in axes(trace, 3)
-                if mode == :mean
-                    if (rng_end - rng_begin) != 0
-                        baseline_adjust = sum(trace.data_array[swp, rng_begin:rng_end, ch]) / (rng_end - rng_begin)
-                        #Now subtract the baseline scaling value
-                        trace.data_array[swp, :, ch] .= trace.data_array[swp, :, ch] .- baseline_adjust
-                    else
-                        #println("no pre-stimulus range exists")
-                    end
-                elseif mode == :slope
-                    if (rng_end - rng_begin) != 0 # && rng_begin != 1
-                        pfit = PN.fit(trace.t[rng_begin:rng_end], trace[swp, rng_begin:rng_end, ch], polyN)
-                        #Now offset the array by the linear range
-                        trace.data_array[swp, :, ch] .= trace[swp, :, ch] - pfit.(trace.t)
-                    end
+        elseif isa(region, Tuple{Int64,Int64})
+                rng_begin, rng_end = region
+        elseif region == :whole
+            rng_begin = 1
+            rng_end = length(trace)
+        elseif region == :prestim
+            #tstamps = getStimulusProtocol(trace)[swp].timestamps[1]
+            rng_begin = 1
+            rng_end = findfirst(trace.t .>= tstamps[1]) #Get the first stimulus index
+        end
+
+
+        for ch in axes(trace, 3)
+            if mode == :mean
+                if (rng_end - rng_begin) != 0
+                    baseline_adjust = sum(trace.data_array[swp, rng_begin:rng_end, ch]) / (rng_end - rng_begin)
+                    #Now subtract the baseline scaling value
+                    trace.data_array[swp, :, ch] .= trace.data_array[swp, :, ch] .- baseline_adjust
+                else
+                    #println("no pre-stimulus range exists")
+                end
+            elseif mode == :slope
+                if (rng_end - rng_begin) != 0 # && rng_begin != 1
+                    pfit = PN.fit(trace.t[rng_begin:rng_end], trace[swp, rng_begin:rng_end, ch], polyN)
+                    #Now offset the array by the linear range
+                    trace.data_array[swp, :, ch] .= trace[swp, :, ch] - pfit.(trace.t)
                 end
             end
         end
