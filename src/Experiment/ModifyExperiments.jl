@@ -192,10 +192,10 @@ function truncate_data!(trace::Experiment{F, T};
         #Use this if there is no stimulus, but rather you want to truncate according to time
         start_rng = round(Int64, t_begin / dt)+1
         end_rng = round(Int64, t_end / dt)
-        #println(start_rng)
-        #println(end_rng)
-        #println(start_rng)
-        #println(end_rng)
+        println(start_rng)
+        println(end_rng)
+        println(start_rng)
+        println(end_rng)
         trace.data_array = trace.data_array[:, start_rng:end_rng, :]
         trace.t = trace.t[start_rng:end_rng] .- trace.t[start_rng]
     elseif isnothing(getStimulusProtocol(trace))
@@ -267,7 +267,7 @@ end
 
 function truncate_data(trace::Experiment{F, T}; kwargs...) where {F, T<:Real} 
     data = deepcopy(trace)
-    truncate_data!(data)
+    truncate_data!(data; kwargs...)
     return data
 end
 
