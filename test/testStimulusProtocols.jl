@@ -28,3 +28,14 @@ end
     push!(a, b)
     @test length(a) == 3
 end
+
+
+@testset "Testing modification of stimulus in experiment" begin
+    data = readABF(test_single_trace, stimulus_name = "IN 7")
+    data2 = readABF(test_many_traces, stimulus_name = "IN 7")
+    stimulus_protocols = getStimulusProtocol(data)
+    @test isa(stimulus_protocols, StimulusProtocol)
+    @test isnothing(setIntensity(data.HeaderDict["StimulusProtocol"], 1.0))
+    photons = rand(12)
+    @test isnothing(setIntensity(data2.HeaderDict["StimulusProtocol"], photons))
+end
