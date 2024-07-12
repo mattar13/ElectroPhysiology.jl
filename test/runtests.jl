@@ -24,6 +24,13 @@ using PhysiologyAnalysis
 using GLMakie, PhysiologyPlotting
 
 data_single = readABF("test\\$(test_single_trace)")
-data_many = readABF("test\\$(test_many_traces)")
 
-data_many.chNames
+data_dyad = dyadic_downsample(data_single)
+
+size(data_dyad)
+getSampleFreq(data_dyad)
+
+log(2, size(data_dyad,2))
+2^21
+
+@test size(data_dyad, 2) == 131072
