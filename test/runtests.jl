@@ -19,18 +19,8 @@ include("testFilters.jl")
 
 #Test analysis
 using PhysiologyAnalysis
+#Lets write some tests for physiology analysis
+
 
 #Test plotting
 using GLMakie, PhysiologyPlotting
-
-data_single = readABF("test\\$(test_single_trace)")
-
-data_dyad = dyadic_downsample(data_single)
-
-size(data_dyad)
-getSampleFreq(data_dyad)
-
-log(2, size(data_dyad,2))
-2^21
-
-@test size(data_dyad, 2) == 131072
