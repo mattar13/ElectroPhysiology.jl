@@ -447,6 +447,6 @@ end
 #   But I don't think they need to go elsewhere
 function convert_stimulus!(exp::Experiment, channel::String; kwargs...)
     stimulus_protocol = extractStimulus(exp.HeaderDict; stimulus_name = channel, kwargs...)
-    println(stimulus_protocol)
+    #println(stimulus_protocol)
 end
 convert_stimulus!(exp::Experiment, n_channel::Int64) = convert_stimulus!(exp, exp.chNames[n_channel])

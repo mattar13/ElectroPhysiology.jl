@@ -3,7 +3,7 @@
 function HeaderToFrame(data; skips = ["data", "EpochTableByChannel", "dataType", "abfFileComment", "StringSection"])
      HeaderDF = DataFrame(Category = String[], Type = String[], Value = Any[])
      for (key, val) in data.HeaderDict
-          println(val |> typeof)
+          #println(val |> typeof)
           if key ∉  skips && !isa(val, Dict)
                push!(HeaderDF, (Category = key, Type = string(val |> typeof), Value = val))
           end
@@ -56,7 +56,7 @@ function writeXLSX(filename::String, data::Experiment;
                          end
                          XLSX.writetable!(sheet_section, SectionDF)
                          if verbose
-                              println("Saving section $key")
+                              #println("Saving section $key")
                          end
                     end
                end 
