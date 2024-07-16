@@ -14,7 +14,7 @@ For Julia this can be Float64, but for older files this may be Float32.
     4) 'epochNumber::T' -> The number ID related to the Epoch
     5) 'level::T' -> The holding level of the Epoch. The value related to the command is found in the "dacUnits"
     6) 'levelDelta::T' -> The change in level for each trial. 
-    7) 'duration::T' -> How long the DAC will be held at a certai level
+    7) 'duration::T' -> How long the DAC will be held at a certain level
     8) 'durationDelta::T' -> From trial to trial the change in the duration
     9) 'digitalPattern::Vector'{T} -> If a digital channel is used, a digital bit pattern will be used (8 bits)
     10) 'pulsePeriod::T' -> The periodicity of the pulse (Sine Wave)
