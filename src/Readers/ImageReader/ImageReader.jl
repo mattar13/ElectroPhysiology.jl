@@ -47,8 +47,8 @@ function readImage(::Type{T}, filename;
      
      fov = objective_calibration[objective] #this returns the micron scale of one field of view
      HeaderDict["PixelsPerMicron"] = px_x/(fov/zoom) #This will need to be overhauled once we get info about size
-     HeaderDict["xrng"] = LinRange(0, fov, px_x)
-     HeaderDict["yrng"] = LinRange(0, fov, px_x)
+     HeaderDict["xrng"] = LinRange(0, fov/zoom, px_x)
+     HeaderDict["yrng"] = LinRange(0, fov/zoom, px_x)
 
      sampling_rate = HeaderDict["state.acq.frameRate"]
      #Resize the data so that all of the pixels are in single value
