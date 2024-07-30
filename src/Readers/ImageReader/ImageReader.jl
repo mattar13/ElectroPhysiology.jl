@@ -1,6 +1,6 @@
 objective_calibration = Dict(
      16 => 850, 
-     60 => 350,
+     60 => 195,
 )
 
 # For now we really don't have this function do anything else other than load
@@ -11,7 +11,7 @@ objective_calibration = Dict(
 #TODO: Remember that the images might be misaligned in plotting. Maybe we need to define this in Plotting
 function readImage(::Type{T}, filename; 
      chName = "CalBryte590", chUnit = "px", chGain = 1.0,
-     objective = 16, zoom = 1
+     objective = 60
 ) where T <: Real
      data_array = load(filename) |> Array{T}
 
@@ -23,13 +23,9 @@ function readImage(::Type{T}, filename;
      
      px_x, px_y, n_frames = size(data_array)
      
-     scale = objective_calibration[objective] #this returns the micron scale of one field of view
      HeaderDict["framesize"] = (px_x, px_y)
-     HeaderDict["xrng"] = 1:px_x 
-     HeaderDict["yrng"] = 1:px_y
      HeaderDict["detector_wavelength"] = [594]
      HeaderDict["ROIs"] = zeros(Int64, px_x*px_y) #Currently ROIs are empty
-     HeaderDict["PixelsPerMicron"] = px_x/scale*zoom
      
      #Extract and split the two photon information
      comment_string = HeaderDict["comment"]
@@ -47,7 +43,13 @@ function readImage(::Type{T}, filename;
           end
      end
      HeaderDict["FileStartDateTime"] = DateTime(HeaderDict["state.internal.triggerTimeString"], "'m/d/Y H:M:S.s'")
+     zoom = HeaderDict["state.acq.zoomFactor"]
      
+     fov = objective_calibration[objective] #this returns the micron scale of one field of view
+     HeaderDict["PixelsPerMicron"] = px_x/(fov/zoom) #This will need to be overhauled once we get info about size
+     HeaderDict["xrng"] = LinRange(0, fov, px_x)
+     HeaderDict["yrng"] = LinRange(0, fov, px_x)
+
      sampling_rate = HeaderDict["state.acq.frameRate"]
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
