@@ -28,7 +28,7 @@ function readImage(::Type{T}, filename;
      HeaderDict["xrng"] = 1:px_x 
      HeaderDict["yrng"] = 1:px_y
      HeaderDict["detector_wavelength"] = [594]
-     #HeaderDict["ROIs"] = zeros(Int64, px_x*px_y) #Currently ROIs are empty
+     HeaderDict["ROIs"] = zeros(Int64, px_x*px_y) #Currently ROIs are empty
      HeaderDict["PixelsPerMicron"] = px_x/scale*zoom
      
      #Extract and split the two photon information
