@@ -14,7 +14,7 @@ function deinterleave!(exp::Experiment{TWO_PHOTON, T};
 
     push!(exp.chNames, new_ch_name)
     push!(exp.chUnits, new_ch_unit)
-    println(size(exp.data_array))
+    #println(size(exp.data_array))
     return exp
 end
 
