@@ -22,14 +22,10 @@ red_zproj = project(data2P, dims = (3))[:,:,1,1]
 red_img = RGBf.(red_zproj, zeros(size(red_zproj)), zeros(size(red_zproj)));
 red_z_fit = fit(Histogram, red_zproj |> vec, LinRange(0.0, 1.0, 1000));
 
-image!(ax1a, red_img)
-lines!(ax2a, red_z_fit.edges[1][2:end], red_z_fit.weights)
-xlims!(ax2a, 0.0, 1.0)
-
 mu = mean(data2P, dims = (1,2))[1,1,1]
 sig = std(data2P, dims = (1,2))[1,1,1]
 adjustBC!(data2P, channel = 1, min_val_x = mu-0.05sig, max_val_x = mu+0.1sig)
-#%%
+
 red_zproj = project(data2P, dims = (3))[:,:,1,1]
 red_img = RGBf.(red_zproj, zeros(size(red_zproj)), zeros(size(red_zproj)))
 red_z_fit = fit(Histogram, red_zproj |> vec, LinRange(0.0, 1.0, 1000))
