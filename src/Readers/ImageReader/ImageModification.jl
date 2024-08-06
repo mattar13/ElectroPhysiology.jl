@@ -6,7 +6,7 @@ function adjustBC!(exp; channel = nothing,
 )
      for (i, ch) in enumerate(eachchannel(exp))
           if isnothing(channel) || channel == i
-               println("BC this channel: $(ch.chNames[1])")
+               #println("BC this channel: $(ch.chNames[1])")
                if min_val_x == :auto
                     min_val_x = minimum(ch)
                elseif min_val_x == :std
