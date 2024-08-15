@@ -78,6 +78,7 @@ export getIMG_datetime
 using CurveFit
 include("Readers/ImageReader/ImageModification.jl")
 export adjustBC!
+export imfilter!, imfilter
 
 include("Readers/ImageReader/ROIReader.jl")
 export recordROI 

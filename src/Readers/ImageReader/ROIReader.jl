@@ -28,7 +28,7 @@ function getROIarr(exp::Experiment{TWO_PHOTON, T}, label::Int64; reshape_arr = t
      ROI_arr = exp.data_array .* mask
      if reshape_arr
           px_x, px_y = exp.HeaderDict["framesize"]
-          return reshape(ROI_arr, (px_x, px_y, size(exp, 2)))
+          return reshape(ROI_arr, (px_x, px_y, size(exp, 2), size(exp,3)))
      else
           return ROI_arr
      end
@@ -39,7 +39,7 @@ function getROIarr(exp::Experiment{TWO_PHOTON, T}; reshape_arr = true) where T<:
      ROI_arr = exp.data_array .* ROI_mask
      if reshape_arr
           px_x, px_y = exp.HeaderDict["framesize"]
-          return reshape(ROI_arr, (px_x, px_y, size(exp, 2)))
+          return reshape(ROI_arr, (px_x, px_y, size(exp, 2), size(exp,3)))
      else
           return ROI_arr
      end
