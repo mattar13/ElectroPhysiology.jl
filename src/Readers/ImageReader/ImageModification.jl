@@ -43,3 +43,10 @@ function adjustBC!(exp; channel = nothing,
      end
      return exp
 end
+
+function mean_filter!(exp, dims...)
+     println(dims)
+     #println(reader)
+
+
+end
