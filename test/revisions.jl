@@ -13,17 +13,26 @@ data2P_fn = "D:/Data/Two Photon/2024_08_08_OPN4_P20_SWCNT/light_stim003.tif"#mig
 data2P = readImage(data2P_fn);
 xlims = data2P.HeaderDict["xrng"]
 ylims = data2P.HeaderDict["yrng"]
-truncate_data!(data2P, t_begin = 200.0, t_end = 400.0)
 deinterleave!(data2P) #This seperates the movies into two seperate movies
+truncate_data!(data2P, t_begin = 200.0, t_end = 400.0)
+
+#Here we should adjust some filtering things
+import Kernel.gaussian
+gaussian_kernel = ElectroPhysiology.Kernel.gaussian(3)
+kernel = ones(1,1,20, 1)
+gaussian(3)
+imfilter!(data2P, kernel)#; channel = 2)
+
+bin!(data2P, (1,1,10))
+
 img_arr = get_all_frames(data2P)
+
 #Extract the objects
 red_zstack = img_arr[:,:,:,2]
 red_zproj = project(data2P, dims = (3))[:,:,1,2]
 red_trace = project(data2P, dims = (1,2))[1,1,:,2]
 
 #Give it a mean filter
-kernel = ones(1,1,20, 1)
-img_filt = imfilter(img_arr, kernel)
 #Extract the objects
 f_red_zstack = img_filt[:,:,:,2]
 f_red_zproj = project(data2P, dims = (3))[:,:,1,2]
