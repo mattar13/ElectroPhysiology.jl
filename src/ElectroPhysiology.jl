@@ -76,10 +76,12 @@ export get_frame, get_all_frames
 export getIMG_datetime
 
 import Images.Kernel
+import OffsetArrays.OffsetArray
 using CurveFit
 include("Readers/ImageReader/ImageModification.jl")
 export adjustBC!
 export imfilter!, imfilter
+export mapwindow, mapwindow!
 export bin!
 export Kernel
 
