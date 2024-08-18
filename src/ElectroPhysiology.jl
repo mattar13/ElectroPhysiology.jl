@@ -75,10 +75,13 @@ export readImage
 export get_frame, get_all_frames
 export getIMG_datetime
 
+import Images.Kernel
 using CurveFit
 include("Readers/ImageReader/ImageModification.jl")
 export adjustBC!
 export imfilter!, imfilter
+export bin!
+export Kernel
 
 include("Readers/ImageReader/ROIReader.jl")
 export recordROI 
