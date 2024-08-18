@@ -60,6 +60,13 @@ function imfilter!(exp::Experiment{TWO_PHOTON}, kernel; channel = nothing)
           img_filt_ch = imfilter(img_arr[:,:,:,channel], kernel)
           reshape_img = reshape(img_filt_ch, (size(img_filt_ch,1)*size(img_filt_ch,2), size(img_filt_ch,3)))
           exp.data_array[:,:,channel] .= reshape_img
+     elseif ndims(kernel) == 2 #This usually means the kernel is frame by frame
+          for frame_idx in 1:size(img_arr,3)
+               frame = img_arr[:,:,frame_idx, channel]
+               img_filt_frame = imfilter(frame, kernel)
+               reshape_img = reshape(img_filt_frame, (size(img_filt_frame,1)*size(img_filt_frame,2)))
+               exp.data_array[:,frame_idx, channel] .= reshape_img
+          end
      end
 end
 
