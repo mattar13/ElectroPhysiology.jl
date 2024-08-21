@@ -94,7 +94,7 @@ function bin!(exp::Experiment{TWO_PHOTON}, dims; operation = :mean)
 end
 
 import Images: mapwindow, mapwindow! #These will allow us to do arbitrary operations
-function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::OffsetArray{T, 2, Array{T, 2}}; channel = nothing) where T <: Real
+function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::Tuple{Int64, Int64}; channel = nothing) where T <: Real
      img_arr = get_all_frames(exp)
      @assert !isnothing(channel) "Channel needs to be specified"
      for frame_idx in 1:size(img_arr,3)
@@ -105,6 +105,7 @@ function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::OffsetArray{T, 2, Ar
      end
 end
 
+#Not working properly. Need to adjust
 function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::Tuple{Int64,Int64,Int64}; channel = nothing) where T<:Real
      img_arr = get_all_frames(exp)
      @assert !isnothing(channel) "Channel needs to be specified"
