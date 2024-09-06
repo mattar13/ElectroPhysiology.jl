@@ -7,19 +7,21 @@ using StatsBase #Might need to add this to PhysiologyAnalysis as well
 
 using GLMakie, PhysiologyPlotting
 
-data2P_fn = "D:/Data/Two Photon/2024_08_08_OPN4_P20_SWCNT/light_stim003.tif"#might be good
+file_loc = "D:/Data/Two Photon"
+data2P_fn = "$(file_loc)/2024_08_15_SWCNT_MORFCRE_BATH/bolus_load005.tif"
 
 #╔═╡Extract the image
 data2P = readImage(data2P_fn);
 xlims = data2P.HeaderDict["xrng"]
 ylims = data2P.HeaderDict["yrng"]
 deinterleave!(data2P) #This seperates the movies into two seperate movies
-truncate_data!(data2P, t_begin = 200.0, t_end = 400.0)
+#truncate_data!(data2P, t_begin = 0.0, t_end = 100.0)
 
 #Here we should adjust some filtering things
-kernel = Kernel.gaussian(3)
+kernel = Kernel.gaussian((1,1,3))
 imfilter!(data2P, kernel; channel = 2)
-mapwindow!(mean, data2P, (1,1, 9), channel = 1)
+
+mapwindow!(mean, data2P, (3,3,1), channel = 1)
 img_arr = get_all_frames(data2P)
 
 #Extract the objects
@@ -53,18 +55,4 @@ lines!(ax2b, data2P.t, red_trace, color = :red)
 
 ticker1 = vlines!(ax2a, [0.0], color = :black)
 ticker2 = vlines!(ax2b, [0.0], color = :black)
-fig
-
-#%%
-fps = (1/data2P.dt) #Increase speed 5x
-
-GLMakie.record(fig, "animation.mp4", enumerate(data2P.t), framerate = 5fps) do (i, t) 
-    println(t)
-
-    hm2a[3] = grn_zstack[:,:,i]
-    hm2b[3] = red_zstack[:,:,i]
-    ticker1[1] = [t]
-    ticker2[1] = [t] 
-
-end
 fig
