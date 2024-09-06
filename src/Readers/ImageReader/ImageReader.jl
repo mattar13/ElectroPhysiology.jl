@@ -11,24 +11,17 @@ objective_calibration = Dict(
 #TODO: Remember that the images might be misaligned in plotting. Maybe we need to define this in Plotting
 function readImage(::Type{T}, filename; 
      chName = "CalBryte590", chUnit = "px", chGain = 1.0,
-     objective = 60, verbose = true
+     objective = 60, verbose = false
 ) where T <: Real
      data_array = load(filename) |> Array{T}
      if verbose
           println("data loaded")
      end
 
-     properties = magickinfo(filename)
-     println("1")
-     HeaderDict = magickinfo(filename, properties)
-     println("2")
-     HeaderDict["date:create"] = DateTime(HeaderDict["date:create"][1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
-     println("3")
-     HeaderDict["date:modify"] = DateTime(HeaderDict["date:modify"][1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
+     HeaderDict = Dict{String,Any}()
+     #properties = magickinfo(filename)
+     #HeaderDict = magickinfo(filename, properties)
      
-     if verbose
-          println("Header loaded")
-     end
      px_x, px_y, n_frames = size(data_array)
 
      HeaderDict["framesize"] = (px_x, px_y)
@@ -36,7 +29,11 @@ function readImage(::Type{T}, filename;
      HeaderDict["ROIs"] = zeros(Int64, px_x*px_y) #Currently ROIs are empty
      
      #Extract and split the two photon information
-     comment_string = HeaderDict["comment"]
+     #HeaderDict["date:create"] = DateTime(magickinfo(filename, "date:create")[1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
+     #HeaderDict["date:modify"] = DateTime(magickinfo(filename, "date:modify")[1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
+
+     comment_string = magickinfo(filename, "comment")["comment"]
+     #Base.gc.gc()
      comment_substrings = split(comment_string, "\r")[1:end-1]
      for comment_string in comment_substrings
           further_substr = split(comment_string, "=")
