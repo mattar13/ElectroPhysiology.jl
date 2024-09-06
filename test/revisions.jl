@@ -1,16 +1,27 @@
 using Revise
 using Pkg; Pkg.activate(".")
 using ElectroPhysiology
+using ImageMagick
 using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
 using StatsBase #Might need to add this to PhysiologyAnalysis as well
 
-using GLMakie, PhysiologyPlotting
+file_loc = "G:/Data/Two Photon"
+data2P_fn = "$(file_loc)/2024_09_03_SWCNT_VGGC6/swcntBATH_kpuff_nomf_20um001.tif"
+filename = data2P_fn
+properties = magickinfo(filename)
 
-data2P_fn = "D:/Data/Two Photon/2024_08_08_OPN4_P20_SWCNT/light_stim003.tif"#might be good
+for prop in properties
+    println(prop)
+    magickinfo(filename, properties)
+end
+HeaderDict = magickinfo(filename, properties)
 
+#this file is huge, we need a more economical way to open files
 #╔═╡Extract the image
 data2P = readImage(data2P_fn);
+
+#%%
 xlims = data2P.HeaderDict["xrng"]
 ylims = data2P.HeaderDict["yrng"]
 truncate_data!(data2P, t_begin = 200.0, t_end = 400.0)
