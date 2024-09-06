@@ -57,7 +57,7 @@ function imfilter!(exp::Experiment{TWO_PHOTON}, kernel::OffsetArray{T, 2, Array{
      end
 end
 
-function imfilter_test!(exp::Experiment{TWO_PHOTON}, kernel::OffsetArray{T, 3, Array{T, 2}}; channel = nothing) where T <: Real
+function imfilter!(exp::Experiment{TWO_PHOTON}, kernel::OffsetArray{T, 3, Array{T, 3}}; channel = nothing) where T <: Real
      img_arr = get_all_frames(exp)
      @assert !isnothing(channel) "Channel needs to be specified"
      img_filt_ch = imfilter(img_arr[:,:,:,channel], kernel)
