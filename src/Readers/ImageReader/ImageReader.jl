@@ -11,18 +11,26 @@ objective_calibration = Dict(
 #TODO: Remember that the images might be misaligned in plotting. Maybe we need to define this in Plotting
 function readImage(::Type{T}, filename; 
      chName = "CalBryte590", chUnit = "px", chGain = 1.0,
-     objective = 60
+     objective = 60, verbose = true
 ) where T <: Real
      data_array = load(filename) |> Array{T}
+     if verbose
+          println("data loaded")
+     end
 
      properties = magickinfo(filename)
+     println("1")
      HeaderDict = magickinfo(filename, properties)
-
+     println("2")
      HeaderDict["date:create"] = DateTime(HeaderDict["date:create"][1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
+     println("3")
      HeaderDict["date:modify"] = DateTime(HeaderDict["date:modify"][1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
      
+     if verbose
+          println("Header loaded")
+     end
      px_x, px_y, n_frames = size(data_array)
-     
+
      HeaderDict["framesize"] = (px_x, px_y)
      HeaderDict["detector_wavelength"] = [594]
      HeaderDict["ROIs"] = zeros(Int64, px_x*px_y) #Currently ROIs are empty
@@ -53,6 +61,10 @@ function readImage(::Type{T}, filename;
      sampling_rate = HeaderDict["state.acq.frameRate"]
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
+     if verbose
+          println("Data sized")
+     end
+
      dt = 1/sampling_rate
      t = (collect(1:n_frames).-1) .* dt
      return Experiment(
