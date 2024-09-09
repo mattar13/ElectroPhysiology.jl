@@ -6,19 +6,8 @@ using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
 using StatsBase #Might need to add this to PhysiologyAnalysis as well
 
-file_loc = "G:/Data/Two Photon"
+file_loc = "D:/Data/Two Photon"
 data2P_fn = "$(file_loc)/2024_09_03_SWCNT_VGGC6/swcntBATH_kpuff_nomf_20um001.tif"
-filename = data2P_fn
-properties = magickinfo(filename)
-
-for prop in properties
-    println(prop)
-    magickinfo(filename, properties)
-end
-HeaderDict = magickinfo(filename, properties)
-
-#this file is huge, we need a more economical way to open files
-#╔═╡Extract the image
 data2P = readImage(data2P_fn);
 
 #%%
@@ -27,12 +16,9 @@ ylims = data2P.HeaderDict["yrng"]
 deinterleave!(data2P) #This seperates the movies into two seperate movies
 #truncate_data!(data2P, t_begin = 0.0, t_end = 100.0)
 
-#Here we should adjust some filtering things
-kernel = Kernel.gaussian((1,1,3))
-imfilter!(data2P, kernel; channel = 2)
-
-mapwindow!(mean, data2P, (3,3,1), channel = 1)
+mapwindow!(mean, data2P, (1,1,3), channel = 2)
 img_arr = get_all_frames(data2P)
+
 
 #Extract the objects
 grn_zstack = img_arr[:,:,:,1]
