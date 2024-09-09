@@ -115,10 +115,16 @@ end
 
 #Not working properly. Need to adjust
 function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::Tuple{Int64,Int64,Int64}; channel = nothing) where T<:Real
-     img_arr = get_all_frames(exp)
-     @assert !isnothing(channel) "Channel needs to be specified"
-     img_filt_ch = mapwindow(f, img_arr[:,:,:,channel], window)
-     reshape_img = reshape(img_filt_ch, (size(img_filt_ch,1)*size(img_filt_ch,2), size(img_filt_ch,3)))
+     if window[1] == 1 && window[2] == 1 #This is weird and throws a stackoverflow error
+          new_window = (window[1], window[3])
+          arr = exp.data_array[:,:,channel]
+          reshape_img = mapwindow(f, arr, new_window)
+     else
+          img_arr = get_all_frames(exp)
+          @assert !isnothing(channel) "Channel needs to be specified"
+          img_filt_ch = mapwindow(f, img_arr[:,:,:,channel], window)
+          reshape_img = reshape(img_filt_ch, (size(img_filt_ch,1)*size(img_filt_ch,2), size(img_filt_ch,3)))
+     end
      exp.data_array[:,:,channel] .= reshape_img
 end
 
