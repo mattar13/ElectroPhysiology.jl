@@ -102,7 +102,7 @@ function bin!(exp::Experiment{TWO_PHOTON}, dims; operation = :mean)
 end
 
 import Images: mapwindow, mapwindow! #These will allow us to do arbitrary operations
-function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::Tuple{Int64, Int64}; channel = nothing) where T <: Real
+function mapwindow!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; channel = nothing) where T <: Real
      img_arr = get_all_frames(exp)
      @assert !isnothing(channel) "Channel needs to be specified"
      for frame_idx in 1:size(img_arr,3)
@@ -114,7 +114,7 @@ function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::Tuple{Int64, Int64};
 end
 
 #Not working properly. Need to adjust
-function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::Tuple{Int64,Int64,Int64}; channel = nothing) where T<:Real
+function mapwindow!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64,Int64,Int64}; channel = nothing) where T<:Real
      if window[1] == 1 && window[2] == 1 #This is weird and throws a stackoverflow error
           new_window = (window[1], window[3])
           arr = exp.data_array[:,:,channel]
@@ -128,7 +128,7 @@ function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::Tuple{Int64,Int64,In
      exp.data_array[:,:,channel] .= reshape_img
 end
 
-function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::Tuple{Int64,Int64,Int64, Int64}; channel = nothing) where T<:Real
+function mapwindow!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64,Int64,Int64, Int64}; channel = nothing) where T<:Real
      img_arr = get_all_frames(exp)
      if isnothing(channel) #This means we want to filter both channels
           @assert ndims(kernel) == 4 "Kernel is size $(size(kernel)) and needs to be 4 dimensions"
@@ -138,8 +138,53 @@ function mapwindow!(f, exp::Experiment{TWO_PHOTON}, window::Tuple{Int64,Int64,In
      end
 end
 
-function mapwindow(exp::Experiment{TWO_PHOTON}, kernel; channel = nothing)
+function mapwindow(f, exp::Experiment{TWO_PHOTON, T}, kernel; channel = nothing) where {T<:Real}
      exp_copy = deepcopy(exp)
-     mapwindow!(f, exp_copy, kernel; channel)
+     mapwindow!(f, exp_copy, kernel; channel = channel)
      return exp_copy
+end
+
+"""
+This baseline adjust works specifically for TWO_PHOTON images. 
+     this is the same thing as delta_f/f
+"""
+function baseline_adjust(exp::Experiment{TWO_PHOTON, T}; kwargs...) where {T<:Real}
+     data = deepcopy(exp)
+     baseline_adjust!(data; kwargs...)
+     return data
+
+end
+
+function baseline_adjust!(exp::Experiment{TWO_PHOTON, T};
+     mode::Symbol = :rolling_mean, polyN = 1, region = :whole,
+     δf_f::Bool = true, voxel_size = (1,1,5), channel = nothing
+) where {T<:Real}
+     if isnothing(channel) #This means we do both
+          for (i, ch) in enumerate(eachchannel(exp))
+               baseline_adjust!(exp, channel = i)
+          end
+     else
+          if mode == :rolling_mean #This method kinda fucks up
+               background = getchannel(mapwindow(mean, exp, voxel_size, channel = channel), channel)
+               delta_f = getchannel(exp, channel) - background
+               if δf_f
+                    delta_f_f = delta_f/background
+                    exp.data_array[:,:,channel] = delta_f_f.data_array
+               else
+                    exp.data_array[:,:,channel] = delta_f.data_array
+               end
+          elseif mode == :mean
+               background = project(data2P, dims = 3)[:,:,1,channel]
+               delta_f = getchannel(exp, channel) - background
+               if δf_f
+                    delta_f_f = delta_f/background
+                    exp.data_array[:,:,channel] = delta_f_f.data_array
+               else
+                    exp.data_array[:,:,channel] = delta_f.data_array
+               end
+          elseif mode == :slope
+
+          end
+          
+     end
 end
