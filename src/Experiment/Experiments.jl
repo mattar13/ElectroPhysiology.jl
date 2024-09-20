@@ -132,6 +132,12 @@ function /(exp::Experiment, val::Real)
     return data
 end
 
+function /(exp::Experiment, exp2::Experiment)
+    exp_copy = deepcopy(exp)
+    exp_copy.data_array = exp.data_array ./ exp2.data_array
+    return exp_copy
+end
+
 #if the value provided is different
 function /(exp::Experiment{T}, vals::Matrix{T}) where {T<:Real}
     #This function has not been worked out yet

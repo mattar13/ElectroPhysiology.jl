@@ -136,13 +136,13 @@ function sub_exp(exp1::Experiment, exp2::Experiment)
     if size(exp1) == size(exp2)
         exp = deepcopy(exp1)
         #return a new experiment? make a new exp
-        exp.exp_array = exp1.exp_array - exp2.exp_array
+        exp.data_array = exp1.data_array - exp2.data_array
         return exp
     else #If the channels don't match, we will automatically drop the unmatching one by default
         exp1, exp2 = match_channels(exp1, exp2)
         exp = deepcopy(exp1)
         #return a new experiment? make a new exp
-        exp.exp_array = exp1.exp_array - exp2.exp_array
+        exp.data_array = exp1.data_array - exp2.data_array
         return exp
     end
 end
