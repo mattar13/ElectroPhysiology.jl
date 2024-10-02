@@ -49,7 +49,7 @@ function imfilter!(exp::Experiment{TWO_PHOTON}, kernel::OffsetArray{T, 2, Array{
      img_arr = get_all_frames(exp)
      @assert !isnothing(channel) "Channel needs to be specified"
 
-     for frame_idx in 1:size(img_arr,3)
+     for frame_idx in axes(img_arr,3)
           frame = img_arr[:,:,frame_idx, channel]
           img_filt_frame = imfilter(frame, kernel)
           reshape_img = reshape(img_filt_frame, (size(img_filt_frame,1)*size(img_filt_frame,2)))
@@ -105,7 +105,7 @@ import Images: mapwindow, mapwindow! #These will allow us to do arbitrary operat
 function mapwindow!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; channel = nothing) where T <: Real
      img_arr = get_all_frames(exp)
      @assert !isnothing(channel) "Channel needs to be specified"
-     for frame_idx in 1:size(img_arr,3)
+     for frame_idx in axes(img_arr,3)
           frame = img_arr[:,:,frame_idx, channel]
           img_filt_frame = mapwindow(f, frame, window)
           reshape_img = reshape(img_filt_frame, (size(img_filt_frame,1)*size(img_filt_frame,2)))
