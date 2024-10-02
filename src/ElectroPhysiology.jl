@@ -66,7 +66,7 @@ export getABF_datetime #Eventually these should go elsewhere
 using FileIO, Images
 using ImageMagick #This package is for getting metadata of .tif files
 import ImageMagick.magickinfo
-include("Readers/ImageReader/ImageUtilities.jl")
+include("Experiment/ImageUtilities.jl")
 export deinterleave!
 export project
 
