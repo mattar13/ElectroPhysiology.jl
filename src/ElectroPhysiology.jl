@@ -29,6 +29,9 @@ export getdata, getchannel, eachchannel, eachtrial
 
 import Base: chop
 import Polynomials as PN
+using FileIO, Images
+using ImageMagick #This package is for getting metadata of .tif files
+import ImageMagick.magickinfo
 include("Experiment/ModifyExperiments.jl") #These functions modify individual experiments
 export scaleby, scaleby!
 export pad, pad!, chop, chop!
@@ -38,6 +41,9 @@ export average_trials, average_trials!
 export downsample, downsample!
 export dyadic_downsample, dyadic_downsample!
 export baseline_adjust, baseline_adjust!
+#Image reading utilities
+export deinterleave!
+export project
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
 export concat, concat!
@@ -62,13 +68,7 @@ export readABF
 export parseABF
 export getABF_datetime #Eventually these should go elsewhere
 
-#=[Image reading utilities]=#
-using FileIO, Images
-using ImageMagick #This package is for getting metadata of .tif files
-import ImageMagick.magickinfo
-include("Experiment/ImageUtilities.jl")
-export deinterleave!
-export project
+
 
 include("Readers/ImageReader/ImageReader.jl")
 export readImage
