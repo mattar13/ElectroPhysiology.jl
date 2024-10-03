@@ -16,9 +16,17 @@ ylims = data2P.HeaderDict["yrng"]
 deinterleave!(data2P) #This seperates the movies into two seperate movies
 #truncate_data!(data2P, t_begin = 0.0, t_end = 100.0)
 
-mapwindow!(mean, data2P, (1,1,3), channel = 2)
-img_arr = get_all_frames(data2P)
+size(data2P)
 
+for (k, d) in data2P.HeaderDict
+     if k != "ROIs"
+          println("$k => $d")
+     else
+          println("$k")
+     end
+end
+
+baseline_adjust!(data2P, channel = 2)
 
 #Extract the objects
 grn_zstack = img_arr[:,:,:,1]
