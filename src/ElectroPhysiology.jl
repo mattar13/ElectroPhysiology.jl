@@ -32,6 +32,10 @@ import Polynomials as PN
 using FileIO, Images
 using ImageMagick #This package is for getting metadata of .tif files
 import ImageMagick.magickinfo
+import Images.Kernel
+import OffsetArrays.OffsetArray
+using CurveFit
+
 include("Experiment/ModifyExperiments.jl") #These functions modify individual experiments
 export scaleby, scaleby!
 export pad, pad!, chop, chop!
@@ -42,8 +46,15 @@ export downsample, downsample!
 export dyadic_downsample, dyadic_downsample!
 export baseline_adjust, baseline_adjust!
 #Image reading utilities
-export deinterleave!
 export project
+
+
+export deinterleave!
+export adjustBC!
+export imfilter!, imfilter
+export mapwindow, mapwindow!
+export bin!
+export Kernel
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
 export concat, concat!
@@ -61,29 +72,16 @@ export normalize, normalize!
 include("Filtering/filteringPipelines.jl")
 export data_filter!, data_filter
 
-
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
 export readABF
 export parseABF
 export getABF_datetime #Eventually these should go elsewhere
 
-
-
 include("Readers/ImageReader/ImageReader.jl")
 export readImage
 export get_frame, get_all_frames
 export getIMG_datetime
-
-import Images.Kernel
-import OffsetArrays.OffsetArray
-using CurveFit
-include("Readers/ImageReader/ImageModification.jl")
-export adjustBC!
-export imfilter!, imfilter
-export mapwindow, mapwindow!
-export bin!
-export Kernel
 
 include("Readers/ImageReader/ROIReader.jl")
 export recordROI 
