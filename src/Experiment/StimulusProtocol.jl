@@ -232,3 +232,11 @@ function iterate(protocol::StimulusProtocol, state)
         return (protocol[state], state+1)
     end
 end
+
+#I couldn't figure out where to put these functions, 
+#   But I don't think they need to go elsewhere
+function convert_stimulus!(exp, channel::String; kwargs...)
+    stimulus_protocol = extractStimulus(exp.HeaderDict; stimulus_name = channel, kwargs...)
+    #println(stimulus_protocol)
+end
+convert_stimulus!(exp, n_channel::Int64) = convert_stimulus!(exp, exp.chNames[n_channel])
