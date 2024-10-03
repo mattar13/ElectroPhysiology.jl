@@ -42,3 +42,33 @@ add_sig_bar(axes, x::Real, y::Real;
 ```@docs
 draw_axes_border(ax; lw = 2.5, color = :black)
 ```
+
+
+### Basic usage
+
+~~~
+#=====================================================================#
+using ElectroPhysiology, PhysiologyPlotting
+using GLMakie
+
+#=[Point to filenames]================================================#
+data_fn = "<DATA_FILEPATH.abf>"
+save_fn = "<SAVE_FILEPATH.png>"
+
+#=[Open data]=========================================================#
+data = readABF(filename)
+
+#=[Plot data]=========================================================#
+fig, axs = experimentplot(data)
+save(save_fn, fig)
+~~~
+
+data2P = readImage(data2P_fn);
+deinterleave!(data2P) #This seperates the movies into two seperate movies
+
+fig = Figure(figsize = (800, 800))
+ax1 = Axis(fig[1,1], aspect = 1.0, title = "Frame 1")
+ax2 = Axis(fig[1,2], aspect = 1.0, title = "Z projection)
+frame = Observable(1)
+tpf = twophotonframe!(ax1, data2P, frame, channel = 2, colorrange = (0.0, 0.02))
+tpp = twophotonprojection!(ax2, data2P, dims = (1, 2), channel = 2)
