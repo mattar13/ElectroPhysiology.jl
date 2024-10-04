@@ -55,7 +55,7 @@ export bin!
 export Kernel
 
 include("Experiment/ImageMorphologyUtils.jl")
-export delta_ff
+export delta_f
 export find_boutons
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
