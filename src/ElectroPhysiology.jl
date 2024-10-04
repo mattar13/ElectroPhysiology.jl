@@ -48,7 +48,7 @@ export baseline_adjust, baseline_adjust!
 #Image reading utilities
 export project
 
-
+include("Experiment/ImageMorphologyUtils.jl")
 export deinterleave!
 export adjustBC!
 export imfilter!, imfilter

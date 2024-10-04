@@ -1,9 +1,13 @@
 [deps]
 ElectroPhysiology = "da7a9670-f599-43ac-b818-143f8bf87d45"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+ImageBase = "c817782e-172a-44cc-b673-b171935fbb9e"
+ImageMorphology = "787d08f9-d448-5407-9aad-5290dd7ab264"
+ImageShow = "4e3cecfd-b093-5904-9786-8bbb286a6a31"
 MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
 PhysiologyAnalysis = "69cbc4a0-077e-48a7-9b45-fa8b7014b5ca"
 PhysiologyPlotting = "d5a2a81f-3167-4eb5-8f67-b1ebe6a4430d"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestImages = "5e47fb64-e119-507b-a336-dd2b206d9990"
 TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
