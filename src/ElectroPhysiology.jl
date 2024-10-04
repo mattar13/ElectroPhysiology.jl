@@ -47,14 +47,16 @@ export dyadic_downsample, dyadic_downsample!
 export baseline_adjust, baseline_adjust!
 #Image reading utilities
 export project
-
-include("Experiment/ImageMorphologyUtils.jl")
 export deinterleave!
 export adjustBC!
 export imfilter!, imfilter
 export mapwindow, mapwindow!
 export bin!
 export Kernel
+
+include("Experiment/ImageMorphologyUtils.jl")
+export delta_ff
+export find_boutons
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
 export concat, concat!
