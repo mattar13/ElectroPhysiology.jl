@@ -6,14 +6,23 @@ using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
 using StatsBase #Might need to add this to PhysiologyAnalysis as well
 
-file_loc = "D:/Data/Two Photon"
+file_loc = "G:/Data/Two Photon"
 data2P_fn = "$(file_loc)/2024_09_03_SWCNT_VGGC6/swcntBATH_kpuff_nomf_20um001.tif"
 data2P = readImage(data2P_fn);
-
-#%%
 xlims = data2P.HeaderDict["xrng"]
 ylims = data2P.HeaderDict["yrng"]
 deinterleave!(data2P) #This seperates the movies into two seperate movies
+
+fig = Figure(figsize = (500, 500))
+ax1a = Axis(fig[1,1], aspect = 1.0)
+ax1b = Axis(fig[1,1], aspect = 1.0)
+ax2a = Axis(fig[2,1], aspect = 1.0)
+ax2b = Axis(fig[2,2], aspect = 1.0)
+twophotonframe!(ax1a, data2P, 1, channel = 2) 
+twophotonprojection!(ax1a, data2P, dims = 3, channel = 2) 
+
+
+#%%
 #truncate_data!(data2P, t_begin = 0.0, t_end = 100.0)
 
 size(data2P)
