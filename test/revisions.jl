@@ -2,54 +2,54 @@ using Revise
 using Pkg; Pkg.activate(".")
 using ElectroPhysiology
 using ImageMagick
-using Images, .ImageMorphology
+using Images
 using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
 using StatsBase #Might need to add this to PhysiologyAnalysis as well
+using ImageMorphology
+import ElectroPhysiology.disk_se
 
-file_loc = "D:/Data/Two Photon"
+file_loc = "G:/Data/Two Photon"
 data2P_fn = "$(file_loc)/2024_09_03_SWCNT_VGGC6/swcntBATH_kpuff_nomf_20um001.tif"
-data2P_fn = raw"D:\Data\Two Photon\2024_10_01_VGGC6_P5_SWCNT\swcnt1b_0um_medium_4x_008.tif"
+data2P_fn = raw"G:\Data\Two Photon\2024_10_01_VGGC6_P5_SWCNT\swcnt1b_0um_medium_4x_008.tif"
 data2P = readImage(data2P_fn);
 xlims = data2P.HeaderDict["xrng"]
 ylims = data2P.HeaderDict["yrng"]
 deinterleave!(data2P) #This seperates the movies into two seperate movies
 
-import ElectroPhysiology.disk_se
 img_arr = get_all_frames(data2P)
-
 red_zstack = img_arr[:,:,:,2]
 red_img = red_zstack[:,:,1]
-image(red_img)
-se = disk_se(50) #Create a structured disc
-out = opening(red_img, se)
-image(out)
 
-# Create a disk-shaped structuring element
+function delta_ff(exp::Experiment{TWO_PHOTON, T}; stim_channel = 1, channel = 2) where T<:Real
+     img_arr = get_all_frames(exp) #Extract
+     cell_activity_arr = img_arr[:,:,1,stim_channel] #We may want to use this to narrow our approach
+ 
+     img_zstack = img_arr[:,:,:,channel]
+     se = disk_se(15) #This is a structured element array with a radius of 15
+     background = opening(img_zstack[:,:,1], se) #remove the background from the first frame
+     zstack_backsub = img_zstack .- background #Subtract the background from the img_zstack
+ 
+     #This section will depend on us pulling out all of the frames we expect to be background
+     baselineFrames = floor(Int64, 0.05 * size(zstack_backsub, 3)) #We might need to do better wit this
+     #baselineFrames = size(zstack_backsub, 3)
+ 
+     f0 = mean(zstack_backsub[:,:,1:baselineFrames], dims = 3)[:,:,1] #Take the to calculate F0
+     dFstack = zstack_backsub .- f0 #delta f = stack - f0
+
+     dFstackMax = maximum(dFstack, dims = 3)[:,:,1] #take the maximum value of the delta F
+     dFstackMaxSmooth = mapwindow(median, dFstackMax, (3,3)) #Do a median filter
+     dFstackMaxSmoothNorm = dFstackMaxSmooth/maximum(dFstackMaxSmooth) #normalize
+
+     dFFstackMaxSmoothNorm = dFstackMaxSmoothNorm./f0
+     return dFFstackMaxSmoothNorm
+end
+
+res = delta_ff(data2P)
+heatmap(res[:,:]')
+
 
 #%%
-using ImageMorphology
-using TestImages
-using ImageBase
-using ImageShow
-
-img = restrict(testimage_dip3e("fig0940")) # rice
-img01 = @. Gray(img > 0.5)
-mosaic(img, img01; nrow=1)
-
-out1 = opening(img) # default: all spatial dimensions, r=1, a box-shape SE
-out2 = opening(img; dims=(2,)) # only apply to the second dimension
-out3 = opening(img; r=5) # half-size r=5
-
-# also to the binary version
-out1_01 = opening(img01)
-out2_01 = opening(img01; dims=(2,))
-out3_01 = opening(img01; r=5)
-
-mosaic(out1, out2, out3, out1_01, out2_01, out3_01; nrow=2, rowmajor=true)
-#%%
-#truncate_data!(data2P, t_begin = 0.0, t_end = 100.0)
-
 fig = Figure(figsize = (500, 500))
 ax1a = Axis(fig[1,1], aspect = 1.0)
 ax1b = Axis(fig[1,1], aspect = 1.0)
