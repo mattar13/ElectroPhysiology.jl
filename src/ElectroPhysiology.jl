@@ -5,7 +5,7 @@ using Requires
 capabilies = Symbol[] #This indicates all the things the package is capable of doing
 using Dates, TimeZones
 import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax, abs
-import Statistics: std, mean
+import Statistics: std, mean, median
 
 #This code does several things
 #=1) Creates several objects used in the analysis of ElectroPhysiology data=#
@@ -55,7 +55,7 @@ export bin!
 export Kernel
 
 include("Experiment/ImageMorphologyUtils.jl")
-export delta_f
+export delta_f, delta_ff
 export find_boutons
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments

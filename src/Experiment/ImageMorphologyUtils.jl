@@ -1,3 +1,4 @@
+#These functions are for the opening algorithim
 function disk_se(radius)
     dims = (2*radius+1, 2*radius+1)
     center = (radius+1, radius+1)
@@ -5,7 +6,7 @@ function disk_se(radius)
     return centered(arr)
 end
 
-function delta_f(exp::Experiment{TWO_PHOTON, T}; stim_channel = 1, channel = 2) where T<:Real
+function delta_f_opening(exp::Experiment{TWO_PHOTON, T}; stim_channel = 1, channel = 2) where T<:Real
     img_arr = get_all_frames(exp) #Extract
     cell_activity_arr = img_arr[:,:,1,stim_channel] #We may want to use this to narrow our approach
 
@@ -23,8 +24,23 @@ function delta_f(exp::Experiment{TWO_PHOTON, T}; stim_channel = 1, channel = 2) 
     return dFstack
 end
 
-function find_boutons(exp::Experiment)
-    dFstack = delta_f(exp)
+#Instead lets try the median algorithim
+
+function delta_f(exp::Experiment; median_window = 41, channel = 1)
+    f0 = mapwindow(median, exp, (1, 1, median_window), channel = channel)
+    δ_f = (exp-f0)
+    return δ_f
+end
+
+function delta_ff(exp::Experiment; kwargs...)
+    δ_f = delta_f(exp; kwargs...)
+    δ_ff = δ_f / maximum(f0, dims = (1,2))[channel]
+    return δ_ff
+end
+
+
+function find_boutons(exp::Experiment; algo = :opening)
+    dFstack = delta_f_opening(exp)
     dFstackMax = maximum(dFstack, dims = 3)[:,:,1] #take the maximum value of the delta F
     dFstackMaxSmooth = mapwindow(median, dFstackMax, (3,3)) #Do a median filter
     dFstackMaxSmoothNorm = dFstackMaxSmooth/maximum(dFstackMaxSmooth) #normalize
