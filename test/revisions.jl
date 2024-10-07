@@ -15,15 +15,16 @@ xlims = data2P.HeaderDict["xrng"]
 ylims = data2P.HeaderDict["yrng"]
 deinterleave!(data2P) #This seperates the movies into two seperate movies
 
-δ_ff = delta_ff(data2P, channel = 1)
+δ_ff = delta_ff(data2P, fn = mean, channel = 2)
+f0 = mapwindow(median, data2P, (1,1,41))
 
 #%%
 fig = Figure(figsize = (500, 500))
-ax1a = Axis(fig[1,1])#, aspect = 1.0)
-#ax1b = Axis(fig[1,1])#, aspect = 1.0)
-ax2a = Axis(fig[2,1])#, aspect = 1.0)
-#ax2b = Axis(fig[2,2])#, aspect = 1.0)
+ax1a = Axis(fig[1,1], aspect = 1.0)
+ax1b = Axis(fig[2,1], aspect = 1.0)
+ax2a = Axis(fig[1,2])#, aspect = 1.0)
+ax2b = Axis(fig[2,2])#, aspect = 1.0)
 #twophotonframe!(ax1a, data2P, 1, channel = 2) 
-twophotonprojection!(ax1a, data2P, dims = (1,2), channel = 1, color = :red) 
-twophotonprojection!(ax2a, δ_ff, dims = (1,2), channel = 1) 
+twophotonprojection!(ax1b, data2P, dims = 3, channel = 2, color = :red) 
+twophotonprojection!(ax2b, δ_ff, dims = (1,2), channel = 2) 
 #twophotonprojection!(ax2a, δ_ff, dims = (1,2), channel = 1, color = :red) 
