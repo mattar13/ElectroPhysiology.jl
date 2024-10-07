@@ -36,10 +36,7 @@ import Images.Kernel
 import OffsetArrays.OffsetArray
 using CurveFit
 
-#This needs to go above baseline_adjust!
-include("Experiment/ImageMorphologyUtils.jl")
-export delta_f, delta_ff
-export find_boutons
+
 
 include("Experiment/ModifyExperiments.jl") #These functions modify individual experiments
 export scaleby, scaleby!
@@ -50,7 +47,11 @@ export average_trials, average_trials!
 export downsample, downsample!
 export dyadic_downsample, dyadic_downsample!
 export baseline_adjust, baseline_adjust!
+
 #Image reading utilities
+include("Experiment/ImageMorphologyUtils.jl")
+export delta_f, delta_ff
+export find_boutons
 export project
 export deinterleave!
 export adjustBC!
