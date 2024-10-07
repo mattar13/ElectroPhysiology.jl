@@ -32,8 +32,9 @@ function delta_f(exp::Experiment; median_window = 41, channel = 1)
     return δ_f
 end
 
-function delta_ff(exp::Experiment; kwargs...)
-    δ_f = delta_f(exp; kwargs...)
+function delta_ff(exp::Experiment; median_window = 41, channel = 1)
+    f0 = mapwindow(median, exp, (1, 1, median_window), channel = channel)
+    δ_f = (exp-f0)
     δ_ff = δ_f / maximum(f0, dims = (1,2))[channel]
     return δ_ff
 end
