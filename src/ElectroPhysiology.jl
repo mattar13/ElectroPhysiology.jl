@@ -50,7 +50,7 @@ export baseline_adjust, baseline_adjust!
 
 #Image reading utilities
 include("Experiment/ImageMorphologyUtils.jl")
-export delta_f, delta_ff
+export delta_ff, delta_ff!
 export find_boutons
 export project
 export deinterleave!

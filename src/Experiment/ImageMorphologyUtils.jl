@@ -195,19 +195,24 @@ function delta_f_opening(exp::Experiment{TWO_PHOTON, T}; stim_channel = 1, chann
     return dFstack
 end
 
-#Instead lets try the median algorithim
-
-function delta_f(exp::Experiment; median_window = 41, fn = median, channel = 1)
-    f0 = mapwindow(fn, exp, (1, 1, median_window), channel = channel)
-    δ_f = (exp-f0)
-    return δ_f
+function delta_ff!(exp::Experiment; window = 41, fn = median, channel = nothing)
+    if isnothing(channel)
+        for (idx, ch) in enumerate(eachchannel(exp))
+            println(idx)
+            delta_ff!(exp, channel = idx, window = window, fn = fn)
+        end
+    else
+        f0 = mapwindow(fn, exp, (1, 1, window), channel = channel)
+        exp.data_array[:,:,channel] = exp[:,:,channel] - f0[:,:,channel] #delta f
+        print(mean(exp, dims = (1,2)))
+        exp.data_array[:,:,channel] = exp[:,:,channel] / maximum(f0, dims = (1,2))[channel]
+    end
 end
 
-function delta_ff(exp::Experiment; median_window = 41, fn = median, channel = 1)
-    f0 = mapwindow(fn, exp, (1, 1, median_window), channel = channel)
-    δ_f = (exp-f0)
-    δ_ff = δ_f / maximum(f0, dims = (1,2))[channel]
-    return δ_ff
+function delta_ff(exp::Experiment; kwargs...)
+    exp_copy = deepcopy(exp)
+    delta_ff!(exp_copy; kwargs...)
+    return exp_copy
 end
 
 
