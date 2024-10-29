@@ -134,6 +134,8 @@ function bin!(exp::Experiment{TWO_PHOTON}, dims; operation = :mean)
     exp.t = exp.t[1:dim_data:size_data]
 end
 
+#=mapping functions====================================================================================================================#
+
 import Images: mapwindow, mapwindow! #These will allow us to do arbitrary operations
 function mapwindow!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; channel = nothing) where T <: Real
     img_arr = get_all_frames(exp)

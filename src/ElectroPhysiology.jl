@@ -36,8 +36,6 @@ import Images.Kernel
 import OffsetArrays.OffsetArray
 using CurveFit
 
-
-
 include("Experiment/ModifyExperiments.jl") #These functions modify individual experiments
 export scaleby, scaleby!
 export pad, pad!, chop, chop!
@@ -57,10 +55,10 @@ export deinterleave!
 export adjustBC!
 export imfilter!, imfilter
 export mapwindow, mapwindow!
+export mapdata
+
 export bin!
 export Kernel
-
-
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
 export concat, concat!
