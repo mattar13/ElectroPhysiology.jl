@@ -54,10 +54,10 @@ export project
 export deinterleave!
 export adjustBC!
 export imfilter!, imfilter
-export mapwindow, mapwindow!
-export mapdata
-
 export bin!
+export mapdata, mapdata!
+export mapframe, mapframe!
+
 export Kernel
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
