@@ -195,7 +195,7 @@ sum(exp::Experiment; kwargs...) = sum(exp.data_array; kwargs...)
 
 std(exp::Experiment; kwargs...) = std(exp.data_array; kwargs...)
 
-copy(nt::Experiment) = Experiment([getfield(nt, fn) for fn in fieldnames(nt |> typeof)]...)
+copy(nt::Experiment{F, T}) where {F, T}= Experiment{F, T}([getfield(nt, fn) for fn in fieldnames(nt |> typeof)]...)
 
 minimum(exp::Experiment; kwargs...) = minimum(exp.data_array; kwargs...)
 
