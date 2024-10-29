@@ -137,45 +137,70 @@ end
 #=mapping functions====================================================================================================================#
 
 import Images: mapwindow, mapwindow! #These will allow us to do arbitrary operations
-function mapwindow!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; channel = nothing) where T <: Real
-    img_arr = get_all_frames(exp)
-    @assert !isnothing(channel) "Channel needs to be specified"
-    for frame_idx in axes(img_arr,3)
-         frame = img_arr[:,:,frame_idx, channel]
-         img_filt_frame = mapwindow(f, frame, window)
-         reshape_img = reshape(img_filt_frame, (size(img_filt_frame,1)*size(img_filt_frame,2)))
-         exp.data_array[:,frame_idx, channel] .= reshape_img
-    end
-end
+"""
+This function maps the given function `f` over a specified window of data in the `exp` Experiment.
+The function modifies the experiment in place, applying the function `f` to each channel within the
+specified window size.
 
-#Not working properly. Need to adjust
-function mapwindow!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64,Int64,Int64}; channel = nothing) where T<:Real
-    if window[1] == 1 && window[2] == 1 #This is weird and throws a stackoverflow error
-         new_window = (window[1], window[3])
-         arr = exp.data_array[:,:,channel]
-         reshape_img = mapwindow(f, arr, new_window)
+Parameters:
+- `f`: A function to be applied over the window of the data.
+- `exp::Experiment{TWO_PHOTON, T}`: The Experiment object containing the data to be processed.
+- `window::Int64`: The size of the moving window over which to apply the function.
+- `channel (optional)`: The specific channel to apply the function on. If not provided, the function is applied on all channels.
+
+This function modifies the data array in `exp` in place by mapping the function over the specified window.
+"""
+function mapdata!(f, exp::Experiment{TWO_PHOTON, T}, window::Int64; channel = nothing) where {T<:Real}
+    if isnothing(channel)
+        for ch in axes(exp, 3)
+            mapdata!(f, exp, window, channel = ch)
+        end
     else
-         img_arr = get_all_frames(exp)
-         @assert !isnothing(channel) "Channel needs to be specified"
-         img_filt_ch = mapwindow(f, img_arr[:,:,:,channel], window)
-         reshape_img = reshape(img_filt_ch, (size(img_filt_ch,1)*size(img_filt_ch,2), size(img_filt_ch,3)))
-    end
-    exp.data_array[:,:,channel] .= reshape_img
-end
-
-function mapwindow!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64,Int64,Int64, Int64}; channel = nothing) where T<:Real
-    img_arr = get_all_frames(exp)
-    if isnothing(channel) #This means we want to filter both channels
-         @assert ndims(kernel) == 4 "Kernel is size $(size(kernel)) and needs to be 4 dimensions"
-         img_filt = mapwindow(f, img_arr, window)
-         reshape_img = reshape(img_filt, (size(img_filt,1)*size(img_filt,2), size(img_filt,3), size(img_filt,4)))
-         exp.data_array = reshape_img       
+        new_window = (1, window)
+        arr = exp.data_array[:,:,channel]
+        reshape_img = mapwindow(f, arr, new_window)
+        exp.data_array[:,:,channel] .= reshape_img
     end
 end
 
-function mapwindow(f, exp::Experiment{TWO_PHOTON, T}, kernel; channel = nothing) where {T<:Real}
+function mapdata(f, exp::Experiment{TWO_PHOTON, T}, window::Int64; kwargs...) where {T<:Real}
     exp_copy = deepcopy(exp)
-    mapwindow!(f, exp_copy, kernel; channel = channel)
+    mapdata!(f, exp_copy, window; kwargs...)
+    return exp_copy
+end
+
+"""
+This function maps a given function `f` over a specific window in each frame of the `exp` Experiment.
+It modifies the experiment in place and processes each frame of the data for the specified channel 
+(or for all channels if none is provided).
+
+Parameters:
+- `f`: A function to be applied over the window of each frame.
+- `exp::Experiment{TWO_PHOTON, T}`: The Experiment object containing the frames to be processed.
+- `window::Tuple{Int64, Int64}`: The size of the moving window over which to apply the function, specified as a tuple `(height, width)`.
+- `channel (optional)`: The specific channel to apply the function on. If not provided, the function is applied on all channels.
+
+This function modifies the data array in `exp` in place by mapping the function over the specified window for each frame.
+"""
+function mapframe!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; channel = nothing) where {T <: Real}
+    img_arr = get_all_frames(exp)
+    if isnothing(channel)
+        for ch in axes(exp, 3)
+            mapframe!(f, exp, window; channel = ch)
+        end
+    else
+        for frame_idx in axes(img_arr,3)
+            frame = img_arr[:,:,frame_idx, channel]
+            img_filt_frame = mapwindow(f, frame, window)
+            reshape_img = reshape(img_filt_frame, (size(img_filt_frame,1)*size(img_filt_frame,2)))
+            exp.data_array[:,frame_idx, channel] .= reshape_img
+        end
+    end
+end
+
+function mapframe(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; kwargs...) where {T <: Real}
+    exp_copy = deepcopy(exp)
+    mapframe!(f, exp_copy, window; kwargs...)
     return exp_copy
 end
 
@@ -197,16 +222,15 @@ function delta_f_opening(exp::Experiment{TWO_PHOTON, T}; stim_channel = 1, chann
     return dFstack
 end
 
-function delta_ff!(exp::Experiment; window = 41, fn = median, channel = nothing)
+function delta_ff!(exp::Experiment; window = 21, fn = median, channel = nothing)
     if isnothing(channel)
         for (idx, ch) in enumerate(eachchannel(exp))
-            println(idx)
             delta_ff!(exp, channel = idx, window = window, fn = fn)
         end
     else
-        f0 = mapwindow(fn, exp, (1, 1, window), channel = channel)
+        f0 = mapdata(fn, exp, window, channel = channel)
         exp.data_array[:,:,channel] = exp[:,:,channel] - f0[:,:,channel] #delta f
-        print(mean(exp, dims = (1,2)))
+        #print(mean(exp, dims = (1,2)))
         exp.data_array[:,:,channel] = exp[:,:,channel] / maximum(f0, dims = (1,2))[channel]
     end
 end
