@@ -127,11 +127,31 @@ function imfilter(exp::Experiment{TWO_PHOTON}, kernel; channel = nothing)
     return exp_copy
 end
 
-function bin!(exp::Experiment{TWO_PHOTON}, dims; operation = :mean)
-    dim_trial, dim_data, dim_channel = dims
-    size_trial, size_data, size_channel = size(exp)
-    exp.data_array = exp.data_array[1:dim_trial:size_trial, 1:dim_data:size_data, 1:dim_channel:size_channel]
-    exp.t = exp.t[1:dim_data:size_data]
+function bin!(fn, exp::Experiment{TWO_PHOTON}, dims::Tuple{Int, Int, Int})
+    img_arr = get_all_frames(exp)
+    n_ch = size(exp, 3)
+    original_dims = size(img_arr)
+    binned_x = Int(original_dims[1] / dims[1])
+    binned_y = Int(original_dims[2] / dims[2])
+    binned_z = Int(original_dims[3] / dims[3])
+    binned_vol = zeros(Float32, binned_x, binned_y, binned_z, n_ch)
+    for ch in n_ch
+        for x in 1:binned_x
+            for y in 1:binned_y
+                for z in 1:binned_z
+                    x_range = (x-1)*dims[1]+1 : min(x*dims[1], original_dims[1])
+                    y_range = (y-1)*dims[2]+1 : min(y*dims[2], original_dims[2])
+                    z_range = (z-1)*dims[3]+1 : min(z*dims[3], original_dims[3])
+                    binned_vol[x, y, z, ch] = fn(img_arr[x_range, y_range, z_range, ch])
+                end
+            end
+        end
+    end
+    
+    println(size(binned_vol))
+    binned_vol = reshape(binned_vol, binned_x*binned_y, binned_z, n_ch)
+    println(size(binned_vol))
+    exp.data_array = binned_vol
 end
 
 #=mapping functions====================================================================================================================#
@@ -150,15 +170,15 @@ Parameters:
 
 This function modifies the data array in `exp` in place by mapping the function over the specified window.
 """
-function mapdata!(f, exp::Experiment{TWO_PHOTON, T}, window::Int64; channel = nothing) where {T<:Real}
+function mapdata!(f, exp::Experiment{TWO_PHOTON, T}, window::Int64; channel = nothing, border = "symmetric") where {T<:Real}
     if isnothing(channel)
         for ch in axes(exp, 3)
-            mapdata!(f, exp, window, channel = ch)
+            mapdata!(f, exp, window, channel = ch, border = border)
         end
     else
         new_window = (1, window)
         arr = exp.data_array[:,:,channel]
-        reshape_img = mapwindow(f, arr, new_window)
+        reshape_img = mapwindow(f, arr, new_window, border)
         exp.data_array[:,:,channel] .= reshape_img
     end
 end
@@ -182,16 +202,16 @@ Parameters:
 
 This function modifies the data array in `exp` in place by mapping the function over the specified window for each frame.
 """
-function mapframe!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; channel = nothing) where {T <: Real}
+function mapframe!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; channel = nothing, border = "symmetric") where {T <: Real}
     img_arr = get_all_frames(exp)
     if isnothing(channel)
         for ch in axes(exp, 3)
-            mapframe!(f, exp, window; channel = ch)
+            mapframe!(f, exp, window; channel = ch, border = border)
         end
     else
         for frame_idx in axes(img_arr,3)
             frame = img_arr[:,:,frame_idx, channel]
-            img_filt_frame = mapwindow(f, frame, window)
+            img_filt_frame = mapwindow(f, frame, window, border = border)
             reshape_img = reshape(img_filt_frame, (size(img_filt_frame,1)*size(img_filt_frame,2)))
             exp.data_array[:,frame_idx, channel] .= reshape_img
         end
@@ -229,9 +249,9 @@ function delta_ff!(exp::Experiment; window = 21, fn = median, channel = nothing)
         end
     else
         f0 = mapdata(fn, exp, window, channel = channel)
-        exp.data_array[:,:,channel] = exp[:,:,channel] - f0[:,:,channel] #delta f
+        df = exp[:,:,channel] - f0[:,:,channel] #delta f
         #print(mean(exp, dims = (1,2)))
-        exp.data_array[:,:,channel] = exp[:,:,channel] / maximum(f0, dims = (1,2))[channel]
+        exp.data_array[:,:,channel] = df[:,:,channel] / f0[:,:,channel]
     end
 end
 
