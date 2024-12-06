@@ -19,7 +19,6 @@ A mutable struct representing a physiological experiment.
 - `chNames`: A vector of strings representing the names of the channels.
 - `chUnits`: A vector of strings representing the units of the channels.
 - `chGains`: A vector of `Real` values representing the Gains values of the channels.
-- `stimulus_protocol`: A `StimulusProtocol{T}` object containing the stimulus protocol information.
 
 ## Constructors
 
@@ -243,3 +242,8 @@ setIntensity(exp::Experiment, photons) = setIntensity(exp.HeaderDict["StimululsP
 getIntensity(exp::Experiment) = getIntensity(exp.HeaderDict["StimulusProtocol"])
 
 getStimulusProtocol(exp::Experiment) = haskey(exp.HeaderDict, "StimulusProtocol") ? exp.HeaderDict["StimulusProtocol"] : nothing
+
+round_nanosecond(time::T) where {T<:Real} = Nanosecond(round(Int64, time * 1e9))
+round_nanosecond(time_series::Vector{T}) where {T<:Real} = map(time -> round_nanosecond(time), time_series)
+
+getRealTime(exp::Experiment) = exp.HeaderDict["FileStartDateTime"] .+ round_nanosecond(exp.t)

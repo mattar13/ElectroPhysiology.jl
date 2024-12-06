@@ -442,3 +442,37 @@ function baseline_adjust!(trace::Experiment{WHOLE_CELL,T};
         end
     end
 end
+
+#%% 
+function create_episodes(expt::Experiment{FORMAT,T}, split_index::Int) where {FORMAT,T}
+    # Check that split_index is within the valid range.
+    if split_index < 1 || split_index >= length(expt.t)
+        error("split_index out of range: must be between 1 and length(expt.t)-1.")
+    end
+
+    # Split the time vectors
+    t1 = expt.t[1:split_index]
+    t2 = expt.t[split_index+1:end]
+
+    # Split the data arrays along the time dimension
+    # data_array dimensions: (time, channel, ...)
+    data1 = expt.data_array[1:split_index, :, :]
+    data2 = expt.data_array[split_index+1:end, :, :]
+
+    # Combine the two episodes into a single Experiment with trials
+    combined_data = cat(data1, data2; dims=4)
+    combined_t = vcat(t1, t2)
+
+    # Create a new Experiment with combined episodes as trials
+    new_expt = Experiment(
+        expt.HeaderDict,
+        expt.dt,
+        combined_t,
+        combined_data,
+        expt.chNames,
+        expt.chUnits,
+        expt.chGains
+    )
+
+    return new_expt
+end
