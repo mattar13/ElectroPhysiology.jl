@@ -444,24 +444,46 @@ function baseline_adjust!(trace::Experiment{WHOLE_CELL,T};
 end
 
 #%% 
-function create_episodes(expt::Experiment{FORMAT,T}, split_index::Int) where {FORMAT,T}
-    # Check that split_index is within the valid range.
-    if split_index < 1 || split_index >= length(expt.t)
-        error("split_index out of range: must be between 1 and length(expt.t)-1.")
+#=
+function create_episodes(expt::Experiment{FORMAT,T}, split_indices::Vector{Int}) where {FORMAT,T}
+    # Check that all split_indices are within the valid range.
+    for idx in split_indices
+        if idx < 1 || idx >= length(expt.t)
+            error("split_index out of range: must be between 1 and length(expt.t)-1.")
+        end
     end
 
-    # Split the time vectors
-    t1 = expt.t[1:split_index]
-    t2 = expt.t[split_index+1:end]
+    # Sort split_indices to ensure they are in ascending order
+    split_indices = sort(split_indices)
 
-    # Split the data arrays along the time dimension
-    # data_array dimensions: (time, channel, ...)
-    data1 = expt.data_array[1:split_index, :, :]
-    data2 = expt.data_array[split_index+1:end, :, :]
+    # Split the time vector and data array based on split_indices
+    start_idx = 1
+    data_segments = Vector{Array{T,3}}()
+    for idx in split_indices
+        push!(data_segments, expt.data_array[:, start_idx:idx, :])
+        start_idx = idx + 1
+    end
+    push!(data_segments, expt.data_array[:, start_idx:end, :])
+    println(size(data_segments))
 
-    # Combine the two episodes into a single Experiment with trials
-    combined_data = cat(data1, data2; dims=4)
-    combined_t = vcat(t1, t2)
+    # Find the maximum length among all data segments
+    segment_lengths = 
+    max_length = maximum(length.(data_segments))
+    println(max_length)
+
+    # Preallocate combined data array with `nothing` values
+    num_channels = size(expt.data_array, 2)
+    num_trials = length(data_segments)
+    combined_data = fill(nothing, num_trials, max_length, num_channels)
+    println(size(combined_data))
+    # Assign each segment to the preallocated combined data array
+    for (i, data) in enumerate(data_segments)
+        println(size(data))
+        combined_data[i, 1:size(data,2), :] .= data
+    end
+
+    # Combine all time segments into a single vector
+    combined_t = vcat(time_segments...)
 
     # Create a new Experiment with combined episodes as trials
     new_expt = Experiment(
@@ -476,3 +498,4 @@ function create_episodes(expt::Experiment{FORMAT,T}, split_index::Int) where {FO
 
     return new_expt
 end
+=#
