@@ -240,3 +240,38 @@ function convert_stimulus!(exp, channel::String; kwargs...)
     #println(stimulus_protocol)
 end
 convert_stimulus!(exp, n_channel::Int64) = convert_stimulus!(exp, exp.chNames[n_channel])
+
+#This is just a quick auxillary function to extract all points where the stimulus increases or decreases
+"""
+```julia
+    exp = readABF(data_fn)
+    t_episodes, idx_episodes = find_stim_index(exp)
+```
+
+This function takes a voltage range from an .abf file and calculates the interchange from high to low
+    or low to high voltage.
+Normally this should be done on a non-episodic range (so only a single trial)
+Channel in the case of what I am doing normally is 3
+The threshold is 2.5 which is telegraph limit
+movement is going from a low voltage to high voltage
+"""
+function find_stim_index(exp; trial = 1, channel = 3, thresh = 2.5, movement = :increase)
+    stimulus = exp.data_array[trial,:,channel]
+    over_thresh = stimulus .< thresh #Label true all telegraph high values
+    indexes = Int64[]
+    for i in eachindex(over_thresh) #Iterate through each index of the stimulus
+        if i+1>length(over_thresh) #If the index +1 is out of bounds no more
+        
+        else #Do the work here
+            if movement == :increase &&  over_thresh[i] > over_thresh[i+1]
+                push!(indexes, i)
+            elseif movement == :decrease && over_thresh[i] < over_thresh[i+1]
+                push!(indexes, i)
+            else
+                
+            end
+        end 
+    end
+    exp.t[indexes], indexes
+end
+
