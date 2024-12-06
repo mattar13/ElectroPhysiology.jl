@@ -5,17 +5,37 @@ using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
 using StatsBase #Might need to add this to PhysiologyAnalysis as well
 using ImageMorphology
-
+import ElectroPhysiology.getRealTime
+using Dates
 ElectroPhysiology.__init__()
 
-data2P_fn = raw"D:\Data\Two Photon\2024_11_06_HB9-GFP\cell_fill3002.tif"
-#data2P_fn = raw"D:\Data\Two Photon\2024_10_08_VGGC6_P12_SWCNT\swcnt_1b_spicy_0um011.tif"
-data2P = readImage(data2P_fn)
-xlims = data2P.HeaderDict["xrng"]
-ylims = data2P.HeaderDict["yrng"]
-deinterleave!(data2P) #This seperates the movies into two seperate movies
-size(data2P, 3)
-#We want to bin the data 
+data_ic_fn = raw"G:\Data\Patching\2024_12_04_Slide_KPUFF\24d04000.abf"
+data_2P_fn = raw"G:\Data\Two Photon\2024_12_04_SlidePuffs\da1mM_1-50_785001.tif"
+dataIC = readABF(data_ic_fn, flatten_episodic = true)
+data2P = readImage(data_2P_fn)
+deinterleave!(data2P)
+
+zproj = project(data2P, dims = (1,2))[1,1,:,:]
+realtime_2P = getRealTime(data2P)
+
+ic_vals = dataIC.data_array[1,:,3]
+realtime_ic = getRealTime(dataIC)
+
+
+#%%
+fig = Figure(resolution = (800, 600))
+ax1 = Axis(fig[1, 1])
+ax2 = Axis(fig[2, 1])
+ax3 = Axis(fig[3, 1])
+linkxaxes!(ax1, ax2, ax3)
+lines!(ax1, realtime_ic, ic_vals)
+lines!(ax2, realtime_2P, zproj[:,1], color = :green)
+lines!(ax3, realtime_2P, zproj[:,2], color = :red)
+fig
+
+
+
+#%%We want to bin the data 
 bin!(mean, data2P, (1,1,5))
 
 img_arr = get_all_frames(data2P)
