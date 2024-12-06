@@ -443,6 +443,10 @@ function baseline_adjust!(trace::Experiment{WHOLE_CELL,T};
     end
 end
 
+
+
+
+
 #%% 
 #=
 function create_episodes(expt::Experiment{FORMAT,T}, split_indices::Vector{Int}) where {FORMAT,T}
