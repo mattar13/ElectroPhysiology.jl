@@ -18,6 +18,7 @@ export StimulusProtocol
 export setindex!, getindex
 export getStimulusProtocol
 export extractStimulus, setIntensity, getIntensity
+export find_stim_index
 
 include("Experiment/Experiments.jl") #This file contains the Experiment structure. 
 export getSampleFreq
