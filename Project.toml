@@ -18,7 +18,7 @@ TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 
 [compat]
 CurveFit = "0.6.0"
-DSP = "^0.7"
+DSP = "^0.7, 0.8"
 FileIO = "1"
 ImageMagick = "1"
 Images = "0.26"
