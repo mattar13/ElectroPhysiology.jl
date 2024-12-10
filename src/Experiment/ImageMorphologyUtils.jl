@@ -157,37 +157,6 @@ end
 #=mapping functions====================================================================================================================#
 
 import Images: mapwindow, mapwindow! #These will allow us to do arbitrary operations
-"""
-This function maps the given function `f` over a specified window of data in the `exp` Experiment.
-The function modifies the experiment in place, applying the function `f` to each channel within the
-specified window size.
-
-Parameters:
-- `f`: A function to be applied over the window of the data.
-- `exp::Experiment{TWO_PHOTON, T}`: The Experiment object containing the data to be processed.
-- `window::Int64`: The size of the moving window over which to apply the function.
-- `channel (optional)`: The specific channel to apply the function on. If not provided, the function is applied on all channels.
-
-This function modifies the data array in `exp` in place by mapping the function over the specified window.
-"""
-function mapdata!(f, exp::Experiment{TWO_PHOTON, T}, window::Int64; channel = nothing, border = "symmetric") where {T<:Real}
-    if isnothing(channel)
-        for ch in axes(exp, 3)
-            mapdata!(f, exp, window, channel = ch, border = border)
-        end
-    else
-        new_window = (1, window)
-        arr = exp.data_array[:,:,channel]
-        reshape_img = mapwindow(f, arr, new_window, border)
-        exp.data_array[:,:,channel] .= reshape_img
-    end
-end
-
-function mapdata(f, exp::Experiment{TWO_PHOTON, T}, window::Int64; kwargs...) where {T<:Real}
-    exp_copy = deepcopy(exp)
-    mapdata!(f, exp_copy, window; kwargs...)
-    return exp_copy
-end
 
 """
 This function maps a given function `f` over a specific window in each frame of the `exp` Experiment.
@@ -224,23 +193,43 @@ function mapframe(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}
     return exp_copy
 end
 
-function delta_f_opening(exp::Experiment{TWO_PHOTON, T}; stim_channel = 1, channel = 2) where T<:Real
-    img_arr = get_all_frames(exp) #Extract
-    cell_activity_arr = img_arr[:,:,1,stim_channel] #We may want to use this to narrow our approach
+"""
+This function maps the given function `f` over a specified window of data in the `exp` Experiment.
+The function modifies the experiment in place, applying the function `f` to each channel within the
+specified window size.
 
-    img_zstack = img_arr[:,:,:,channel]
-    se = disk_se(15) #This is a structured element array with a radius of 15
-    background = opening(img_zstack[:,:,1], se) #remove the background from the first frame
-    zstack_backsub = img_zstack .- background #Subtract the background from the img_zstack
+Parameters:
+- `f`: A function to be applied over the window of the data.
+- `exp::Experiment{TWO_PHOTON, T}`: The Experiment object containing the data to be processed.
+- `window::Int64`: The size of the moving window over which to apply the function.
+- `channel (optional)`: The specific channel to apply the function on. If not provided, the function is applied on all channels.
 
-    #This section will depend on us pulling out all of the frames we expect to be background
-    baselineFrames = floor(Int64, 0.05 * size(zstack_backsub, 3)) #We might need to do better wit this
-    #baselineFrames = size(zstack_backsub, 3)
-
-    f0 = mean(zstack_backsub[:,:,1:baselineFrames], dims = 3)[:,:,1] #Take the to calculate F0
-    dFstack = zstack_backsub .- f0 #delta f = stack - f0
-    return dFstack
+This function modifies the data array in `exp` in place by mapping the function over the specified window.
+"""
+function mapdata!(f, exp::Experiment{TWO_PHOTON, T}, window::Int64; channel = nothing, border = "symmetric") where {T<:Real}
+    if isnothing(channel)
+        for ch in axes(exp, 3)
+            mapdata!(f, exp, window, channel = ch, border = border)
+        end
+    else
+        new_window = (1, window)
+        arr = exp.data_array[:,:,channel]
+        reshape_img = mapwindow(f, arr, new_window, border)
+        exp.data_array[:,:,channel] .= reshape_img
+    end
 end
+
+function mapdata(f, exp::Experiment{TWO_PHOTON, T}, window::Int64; kwargs...) where {T<:Real}
+    exp_copy = deepcopy(exp)
+    mapdata!(f, exp_copy, window; kwargs...)
+    return exp_copy
+end
+
+"""
+Delta F over F function
+
+
+"""
 
 function delta_ff!(exp::Experiment; window = 21, fn = median, channel = nothing)
     if isnothing(channel)
@@ -261,6 +250,25 @@ function delta_ff(exp::Experiment; kwargs...)
     return exp_copy
 end
 
+
+#=[Experimental localization functions]=================================================================================================#
+function delta_f_opening(exp::Experiment{TWO_PHOTON, T}; stim_channel = 1, channel = 2) where T<:Real
+    img_arr = get_all_frames(exp) #Extract
+    cell_activity_arr = img_arr[:,:,1,stim_channel] #We may want to use this to narrow our approach
+
+    img_zstack = img_arr[:,:,:,channel]
+    se = disk_se(15) #This is a structured element array with a radius of 15
+    background = opening(img_zstack[:,:,1], se) #remove the background from the first frame
+    zstack_backsub = img_zstack .- background #Subtract the background from the img_zstack
+
+    #This section will depend on us pulling out all of the frames we expect to be background
+    baselineFrames = floor(Int64, 0.05 * size(zstack_backsub, 3)) #We might need to do better wit this
+    #baselineFrames = size(zstack_backsub, 3)
+
+    f0 = mean(zstack_backsub[:,:,1:baselineFrames], dims = 3)[:,:,1] #Take the to calculate F0
+    dFstack = zstack_backsub .- f0 #delta f = stack - f0
+    return dFstack
+end
 
 function find_boutons(exp::Experiment; algo = :opening)
     dFstack = delta_f_opening(exp)
