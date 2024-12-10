@@ -443,9 +443,36 @@ function baseline_adjust!(trace::Experiment{WHOLE_CELL,T};
     end
 end
 
+"""
+```julia
+exp = readABF(data_filename)
+offset::Float64 = 1.0 #seconds
+time_offset!(exp, offset)
+```
 
+```julia
+exp = readABF(data_filename)
+offset = Millisecond(10.0) #converts automatically to seconds
+time_offset!(exp, offset)
+```
 
+```julia
+exp = readABF(data_filename)
+offset::Float64 = 1.0 #seconds
+offset_exp = time_offset(exp, offset) #Deepcopy of the experiment
+```
 
+This function changes the time of the data. Really simple function
+
+"""
+time_offset!(exp::Experiment{FORMAT, T}, offset::T) where {FORMAT, T<:Real} = exp.t .+= offset
+time_offset!(exp::Experiment{FORMAT, T}, time_offset::Millisecond) where {FORMAT, T<:Real} = exp.t .+= (time_offset.value)/1000 
+
+function time_offset(exp::Experiment{FORMAT, T}, offset) where {FORMAT, T<:Real}
+    new_exp = deepcopy(exp)
+    time_offset!(new_exp, offset)
+    new_exp
+end
 
 #%% 
 #=

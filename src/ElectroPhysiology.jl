@@ -36,6 +36,7 @@ import ImageMagick.magickinfo
 import Images.Kernel
 import OffsetArrays.OffsetArray
 using CurveFit
+import FastRunningMedian
 
 include("Experiment/ModifyExperiments.jl") #These functions modify individual experiments
 export scaleby, scaleby!
@@ -46,6 +47,9 @@ export average_trials, average_trials!
 export downsample, downsample!
 export dyadic_downsample, dyadic_downsample!
 export baseline_adjust, baseline_adjust!
+export time_offset, time_offset!
+#This is for the new median filtering option
+
 
 #Image reading utilities
 include("Experiment/ImageMorphologyUtils.jl")
