@@ -5,44 +5,63 @@ using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
 using StatsBase #Might need to add this to PhysiologyAnalysis as well
 using ImageMorphology
-import ElectroPhysiology.getRealTime
 using Dates
+import ElectroPhysiology.getRealTime
 ElectroPhysiology.__init__()
 
 data_ic_fn = raw"G:\Data\Patching\2024_12_04_Slide_KPUFF\24d04000.abf"
 data_2P_fn = raw"G:\Data\Two Photon\2024_12_04_SlidePuffs\da1mM_1-50_785001.tif"
+#%%
 dataIC = readABF(data_ic_fn, flatten_episodic = true)
 data2P = readImage(data_2P_fn)
 deinterleave!(data2P)
 
-zproj = project(data2P, dims = (1,2))[1,1,:,:]
-realtime_2P = getRealTime(data2P)
-
-ic_vals = dataIC.data_array[1,:,3]
-realtime_ic = getRealTime(dataIC)
-
-
 #%%
-fig = Figure(resolution = (800, 600))
-ax1 = Axis(fig[1, 1])
-ax2 = Axis(fig[2, 1])
-ax3 = Axis(fig[3, 1])
-linkxaxes!(ax1, ax2, ax3)
-lines!(ax1, realtime_ic, ic_vals)
-lines!(ax2, realtime_2P, zproj[:,1], color = :green)
-lines!(ax3, realtime_2P, zproj[:,2], color = :red)
+@time median_filtered = mapdata_median(data2P, 151, channel = 2);
+
+
+fig = Figure()
+ax1a = Axis(fig[1,1])
+twophotonprojection!(ax1a, median_filtered, channel = 1)
+
+ax1b = Axis(fig[1,2])
+twophotonprojection!(ax1b, median_filtered, channel = 2)
+
+ax2a = Axis(fig[2,1])
+twophotonprojection!(ax2a, data2P, dims = (1,2), channel = 1, color = :red)
+twophotonprojection!(ax2a, median_filtered, dims = (1,2), channel = 1)
+
+ax2b = Axis(fig[2,2])
+twophotonprojection!(ax2b, data2P, dims = (1,2), channel = 2, color = :red)
+twophotonprojection!(ax2b, median_filtered, dims = (1,2), channel = 2)
 fig
 
-
-
-#%%We want to bin the data 
-bin!(mean, data2P, (1,1,5))
-
-img_arr = get_all_frames(data2P)
 #%%
-dff = delta_ff(data2P, window = 41)
-mapdata(median, data2P, 21, border = "symmetric")
+zproj = project(data2P, dims = (1,2))[1,1,:,:]
+ic_vals = dataIC.data_array[1,:,3]
 
+#Calculate the time sync between the start of the 2P and start of the pizo driver
+start2P = data2P.HeaderDict["FileStartDateTime"]-Second(3.0) #The computer clocks are off by 3 seconds
+startIC = dataIC.HeaderDict["FileStartDateTime"]
+t_offset = Millisecond(startIC - start2P) 
+time_offset!(dataIC, t_offset)
+
+#program the time offset into a single function
+t_episodes, eps_idx_IC = find_stim_index(dataIC)
+#To convert the values from t_episodes into the data from data2P, divide the t_episodes by data2P.dt
+eps_idxs_2P = round.(Int64, (t_episodes./data2P.dt))
+
+
+#%% 
+fig = Figure(title = "Testing delta F/F")
+ax1 = Axis(fig[1,1])
+twophotonprojection!(ax1, data2P)
+
+ax2a = Axis(fig[2,1])
+ax2b = Axis(fig[2,2])
+ax2c = Axis(fig[2,3])
+
+fig
 #%%
 fig = Figure(size = (1200, 700), px_per_unit = 2)
 ax1a = GLMakie.Axis(fig[1,1], aspect = 1.0)
