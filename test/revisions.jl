@@ -17,8 +17,6 @@ data2P = readImage(data_2P_fn)
 deinterleave!(data2P)
 
 #%%
-@time median_filtered = mapdata_median(data2P, 151, channel = 2);
-
 
 fig = Figure()
 ax1a = Axis(fig[1,1])
