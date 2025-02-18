@@ -11,7 +11,8 @@ import Statistics: std, mean, median
 #=1) Creates several objects used in the analysis of ElectroPhysiology data=#
 #=2) Reads =#
 #=3) Modifies experiment objects =#
-using DSP #Used for lowpass, highpass, EI, and notch filtering
+#Also make sure to move this eventually
+# using DSP #Used for lowpass, highpass, EI, and notch filtering
 
 include("Stimulus/StimulusProtocol.jl")
 export StimulusProtocol
@@ -32,11 +33,10 @@ import Base: chop
 import Polynomials as PN
 using FileIO, Images
 using ImageMagick #This package is for getting metadata of .tif files
-import ImageMagick.magickinfo
-import Images.Kernel
-import OffsetArrays.OffsetArray
-using CurveFit
-import FastRunningMedian: MedianFilter, running_median!
+import ImageMagick.magickinfo 
+#import Images.Kernel #Where are these functions used?
+#import OffsetArrays.OffsetArray #Where are these functions used?
+#using CurveFit #Where are these functions used?
 
 include("Experiment/ModifyExperiments.jl") #These functions modify individual experiments
 export scaleby, scaleby!
@@ -48,10 +48,6 @@ export downsample, downsample!
 export dyadic_downsample, dyadic_downsample!
 export baseline_adjust, baseline_adjust!
 export time_offset, time_offset!
-
-#This is for the new median filtering option
-include("Experiment/MedianFilter.jl")
-export mapdata_median!, mapdata_median
 
 #Image reading utilities
 include("Experiment/ImageMorphologyUtils.jl")
