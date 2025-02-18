@@ -13,7 +13,7 @@ import Statistics: std, mean, median
 #=3) Modifies experiment objects =#
 using DSP #Used for lowpass, highpass, EI, and notch filtering
 
-include("Experiment/StimulusProtocol.jl")
+include("Stimulus/StimulusProtocol.jl")
 export StimulusProtocol
 export setindex!, getindex
 export getStimulusProtocol
@@ -75,13 +75,14 @@ include("Experiment/ExportingExperiments.jl")
 export writeXLSX
 
 #1)Filter ====================================================================================#
-include("Filtering/filtering.jl")
-export filter_data, filter_data!
-export rolling_mean
-export normalize, normalize!
+# Filtering technically should be moved to PhysiologyAnalysis.jl
+#include("Filtering/filtering.jl")
+#export filter_data, filter_data!
+#export rolling_mean
+#export normalize, normalize!
 
-include("Filtering/filteringPipelines.jl")
-export data_filter!, data_filter
+#include("Filtering/filteringPipelines.jl")
+#export data_filter!, data_filter
 
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
@@ -98,7 +99,6 @@ include("Readers/ImageReader/ROIReader.jl")
 export recordROI 
 export getROIindexes, getROImask, getROIarr
 export loadROIfn!
-
 
 function __init__()    
     @require XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0" begin
