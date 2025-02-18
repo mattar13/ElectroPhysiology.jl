@@ -70,16 +70,6 @@ export create_signal_waveform!
 include("Experiment/ExportingExperiments.jl")
 export writeXLSX
 
-#1)Filter ====================================================================================#
-# Filtering technically should be moved to PhysiologyAnalysis.jl
-#include("Filtering/filtering.jl")
-#export filter_data, filter_data!
-#export rolling_mean
-#export normalize, normalize!
-
-#include("Filtering/filteringPipelines.jl")
-#export data_filter!, data_filter
-
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
 export readABF
