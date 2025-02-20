@@ -237,7 +237,11 @@ getChannelUnite(exp::Experiment) = exp.chUnits
 
 getGains(exp::Experiment) = exp.chGains
 
-setIntensity(exp::Experiment, photons) = setIntensity(exp.HeaderDict["StimululsProtocol"], photons)
+addStimulus!(exp::Experiment, protocol::StimulusProtocol) = exp.HeaderDict["StimulusProtocol"] = protocol
+
+addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; kwargs...) = exp.HeaderDict["StimulusProtocol"] = extractStimulus(protocol_fn, stim_channel; kwargs...)
+
+setIntensity(exp::Experiment, photons) = setIntensity(exp.HeaderDict["StimulusProtocol"], photons)
 
 getIntensity(exp::Experiment) = getIntensity(exp.HeaderDict["StimulusProtocol"])
 
