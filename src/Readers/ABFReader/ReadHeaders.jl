@@ -75,13 +75,14 @@ function readABFInfo(::Type{T}, filename::String; loadData=true, data_format=[3,
                 raw = raw .+ dataOffset #Scale the data by the offset
             end
             #We can try to convert the data into a array of shape [trials, data, channels]
-            raw = reshape(raw, (channelCount, trialPointCount, trialCount)) #Reshape the data
-            raw = permutedims(raw, data_format) #permute the dims
             if flatten_episodic
-                raw = reshape(raw, (1, trialPointCount * trialCount, channelCount))
+                raw = reshape(raw, (channelCount, trialPointCount * trialCount, 1))
                 headerSection["trialCount"] = 1
                 headerSection["trialPointCount"] = trialPointCount * trialCount
+            else
+                raw = reshape(raw, (channelCount, trialPointCount, trialCount)) #Reshape the data
             end
+            raw = permutedims(raw, data_format) #permute the dims
             headerSection["data"] = Array{T}(raw)
         end
 

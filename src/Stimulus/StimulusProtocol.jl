@@ -27,6 +27,22 @@ mutable struct Flash <: Stimulus
 end
 Flash() = Flash(0.0)
 
+mutable struct Step <: Stimulus
+    amplitude::Real
+end
+
+mutable struct Ramp <: Stimulus
+    amplitude::Real
+    duration::Real
+end
+
+mutable struct Puff <: Stimulus
+    duration::Real
+    agent::String
+    concentration::Real
+    unit::String
+end
+
 import Base.string
 string(flash::Flash) = "flash"
 
@@ -152,6 +168,62 @@ function getIntensity(stimulus_protocols::StimulusProtocol{T, Flash}) where T<:R
 end
 
 """
+    extract_events(stim::AbstractVector{<:Number}) -> Vector{Tuple{Int,Int}}
+
+Extracts the start and end indices of stimulus events from a binary stimulus waveform.
+
+A stimulus waveform is represented by a vector of 0s and 1s where 0 indicates no stimulus and 1 indicates 
+the presence of a stimulus. An event is defined as a contiguous sequence of 1s. The function detects transitions 
+from 0 to 1 (event start) and from 1 to 0 (event end), and returns a vector of tuples containing the start and end 
+indices of each event.
+
+# Arguments
+- `stim`: A one-dimensional array (or vector) of numbers (typically 0s and 1s) representing the stimulus waveform.
+
+# Returns
+- A vector of tuples `(idx_start, idx_end)` where:
+  - `idx_start` is the index at which a stimulus event starts (i.e. where the signal transitions from 0 to 1).
+  - `idx_end` is the index at which that event ends (i.e. where the signal transitions from 1 to 0).
+"""
+function extract_events(stim::AbstractVector{<:Number})
+    n = length(stim)
+    if n == 0
+        return Tuple{Int,Int}[]
+    end
+
+    # Compute differences between consecutive elements.
+    # A value of 1 means a 0→1 transition, and -1 means a 1→0 transition.
+    d = diff(stim)
+    starts = [i + 1 for i in findall(x -> x == 1, d)]
+    ends   = [i for i in findall(x -> x == -1, d)]
+
+    # If the first element is already 1, then the event starts at index 1.
+    if stim[1] == 1
+        unshift!(starts, 1)
+    end
+
+    # If the last element is 1, then the event hasn’t closed—so end it at the last index.
+    if stim[end] == 1
+        push!(ends, n)
+    end
+
+    # Now pair up each start with the next end that comes after it.
+    events = Tuple{Int,Int}[]
+    i, j = 1, 1
+    while i <= length(starts) && j <= length(ends)
+        if starts[i] <= ends[j]
+            push!(events, (starts[i], ends[j]))
+            i += 1
+            j += 1
+        else
+            j += 1
+        end
+    end
+
+    return events
+end
+
+"""
     extractStimulus(abfInfo::Dict{String, Any}; stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
     extractStimulus(abf_path::String; kwargs...)
 
@@ -183,7 +255,6 @@ function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
 
     # Get the stimulus waveform for the given stimulus_name
     stimulus_waveform = getWaveform(abfInfo, stimulus_name)
-    #println(size(stimulus_waveform))
 
     #We have to determine if the stimulus is episodic or not
     
@@ -194,15 +265,16 @@ function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
 
     # Iterate over the trials
     for swp in axes(abfInfo["data"], 1)
+        println(swp)
         # Get the stimulus waveform for the current trial and apply the threshold
-        stim_wave = stimulus_waveform[swp, :, 1] .> stimulus_threshold
+        #stim_wave = stimulus_waveform[swp, :, 1] .> stimulus_threshold
         
         # Find the start and end timestamps of the stimulus event in the current trial
-        start_time = findfirst(stim_wave) * dt
-        end_time = (findlast(stim_wave) + 1) * dt
+        #start_time = findfirst(stim_wave) * dt
+        #end_time = (findlast(stim_wave) + 1) * dt
 
         # Update the StimulusProtocol object with the timestamps for the current trial
-        stimuli[swp] = (start_time, end_time)
+        #stimuli[swp] = (start_time, end_time)
     end
 
     return stimuli
