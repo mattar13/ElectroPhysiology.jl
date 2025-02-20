@@ -23,6 +23,7 @@ function getWaveform(abf_info::Dict{String,Any}, trial::Int64, channel::Int64;
 )
     if channel_type == :data
         #rather than extracting the digital or analog stimuli, we use the actual ADC
+        #A scenario arises in which we have flattened the data
         return abf_info["data"][trial, :, channel]
     elseif channel_type == :analog
         epochTable = abf_info["EpochTableByChannel"][channel] #Load the channel
@@ -44,8 +45,10 @@ function getWaveform(abf::Dict{String,Any}, trial::Union{Vector{Int64},Int64}, c
     adc_idx = findall(x -> channel == x, abf["adcNames"])
     dac_idx = findall(x -> channel == x, abf["dacNames"])
     if !isempty(adc_idx)
+        #println("Is ADC") #These are debugging things to see if the function is working
         return getWaveform(abf, trial, adc_idx[1]; channel_type = :data)
     elseif !isempty(dac_idx)
+        #println("Is DAC") #These are debugging things to see if the function is working
         return getWaveform(abf, trial, dac_idx[1])
     else
         channel_ID = lowercase(channel[1:end-1])
@@ -105,6 +108,7 @@ end
 function getWaveform(abf::Dict{String,Any}, channel::String; kwargs...)
     #This function gets called to iterate through all trials
     waveforms = zeros(abf["trialCount"], abf["trialPointCount"], 1)
+    println(size(waveforms))
     for i = 1:abf["trialCount"]
         waveforms[i, :, 1] .= getWaveform(abf, i, channel; kwargs...)
     end

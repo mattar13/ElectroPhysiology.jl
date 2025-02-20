@@ -47,7 +47,7 @@ For datashape
     2 -> dataspan
     3 -> trials
 """
-function readABFInfo(::Type{T}, filename::String; loadData=true, data_format=[3, 2, 1]) where {T<:Real}
+function readABFInfo(::Type{T}, filename::String; loadData=true, data_format=[3, 2, 1], flatten_episodic = false) where {T<:Real}
     #Can we go through and convert anything before loading
     file_dir = splitpath(filename)
 
@@ -77,6 +77,11 @@ function readABFInfo(::Type{T}, filename::String; loadData=true, data_format=[3,
             #We can try to convert the data into a array of shape [trials, data, channels]
             raw = reshape(raw, (channelCount, trialPointCount, trialCount)) #Reshape the data
             raw = permutedims(raw, data_format) #permute the dims
+            if flatten_episodic
+                raw = reshape(raw, (1, trialPointCount * trialCount, channelCount))
+                headerSection["trialCount"] = 1
+                headerSection["trialPointCount"] = trialPointCount * trialCount
+            end
             headerSection["data"] = Array{T}(raw)
         end
 

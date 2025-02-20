@@ -114,7 +114,7 @@ function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
     time_unit=:s, #The time unit is s, change to ms
 ) where {T<:Real}
     # Read ABF header information
-    HeaderDict = readABFInfo(abf_data)
+    HeaderDict = readABFInfo(abf_data, flatten_episodic = flatten_episodic)
 
     # Extract channel indices based on the input
     if isa(channels, Vector{String}) || isa(channels, String)
@@ -129,9 +129,9 @@ function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
     data = extract_data(trials, channels, ch_names, HeaderDict, warn_bad_channel)
 
     # Flatten episodic data if requested
-    if flatten_episodic
-        data = flatten_data(data)
-    end
+    #if flatten_episodic
+    #    data = flatten_data(data)
+    #end
 
     # Prepare time information
     dt, t = prepare_time_info(data, HeaderDict, time_unit)
