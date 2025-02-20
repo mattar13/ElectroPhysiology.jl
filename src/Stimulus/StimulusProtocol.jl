@@ -5,7 +5,8 @@ An abstract type representing a stimulus in a physiological experiment.
 
 Subtypes of `Stimulus` should implement specific stimulus types and their corresponding parameters.
 """
-abstract type Stimulus end
+abstract type Stimulus end #Define an empty Constructors
+Stimulus() = Stimulus
 
 """
     Flash <: Stimulus
@@ -78,17 +79,16 @@ stim_type_time_channel = StimulusProtocol(Flash(), "IN 3", (0.00, 0.01))
 ```
 """
 mutable struct StimulusProtocol{T, S}
-    type::Vector{S}
-    channelName::Union{Vector{String},Vector{Int64}} #We might need to change this to a vector
+    type::S
+    channelName::String #We might need to change this to a vector
     timestamps::Vector{Tuple{T,T}}
 end
 
-StimulusProtocol() = StimulusProtocol([Flash()], ["Nothing"], [(0.0, 0.0)])
-StimulusProtocol(stimulus_channel::String) = StimulusProtocol([Flash()], [stimulus_channel], [(0.0, 0.0)])
-StimulusProtocol(n_swp::Int64) = StimulusProtocol(fill(Flash(), n_swp), fill("Nothing",n_swp), fill((0.0, 0.0), n_swp))
-StimulusProtocol(stimulus_channel::String, n_swp::Int64) = StimulusProtocol(fill(Flash(), n_swp), fill(stimulus_channel, n_swp), fill((0.0, 0.0), n_swp))
-StimulusProtocol(timestamps::Tuple) = StimulusProtocol([Flash()], ["Nothing"], [timestamps])
-StimulusProtocol(type::S, channelName::Union{String,Int64}, timestamps::Tuple{T,T}) where {T<:Real,S} = StimulusProtocol([type], [channelName], [timestamps])
+StimulusProtocol() = StimulusProtocol(Stimulus(), "Nothing", [(-Inf, Inf)])
+StimulusProtocol(stimulus_channel::String) = StimulusProtocol(Stimulus(), stimulus_channel, [(-Inf, Inf)])
+StimulusProtocol(n_swp::Int64) = StimulusProtocol(Stimulus(), "Nothing", fill((0.0, 0.0), n_swp))
+StimulusProtocol(timestamps::Tuple) = StimulusProtocol(Stimulus(), "Nothing", [timestamps])
+StimulusProtocol(type::S, channelName::Union{String,Int64}, timestamps::Tuple{T,T}) where {T<:Real,S} = StimulusProtocol(type, channelName, [timestamps])
 
 function getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Real 
     stim_type = stimulus_protocol.type[inds...]
@@ -223,81 +223,24 @@ function extract_events(stim::AbstractVector{<:Number})
     return events
 end
 
-"""
-    extractStimulus(abfInfo::Dict{String, Any}; stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
-    extractStimulus(abf_path::String; kwargs...)
-
-Extract the stimulus information from the given `abfInfo` dictionary and returns a `StimulusProtocol` object containing stimulus timestamps.
-
-# Arguments
-- `abfInfo`: A dictionary containing information about the physiological data.
-- `stimulus_name`: (Optional) The name of the stimulus channel. Default is "IN 7".
-- `stimulus_threshold`: (Optional) The threshold for detecting stimulus events in the waveform. Default is 2.5.
-
-# Returns
-- A `StimulusProtocol` object containing the stimulus timestamps for each trial.
-
-# Examples
-```julia
-abfInfo = loadABF("path/to/abf/file")
-stimuli = extractStimulus(abfInfo)
-```
-
-```julia
-stimuli = extractStimulus("path/to/abf/file")
-```
-"""
-function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
-    stimulus_threshold::Float64=2.5
-)
-    # Get the time interval between data points
-    dt = abfInfo["dataSecPerPoint"]
-
-    # Get the stimulus waveform for the given stimulus_name
-    stimulus_waveform = getWaveform(abfInfo, stimulus_name)
-
-    #We have to determine if the stimulus is episodic or not
-    
-
-    # Instantiate a StimulusProtocol object with the provided stimulus_name and the number of trials
-    num_trials = size(abfInfo["data"], 1)
-    stimuli = StimulusProtocol(stimulus_name, num_trials)
-
-    # Iterate over the trials
-    for swp in axes(abfInfo["data"], 1)
-        println(swp)
-        # Get the stimulus waveform for the current trial and apply the threshold
-        #stim_wave = stimulus_waveform[swp, :, 1] .> stimulus_threshold
-        
-        # Find the start and end timestamps of the stimulus event in the current trial
-        #start_time = findfirst(stim_wave) * dt
-        #end_time = (findlast(stim_wave) + 1) * dt
-
-        # Update the StimulusProtocol object with the timestamps for the current trial
-        #stimuli[swp] = (start_time, end_time)
-    end
-
-    return stimuli
-end
-
-extractStimulus(abf_path::String, stimulus_name::String; flatten_episodic = false, kwargs...) = extractStimulus(readABFInfo(abf_path; flatten_episodic = flatten_episodic), stimulus_name; kwargs...)
-
 size(stimulus::StimulusProtocol) = size(stimulus.timestamps)
 
 size(stimulus::StimulusProtocol, dim::Int64) = size(stimulus.timestamps, dim)
 
 length(stimulus::StimulusProtocol) = size(stimulus, 1)
 
-function push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol)
-    push!(stimulusA.timestamps, stimulusB.timestamps...)
-    push!(stimulusA.channelName, stimulusB.channelName...)
-    push!(stimulusA.type, stimulusB.type...)
+function push!(stimulus::StimulusProtocol, ts::Tuple)
+    if stimulus.timestamps[1] == (-Inf, Inf)
+        stimulus.timestamps = [ts]
+    else
+        push!(stimulus.timestamps, ts)
+    end
 end
 
-function push!(stimulus::StimulusProtocol, ts::Tuple)
-    newStim = StimulusProtocol(ts)
-    push!(stimulus, newStim)
+function push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol)
+    push!(stimulusA, stimulusB.timestamps...)
 end
+
 
 
 import Base.iterate
@@ -352,3 +295,57 @@ function find_stim_index(exp; trial = 1, channel = 3, thresh = 2.5, movement = :
     exp.t[indexes], indexes
 end
 
+
+"""
+    extractStimulus(abfInfo::Dict{String, Any}; stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
+    extractStimulus(abf_path::String; kwargs...)
+
+Extract the stimulus information from the given `abfInfo` dictionary and returns a `StimulusProtocol` object containing stimulus timestamps.
+
+# Arguments
+- `abfInfo`: A dictionary containing information about the physiological data.
+- `stimulus_name`: (Optional) The name of the stimulus channel. Default is "IN 7".
+- `stimulus_threshold`: (Optional) The threshold for detecting stimulus events in the waveform. Default is 2.5.
+
+# Returns
+- A `StimulusProtocol` object containing the stimulus timestamps for each trial.
+
+# Examples
+```julia
+abfInfo = loadABF("path/to/abf/file")
+stimuli = extractStimulus(abfInfo)
+```
+
+```julia
+stimuli = extractStimulus("path/to/abf/file")
+```
+"""
+function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
+    stimulus_threshold::Float64=2.5
+)
+    # Get the time interval between data points
+    dt = abfInfo["dataSecPerPoint"]
+
+    # Instantiate a StimulusProtocol object with the provided stimulus_name and the number of trials
+    num_trials = size(abfInfo["data"], 1)
+    stimuli = StimulusProtocol(stimulus_name)
+    stimulus_waveform = getWaveform(abfInfo, stimulus_name)
+    # Iterate over the trials
+    for swp in axes(abfInfo["data"], 1)
+        # Get the stimulus waveform for the current trial and apply the threshold
+        stim_wave = stimulus_waveform[swp, :, 1] .> stimulus_threshold
+        
+        #Find the start and end timestamps of the stimulus event in the current trial
+        events = extract_events(stim_wave)
+        #Update the StimulusProtocol object with the timestamps for the current trial
+        for event in events
+            start_time = (event[1] - 1) * dt
+            end_time = event[2] * dt
+            push!(stimuli, (start_time, end_time))
+        end
+    end
+
+    return stimuli
+end
+
+extractStimulus(abf_path::String, stimulus_name::String; flatten_episodic = false, kwargs...) = extractStimulus(readABFInfo(abf_path; flatten_episodic = flatten_episodic), stimulus_name; kwargs...)
