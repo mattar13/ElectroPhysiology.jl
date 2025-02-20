@@ -349,3 +349,6 @@ function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
 end
 
 extractStimulus(abf_path::String, stimulus_name::String; flatten_episodic = false, kwargs...) = extractStimulus(readABFInfo(abf_path; flatten_episodic = flatten_episodic), stimulus_name; kwargs...)
+
+getStimulusStartTime(stimulus::StimulusProtocol) = map(x -> x[1], stimulus.timestamps)
+getStimulusEndTime(stimulus::StimulusProtocol) = map(x -> x[2], stimulus.timestamps)
