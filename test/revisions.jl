@@ -10,7 +10,7 @@ abfInfo = dataIC.HeaderDict
 abfInfo["trialCount"]
 abfInfo["trialPointCount"]
 
-extractStimulus(data_ic_fn)
+extractStimulus(data_ic_fn, "IN 2", flatten_episodic = true)
 
 
 getWaveform(dataIC.HeaderDict, "IN 2")
