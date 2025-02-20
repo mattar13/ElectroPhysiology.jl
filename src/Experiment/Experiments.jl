@@ -239,13 +239,15 @@ getGains(exp::Experiment) = exp.chGains
 
 addStimulus!(exp::Experiment, protocol::StimulusProtocol) = exp.HeaderDict["StimulusProtocol"] = protocol
 
-addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; kwargs...) = exp.HeaderDict["StimulusProtocol"] = extractStimulus(protocol_fn, stim_channel; kwargs...)
+addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; flatten_episodic = true, kwargs...) = exp.HeaderDict["StimulusProtocol"] = extractStimulus(protocol_fn, stim_channel; flatten_episodic = flatten_episodic, kwargs...)
 
 setIntensity(exp::Experiment, photons) = setIntensity(exp.HeaderDict["StimulusProtocol"], photons)
 
 getIntensity(exp::Experiment) = getIntensity(exp.HeaderDict["StimulusProtocol"])
 
 getStimulusProtocol(exp::Experiment) = haskey(exp.HeaderDict, "StimulusProtocol") ? exp.HeaderDict["StimulusProtocol"] : nothing
+getStimulusStartTime(exp::Experiment) = getStimulusStartTime(getStimulusProtocol(exp))
+getStimulusEndTime(exp::Experiment) = getStimulusEndTime(getStimulusProtocol(exp))
 
 round_nanosecond(time::T) where {T<:Real} = Nanosecond(round(Int64, time * 1e9))
 round_nanosecond(time_series::Vector{T}) where {T<:Real} = map(time -> round_nanosecond(time), time_series)
