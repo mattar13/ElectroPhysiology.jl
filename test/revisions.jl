@@ -1,22 +1,38 @@
 using Revise
 using Pkg; Pkg.activate(".")
 using ElectroPhysiology
+
+#%% I would like to extract this data as a stimulus object
+data_ic_fn = raw"G:\Data\Patching\2025-02-14-da_puffs\25214001.abf"
+dataIC = readABF(data_ic_fn, flatten_episodic = true)
+size(dataIC)
+abfInfo = dataIC.HeaderDict
+abfInfo["trialCount"]
+abfInfo["trialPointCount"]
+
+extractStimulus(data_ic_fn)
+
+
+getWaveform(dataIC.HeaderDict, "IN 2")
+abfInfo["data"]
+
+#%% Other stuff
 using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
+
+
 using StatsBase #Might need to add this to PhysiologyAnalysis as well
 using ImageMorphology
 using Dates
 import ElectroPhysiology.getRealTime
 ElectroPhysiology.__init__()
 
-data_ic_fn = raw"G:\Data\Patching\2024_12_04_Slide_KPUFF\24d04000.abf"
 data_2P_fn = raw"G:\Data\Two Photon\2024_12_04_SlidePuffs\da1mM_1-50_785001.tif"
 #%%
-dataIC = readABF(data_ic_fn, flatten_episodic = true)
 data2P = readImage(data_2P_fn)
 deinterleave!(data2P)
 
-#%%
+#Extract the data_ic_fn as a stimulus object
 
 fig = Figure()
 ax1a = Axis(fig[1,1])

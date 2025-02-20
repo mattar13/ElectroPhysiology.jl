@@ -1,3 +1,4 @@
+println("This is loading, and shouldn't be")
 #Export this only if XLSX and DataFrame are loaded
 function DataFrame(protocol::StimulusProtocol{T}) where T <: Real
      StimulusDF = DataFrame(Type = String[], Intensity = T[], Channel = String[], TimeStart = T[], TimeEnd = T[])

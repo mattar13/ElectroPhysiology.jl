@@ -105,6 +105,7 @@ function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Stimulus, I...) wh
     stimulus_protocol.type[I...] = X
 end
 #If you have a list of photon amounts, you can set the intensity of every stimulus
+
 """
     setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photons::Vector{T}) where T<:Real
     setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photon::T) where T<:Real
@@ -175,8 +176,9 @@ stimuli = extractStimulus("path/to/abf/file")
 ```
 """
 function extractStimulus(abfInfo::Dict{String,Any};
-    stimulus_name::String="IN 7",
-    stimulus_threshold::Float64=2.5)
+    stimulus_name::String="IN 2",
+    stimulus_threshold::Float64=2.5
+)
     # Get the time interval between data points
     dt = abfInfo["dataSecPerPoint"]
 
