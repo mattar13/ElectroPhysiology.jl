@@ -50,6 +50,7 @@ export baseline_adjust, baseline_adjust!
 export time_offset, time_offset!
 
 #Image reading utilities
+using OffsetArrays
 include("Experiment/ImageMorphologyUtils.jl")
 export delta_ff, delta_ff!
 export find_boutons
@@ -86,7 +87,8 @@ export recordROI
 export getROIindexes, getROImask, getROIarr
 export loadROIfn!
 
-function __init__()    
+#For some reason this is starting
+function OLD__init__()    
     @require XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0" begin
         using .XLSX; push!(capabilies, :XLSX)
         @require DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0" begin
@@ -95,7 +97,7 @@ function __init__()
             export readXLSX
 
             import .DataFrames.DataFrame
-            include("Experiment/StimulusToDataFrame.jl")
+            include("Stimulus/StimulusToDataFrame.jl")
             export DataFrame
         end
     end
