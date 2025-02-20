@@ -3,23 +3,22 @@ using Pkg; Pkg.activate(".")
 using ElectroPhysiology
 
 #%% I would like to extract this data as a stimulus object
+data2P_fn = raw"G:\Data\Two Photon\2025-02-14-GRAB-DA\GRAB-DA2m-R1-R_da_puff_100um004.tif"
+data2P = readImage(data2P_fn)
+
 data_ic_fn = raw"G:\Data\Patching\2025-02-14-da_puffs\25214001.abf"
-dataIC = readABF(data_ic_fn, flatten_episodic = true)
-size(dataIC)
-abfInfo = dataIC.HeaderDict
-abfInfo["trialCount"]
-abfInfo["trialPointCount"]
+addStimulus!(data2P, data_ic_fn, "IN 2")
 
-extractStimulus(data_ic_fn, "IN 2", flatten_episodic = true)
-
-
-getWaveform(dataIC.HeaderDict, "IN 2")
-abfInfo["data"]
+z_mean = project(data2P, dims = (1,2))[1,1,:,1]
 
 #%% Other stuff
 using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
+fig, ax = lines(data2P.t, z_mean)
+vlines!(ax, getStimulusEndTime(dataIC), color = :red)
+fig
 
+#%%
 
 using StatsBase #Might need to add this to PhysiologyAnalysis as well
 using ImageMorphology
