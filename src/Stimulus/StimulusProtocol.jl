@@ -175,8 +175,7 @@ stimuli = extractStimulus(abfInfo)
 stimuli = extractStimulus("path/to/abf/file")
 ```
 """
-function extractStimulus(abfInfo::Dict{String,Any};
-    stimulus_name::String="IN 2",
+function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
     stimulus_threshold::Float64=2.5
 )
     # Get the time interval between data points
@@ -184,6 +183,10 @@ function extractStimulus(abfInfo::Dict{String,Any};
 
     # Get the stimulus waveform for the given stimulus_name
     stimulus_waveform = getWaveform(abfInfo, stimulus_name)
+    #println(size(stimulus_waveform))
+
+    #We have to determine if the stimulus is episodic or not
+    
 
     # Instantiate a StimulusProtocol object with the provided stimulus_name and the number of trials
     num_trials = size(abfInfo["data"], 1)
@@ -205,7 +208,7 @@ function extractStimulus(abfInfo::Dict{String,Any};
     return stimuli
 end
 
-extractStimulus(abf_path::String; kwargs...) = extractStimulus(readABFInfo(abf_path); kwargs...)
+extractStimulus(abf_path::String, stimulus_name::String; flatten_episodic = false, kwargs...) = extractStimulus(readABFInfo(abf_path; flatten_episodic = flatten_episodic), stimulus_name; kwargs...)
 
 size(stimulus::StimulusProtocol) = size(stimulus.timestamps)
 

@@ -108,7 +108,6 @@ end
 function getWaveform(abf::Dict{String,Any}, channel::String; kwargs...)
     #This function gets called to iterate through all trials
     waveforms = zeros(abf["trialCount"], abf["trialPointCount"], 1)
-    println(size(waveforms))
     for i = 1:abf["trialCount"]
         waveforms[i, :, 1] .= getWaveform(abf, i, channel; kwargs...)
     end
