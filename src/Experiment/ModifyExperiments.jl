@@ -291,8 +291,14 @@ function average_trials(trace::Experiment{F,T}) where {F, T<:Real}
     return data
 end
 
-average_trials!(trace::Experiment{F,T}) where {F, T<:Real} = trace.data_array = sum(trace, dims=1) / size(trace, 1)
-
+function average_trials!(trace::Experiment{F,T}) where {F, T<:Real}
+    #trace.HeaderDict["stimulus_protocol"] = 
+    new_stimulus_protocol = deepcopy(getStimulusProtocol(trace))
+    new_stimulus_protocol.timestamps = [new_stimulus_protocol.timestamps[1]]
+    new_stimulus_protocol.sweeps = [new_stimulus_protocol.sweeps[1]]
+    trace.HeaderDict["StimulusProtocol"] = new_stimulus_protocol
+    trace.data_array = sum(trace, dims=1) / size(trace, 1)
+end
 """
     downsample(trace::Experiment, sample_rate::T) where {T<:Real}
 
@@ -465,8 +471,17 @@ offset_exp = time_offset(exp, offset) #Deepcopy of the experiment
 This function changes the time of the data. Really simple function
 
 """
-time_offset!(exp::Experiment{FORMAT, T}, offset::T) where {FORMAT, T<:Real} = exp.t .+= offset
-time_offset!(exp::Experiment{FORMAT, T}, time_offset::Millisecond) where {FORMAT, T<:Real} = exp.t .+= (time_offset.value)/1000 
+function time_offset!(exp::Experiment{FORMAT, T}, offset::T) where {FORMAT, T<:Real}
+    exp.t .+= offset
+    sps = getStimulusProtocol(exp)
+    for (i, ts) in enumerate(sps.timestamps)
+        sps.timestamps[i] = (ts[1] .+ offset, ts[2] .+ offset)
+    end
+end
+
+function time_offset!(exp::Experiment{FORMAT, T}, time_offset::Millisecond) where {FORMAT, T<:Real} 
+    exp.t .+= (time_offset.value)/1000 
+end
 
 function time_offset(exp::Experiment{FORMAT, T}, offset) where {FORMAT, T<:Real}
     new_exp = deepcopy(exp)
