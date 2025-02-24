@@ -240,7 +240,7 @@ getGains(exp::Experiment) = exp.chGains
 addStimulus!(exp::Experiment, protocol::StimulusProtocol) = exp.HeaderDict["StimulusProtocol"] = protocol
 
 #This function is used if the stimulus channel is in a different file
-addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; flatten_episodic = true, kwargs...) = 
+addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; kwargs...) = 
     addStimulus!(exp, extractStimulus(protocol_fn, stim_channel; flatten_episodic = flatten_episodic, kwargs...))
 
 #This function is used if the stimulus channel is present in the recording
