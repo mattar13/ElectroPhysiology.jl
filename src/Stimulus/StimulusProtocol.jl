@@ -340,7 +340,6 @@ function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
     dt = abfInfo["dataSecPerPoint"]
 
     # Instantiate a StimulusProtocol object with the provided stimulus_name and the number of trials
-    num_trials = size(abfInfo["data"], 1)
     stimuli = StimulusProtocol(stimulus_name)
     stimulus_waveform = getWaveform(abfInfo, stimulus_name)
     # Iterate over the trials
