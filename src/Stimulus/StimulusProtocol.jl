@@ -78,35 +78,31 @@ stim_tstamp = StimululsProtocol((0.0, 0.01))
 stim_type_time_channel = StimulusProtocol(Flash(), "IN 3", (0.00, 0.01))
 ```
 """
-mutable struct StimulusProtocol{T, S}
+mutable struct StimulusProtocol{T, S} 
     type::S
     channelName::String #We might need to change this to a vector
+    sweeps::Vector{Int64}
     timestamps::Vector{Tuple{T,T}}
 end
 
 StimulusProtocol() = StimulusProtocol(Stimulus(), "Nothing", [(-Inf, Inf)])
-StimulusProtocol(stimulus_channel::String) = StimulusProtocol(Stimulus(), stimulus_channel, [(-Inf, Inf)])
-StimulusProtocol(n_swp::Int64) = StimulusProtocol(Stimulus(), "Nothing", fill((0.0, 0.0), n_swp))
-StimulusProtocol(timestamps::Tuple) = StimulusProtocol(Stimulus(), "Nothing", [timestamps])
-StimulusProtocol(type::S, channelName::Union{String,Int64}, timestamps::Tuple{T,T}) where {T<:Real,S} = StimulusProtocol(type, channelName, [timestamps])
+StimulusProtocol(stimulus_channel::String) = StimulusProtocol(Stimulus(), stimulus_channel, [1], [(-Inf, Inf)])
+StimulusProtocol(n_swp::Int64) = StimulusProtocol(Stimulus(), "Nothing", [1:swp], fill((0.0, 0.0), n_swp), 1:swp)
+StimulusProtocol(timestamps::Tuple) = StimulusProtocol(Stimulus(), "Nothing", [1], [timestamps])
+StimulusProtocol(type::S, channelName::Union{String,Int64}, timestamps::Tuple{T,T}) where {T<:Real,S} = 
+    StimulusProtocol(type, channelName, [1], [timestamps])
 
-function getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Real 
-    stim_type = stimulus_protocol.type[inds...]
-    stim_channel = stimulus_protocol.channelName[inds...]
-    stim_timestamps = stimulus_protocol.timestamps[inds...]
-    if isa(stim_timestamps, Vector)
-        return StimulusProtocol(
-            stim_type,
-            stim_channel,
-            stim_timestamps
-        )
-    elseif isa(stim_timestamps, Tuple{T, T})
-        return StimulusProtocol(
-            [stim_type],
-            [stim_channel],
-            [stim_timestamps]
-        )
+function getindex(stimulus_protocol::StimulusProtocol{T}, ind::Int64) where T <: Real 
+    idxs = findall(x -> x == ind, stimulus_protocol.sweeps)
+    if isempty(idxs)
+        throw(ArgumentError("Index $ind not in sweeps $(stimulus_protocol.sweeps)."))
+    else
+        return stimulus_protocol.timestamps[idxs]
     end
+end
+
+function getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Real
+    return map(x -> getindex(stimulus_protocol, x), inds)
 end
 
 function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Tuple, I...) where T <: Real 
@@ -233,6 +229,25 @@ function push!(stimulus::StimulusProtocol, ts::Tuple)
     if stimulus.timestamps[1] == (-Inf, Inf)
         stimulus.timestamps = [ts]
     else
+        push!(stimulus.sweeps, maximum(stimulus.sweeps)+1)
+        push!(stimulus.timestamps, ts)
+    end
+end
+
+function push!(stimulus::StimulusProtocol, ts::Tuple...)
+    for t in ts
+        push!(stimulus, t)
+    end
+end
+
+function push!(stimulus::StimulusProtocol, sweep::Int64, ts::Tuple)
+    if sweep > maximum(stimulus.sweeps)
+        #We should warn the user that the next sweep number will be used instead
+        @warn "The next sweep number will be used instead of $sweep"
+        push!(stimulus.sweeps, maximum(stimulus.sweeps)+1)
+        push!(stimulus.timestamps, ts)
+    else
+        push!(stimulus.sweeps, sweep)
         push!(stimulus.timestamps, ts)
     end
 end
@@ -240,8 +255,6 @@ end
 function push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol)
     push!(stimulusA, stimulusB.timestamps...)
 end
-
-
 
 import Base.iterate
 iterate(protocol::StimulusProtocol) = (protocol[1], 2)
