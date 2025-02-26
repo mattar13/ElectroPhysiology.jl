@@ -2,6 +2,32 @@ using Revise
 using Pkg; Pkg.activate(".")
 using ElectroPhysiology
 
+#%% Believe it or not we need to now open up some old ERG data. So lets figure out how to reconfigure add stimulus for the old ERG data
+fn = raw"E:\Data\ERG\Retinoschisis\2022_03_17_WTAdult\Mouse1_Adult_WT\NoDrugs\Rods\nd2_1p_0000.abf"
+data = readABF(fn)
+addStimulus!(data, fn, "IN 7")
+average_trials!(data)
+stimulus_protocol = getStimulusProtocol(data)
+
+#%% Plotting
+using Pkg; Pkg.activate("test")
+using GLMakie, PhysiologyPlotting
+
+fig = Figure()
+ax1 = Axis(fig[1,1])
+ax2 = Axis(fig[2,1])
+experimentplot!(ax1, data, channel = 1)
+experimentplot!(ax2, data, channel = 5)
+
+fig
+
+#%%
+using StatsBase #Might need to add this to PhysiologyAnalysis as well
+using ImageMorphology
+using Dates
+import ElectroPhysiology.getRealTime
+ElectroPhysiology.__init__()
+
 #%% I would like to extract this data as a stimulus object
 data2P_fn = raw"G:\Data\Two Photon\2025-02-14-GRAB-DA\GRAB-DA2m-R1-R_da_puff_100um004.tif"
 data2P = readImage(data2P_fn)
@@ -11,20 +37,6 @@ addStimulus!(data2P, data_ic_fn, "IN 2")
 
 z_mean = project(data2P, dims = (1,2))[1,1,:,1]
 
-#%% Other stuff
-using Pkg; Pkg.activate("test")
-using GLMakie, PhysiologyPlotting
-fig, ax = lines(data2P.t, z_mean)
-vlines!(ax, getStimulusEndTime(dataIC), color = :red)
-fig
-
-#%%
-
-using StatsBase #Might need to add this to PhysiologyAnalysis as well
-using ImageMorphology
-using Dates
-import ElectroPhysiology.getRealTime
-ElectroPhysiology.__init__()
 
 data_2P_fn = raw"G:\Data\Two Photon\2024_12_04_SlidePuffs\da1mM_1-50_785001.tif"
 #%%
