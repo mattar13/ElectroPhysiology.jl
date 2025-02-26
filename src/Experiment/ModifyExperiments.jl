@@ -193,6 +193,15 @@ function truncate_data!(trace::Experiment{F, T};
         end_rng = round(Int64, t_end / dt)
         trace.data_array = trace.data_array[:, start_rng:end_rng, :]
         trace.t = trace.t[start_rng:end_rng] .- trace.t[start_rng]
+        
+        try
+            stim_protocol = getStimulusProtocol(trace)
+            stim_protocol.timestamps = [(stim_protocol.timestamps[1][1]-t_begin, stim_protocol.timestamps[1][2]-t_begin)]
+
+        catch error
+            println("No stimulus protocol exists")
+        end
+
     elseif isnothing(getStimulusProtocol(trace))
         #println("No explicit stimulus has been set")
         size_of_array = round(Int64, t_post / dt)
