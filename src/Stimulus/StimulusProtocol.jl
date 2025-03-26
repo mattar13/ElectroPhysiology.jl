@@ -105,12 +105,12 @@ function getindex(stimulus_protocol::StimulusProtocol{T}, inds...) where T <: Re
     return map(x -> getindex(stimulus_protocol, x), inds)
 end
 
-function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Tuple, I...) where T <: Real 
-     stimulus_protocol.timestamps[I...] = X
+function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Tuple{T, T}, I...) where T <: Real 
+    stimulus_protocol[I].timestamps = [X,]
 end
 
-function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Union{String, Int64}, I...) where T <: Real 
-    stimulus_protocol.channelName[I...] = X
+function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Vector{Tuple{T, T}}, I) where T <: Real 
+    stimulus_protocol[I] = X
 end
 
 function setindex!(stimulus_protocol::StimulusProtocol{T}, X::Stimulus, I...) where T <: Real 
