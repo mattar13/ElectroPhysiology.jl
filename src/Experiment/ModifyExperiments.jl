@@ -187,7 +187,7 @@ function truncate_data!(trace::Experiment{F, T};
     dt = trace.dt
     size_of_array = 0
     overrun_time = 0 #This is for if t_pre is set too far before the stimulus
-    if truncate_based_on == :time_range || !isnothing(t_begin) && !isnothing(t_end)
+    if truncate_based_on == :time_range
         #Use this if there is no stimulus, but rather you want to truncate according to time
         start_rng = round(Int64, t_begin / dt)+1
         end_rng = round(Int64, t_end / dt)
@@ -208,9 +208,10 @@ function truncate_data!(trace::Experiment{F, T};
         trace.data_array = trace.data_array[:, 1:size_of_array, :] #remake the array with only the truncated data
         trace.t = range(0.0, t_post, length=size_of_array)
     else
-        for swp = axes(trace, 1)
-            tstamps = trace.stimulus_protocol[swp].timestamps[1]
-            #println(tstamps)
+        for swp in axes(trace, 1)
+            stim_protocol = getStimulusProtocol(trace)
+            tstamps = stim_protocol.timestamps[swp]
+
             idx_range = round.(Int64, tstamps ./ dt)
             if truncate_based_on == :stimulus_beginning
                 #This will set the beginning of the stimulus as the truncation location
@@ -225,8 +226,8 @@ function truncate_data!(trace::Experiment{F, T};
                 t_end_adjust = 0.0
             end
             #println((t_begin_adjust, t_end_adjust))
-            trace.stimulus_protocol[swp] = (t_begin_adjust, t_end_adjust)
-            
+            stim_protocol.timestamps[swp] = (t_begin_adjust, t_end_adjust)
+
             #First lets calculate how many indexes we need before the stimulus
             needed_before = round(Int, t_pre / dt)
             needed_after = round(Int, t_post / dt)
