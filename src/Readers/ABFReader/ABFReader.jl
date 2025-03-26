@@ -143,7 +143,6 @@ function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
     end
     
     if average_trials
-        data, stimulus_protocol = average_data_and_protocol(data, stimulus_protocol)
         new_stimulus_protocol = deepcopy(HeaderDict["StimulusProtocol"])
         new_stimulus_protocol.timestamps = [new_stimulus_protocol.timestamps[1]]
         new_stimulus_protocol.sweeps = [new_stimulus_protocol.sweeps[1]]
