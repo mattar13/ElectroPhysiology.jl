@@ -182,7 +182,8 @@ truncated_exp = truncate_data(exp, t_pre=0.5, t_post=2.5)
 function truncate_data!(trace::Experiment{F, T}; 
     t_pre=1.0, t_post=5.0, 
     t_begin = 0.0, t_end = 1000.0, 
-    truncate_based_on=:time_range
+    truncate_based_on=:time_range, 
+    time_zero = false
 ) where {F, T<:Real}
     dt = trace.dt
     size_of_array = 0
@@ -266,6 +267,15 @@ function truncate_data!(trace::Experiment{F, T};
         end
         trace.data_array = trace.data_array[:, 1:size_of_array, :] #remake the array with only the truncated data
         trace.t = range(-t_pre + overrun_time, t_post, length=size_of_array)
+        if time_zero
+            min_time = minimum(trace.t)
+            trace.t .-= min_time
+            for swp in axes(trace, 1)
+                stim_protocol = getStimulusProtocol(trace)
+                tstamps = stim_protocol.timestamps[swp]
+                stim_protocol.timestamps[swp] = (tstamps[1] - min_time, tstamps[2] - min_time)
+            end
+        end
     end
     return trace
 end
