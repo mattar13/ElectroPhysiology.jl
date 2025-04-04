@@ -1,23 +1,47 @@
 using Revise
 using Pkg; Pkg.activate(".")
 using ElectroPhysiology
-
-#%% Believe it or not we need to now open up some old ERG data. So lets figure out how to reconfigure add stimulus for the old ERG data
-fn = raw"E:\Data\ERG\Retinoschisis\2022_03_17_WTAdult\Mouse1_Adult_WT\NoDrugs\Rods\nd2_1p_0000.abf"
-data = readABF(fn)
-addStimulus!(data, fn, "IN 7")
-average_trials!(data)
-stimulus_protocol = getStimulusProtocol(data)
-
-#%% Plotting
 using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
+
+#%% We have stimulus protocols that are a flicker response
+fn = raw"F:\Data\Patching\2025-03-26-GRAB-DA_STR\25326048.abf"
+dataStim = readABF(fn, flatten_episodic = true, stimulus_name = "IN 3", stimulus_threshold = 0.5);
+spike_train_group!(stim_protocol, 3.0)
+dataStim.chNames
+stim_protocol = getStimulusProtocol(dataStim)
+
+stim_protocol.timestamps
+
+
+experimentplot(dataStim, channel = 3)
+
+for (k, v) in dataStim.HeaderDict
+    println("$k")
+end
+dataStim.HeaderDict["ProtocolSection"]["nActiveDACChannel"]
+dataStim.HeaderDict["EpochSection"]["nEpochDigitalOutput"][3]
+EpochTable = dataStim.HeaderDict["EpochTableByChannel"]
+#In the epoch table, 15000 is the samples 
+dataStim.dt
+
+EpochTable[1].epochs[2].duration*dataStim.dt#This is the duration of the first epoch in seconds
+
+
+#%% I would like to add flash intensity to the ERG data
+fn = raw"E:\Data\ERG\Retinoschisis\2022_03_17_WTAdult\Mouse1_Adult_WT\NoDrugs\Rods\nd2_1p_0000.abf"
+dataERG = readABF(fn, flatten_episodic = false, stimulus_name = "IN 7", average_trials = true);
+
+
+#We have to edit the stimulus 
+#addStimulus!(dataERG, "IN 7"); #Have to add this any time you add a stimulus
+truncate_data!(dataERG, t_pre = 0.15, t_post = 3.0, time_zero = true, truncate_based_on=:stimulus_beginning);
 
 fig = Figure()
 ax1 = Axis(fig[1,1])
 ax2 = Axis(fig[2,1])
-experimentplot!(ax1, data, channel = 1)
-experimentplot!(ax2, data, channel = 5)
+experimentplot!(ax1, dataERG, channel = 1)
+experimentplot!(ax2, dataERG, channel = 3)
 
 fig
 
