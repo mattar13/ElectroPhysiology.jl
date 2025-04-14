@@ -1,13 +1,20 @@
 using Revise
 using Pkg; Pkg.activate(".")
 using ElectroPhysiology
+using Base.Threads
 
 #%% Believe it or not we need to now open up some old ERG data. So lets figure out how to reconfigure add stimulus for the old ERG data
-fn = raw"E:\Data\ERG\Retinoschisis\2022_03_17_WTAdult\Mouse1_Adult_WT\NoDrugs\Rods\nd2_1p_0000.abf"
-data = readABF(fn)
-addStimulus!(data, fn, "IN 7")
-average_trials!(data)
+fn = raw"H:\Data\Two Photon\2025-03-05-GRAB-DA-STRIATUM\grab-da_b4_str_stim500uA_3x_NOMF045.tif"
+data = readImage(fn)
+deinterleave!(data) #This seperates the movies into two seperate movies
+getchannel(data, 1).data_array
+
+
 stimulus_protocol = getStimulusProtocol(data)
+
+#%% Make a multi-threading to do median filter
+import ElectroPhysiology.compute_baseline
+compute_baseline(data, channel = -1)
 
 #%% Plotting
 using Pkg; Pkg.activate("test")
