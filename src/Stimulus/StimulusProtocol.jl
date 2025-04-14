@@ -364,3 +364,51 @@ extractStimulus(abf_path::String, stimulus_name::String; flatten_episodic = fals
 
 getStimulusStartTime(stimulus::StimulusProtocol) = map(x -> x[1], stimulus.timestamps)
 getStimulusEndTime(stimulus::StimulusProtocol) = map(x -> x[2], stimulus.timestamps)
+
+function spike_train_group!(stim_protocol::StimulusProtocol{T,S}, group_time) where {T<:Real,S}
+    # Create a new StimulusProtocol object to store the grouped events.
+    # This uses the provided constructor that accepts a channel name.
+    grouped_stimulus = StimulusProtocol(stim_protocol.channelName)
+    
+    # Get the current timestamps from the original protocol.
+    current_timestamps = stim_protocol.timestamps
+    
+    grouped_timestamps = Tuple{T,T}[]
+    
+    # If there are no timestamps, just return the new (empty) protocol.
+    if isempty(current_timestamps)
+        return grouped_stimulus
+    end
+
+    # Initialize the first group using the first event.
+    group_begin_time = current_timestamps[1][1]
+    group_end_time   = current_timestamps[1][2]
+    
+    # Iterate over the remaining events (starting at the second).
+    for (episode, (start_time, end_time)) in enumerate(current_timestamps)
+        if episode == 1
+            continue # Skip the first episode since it's already grouped.
+        end
+        # If adding this event would exceed the allowed group duration,
+        # save the current group and start a new one.
+        if end_time - group_begin_time > group_time
+            push!(grouped_timestamps, (group_begin_time, group_end_time))
+            #println("New group at episode $episode")
+            group_begin_time = start_time
+            group_end_time   = end_time
+        else
+            # Otherwise, extend the current group.
+            group_end_time = max(group_end_time, end_time)
+            #println("Group together at episode $episode")
+        end
+    end
+    
+    # Push the last group into the grouped timestamps.
+    push!(grouped_timestamps, (group_begin_time, group_end_time))
+    
+    # Update the new protocol's timestamps.
+    stim_protocol.timestamps = grouped_timestamps
+    stim_protocol.sweeps = collect(1:length(grouped_timestamps)) # Update the sweep numbers
+    #return grouped_stimulus
+    nothing
+end
