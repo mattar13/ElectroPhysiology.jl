@@ -6,7 +6,7 @@ capabilies = Symbol[] #This indicates all the things the package is capable of d
 using Dates, TimeZones
 import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax, abs
 import Statistics: std, mean, median
-
+using ProgressMeter
 #This code does several things
 #=1) Creates several objects used in the analysis of ElectroPhysiology data=#
 #=2) Reads =#
