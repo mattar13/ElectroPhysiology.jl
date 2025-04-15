@@ -64,7 +64,6 @@ export imfilter!, imfilter
 export bin!
 export mapdata, mapdata!
 export mapframe, mapframe!
-
 export Kernel
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
@@ -73,6 +72,10 @@ export create_signal_waveform!
 
 include("Experiment/ExportingExperiments.jl")
 export writeXLSX
+
+include("Filtering/DeltaFF.jl")
+export baseline_median
+
 
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
