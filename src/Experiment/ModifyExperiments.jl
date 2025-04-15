@@ -511,14 +511,15 @@ end
 
 # Function to compute baseline using a median filter across time
 using Base.Threads: @threads
-function compute_baseline(data::Experiment{FORMAT, T}; kernel_size=51, channel = -1) where {FORMAT, T<:Real}
+function compute_baseline(data::Experiment{FORMAT, T}; kernel_size=51, channel = -1, border = "symmetric") where {FORMAT, T<:Real}
     if channel == -1
         #we want to iterate through each channel
         baselines = similar(data.data_array)
-        for ch in eachchannel(data)
-            println("Channel $(ch.chNames[1])")
+        for (idx, ch) in enumerate(eachchannel(data))
+            #println("Channel $(ch.chNames[1])")
             baseline = compute_baseline(ch, kernel_size=kernel_size, channel = 1)
-            baselines[:, :, ch] .= baseline
+            #println("Baseline size: $(size(baseline)) $(typeof(baseline))")
+            baselines[:, :, idx] .= baseline
         end
         return baselines
     else
@@ -527,8 +528,8 @@ function compute_baseline(data::Experiment{FORMAT, T}; kernel_size=51, channel =
         baseline = similar(data_arr)
         radius = (kernel_size - 1) ÷ 2
         
-        @threads for pix in 1:pixels
-            baseline[pix, :] .= mapwindow(median, data[pix, :], radius; border="replicate")
+        @showprogress desc = "Median Filtering" @threads for pix in 1:pixels
+            baseline[pix, :] .= mapwindow(median, data[pix, :], radius; border=border)
         end
 
         return baseline
