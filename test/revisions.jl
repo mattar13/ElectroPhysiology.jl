@@ -2,23 +2,41 @@ using Revise
 using Pkg; Pkg.activate(".")
 using ElectroPhysiology
 using Base.Threads
+import ElectroPhysiology.compute_baseline
+
+#Plotting
+using Pkg; Pkg.activate("test")
+using GLMakie, PhysiologyPlotting
 
 #%% Believe it or not we need to now open up some old ERG data. So lets figure out how to reconfigure add stimulus for the old ERG data
 fn = raw"H:\Data\Two Photon\2025-03-05-GRAB-DA-STRIATUM\grab-da_b4_str_stim500uA_3x_NOMF045.tif"
 data = readImage(fn)
 deinterleave!(data) #This seperates the movies into two seperate movies
-getchannel(data, 1).data_array
-
-
 stimulus_protocol = getStimulusProtocol(data)
 
+import ElectroPhysiology.NA
 #%% Make a multi-threading to do median filter
-import ElectroPhysiology.compute_baseline
-compute_baseline(data, channel = -1)
+baselines = compute_baseline(data, kernel_size = 500, channel = -1, border = NA())
 
-#%% Plotting
-using Pkg; Pkg.activate("test")
-using GLMakie, PhysiologyPlotting
+#%%
+fig = Figure()
+ax1 = Axis(fig[1,1])
+ax2 = Axis(fig[2,1])
+
+f = mean(data.data_array, dims = 1)[1,:,:]
+d0 = mean(baselines, dims = 1)[1,:,:]
+lines!(ax1, data.t, f[:,1])
+lines!(ax1, data.t, d0[:,1])
+
+lines!(ax2, data.t, f[:,2])
+lines!(ax2, data.t, d0[:,2])
+
+ax1b = Axis(fig[1,2])
+ax2b = Axis(fig[2,2])
+lines!(ax1b, data.t, f[:, 1] - d0[:,1])
+lines!(ax2b, data.t, f[:, 2] - d0[:,2])
+
+fig
 
 #%% We have stimulus protocols that are a flicker response
 fn = raw"F:\Data\Patching\2025-03-26-GRAB-DA_STR\25326048.abf"
