@@ -1,5 +1,5 @@
 # Function to compute baseline using a median filter across time
-using Base.Threads: @threads
+
 function baseline_median(data::Experiment{FORMAT, T}; kernel_size=51, channel = -1, border = "symmetric") where {FORMAT, T<:Real}
     if channel == -1
         #we want to iterate through each channel

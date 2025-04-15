@@ -5,6 +5,7 @@ using Requires
 capabilies = Symbol[] #This indicates all the things the package is capable of doing
 using Dates, TimeZones
 import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax, abs
+using Base.Threads: @threads #Allow for multi-threading
 import Statistics: std, mean, median
 using ProgressMeter
 #This code does several things
