@@ -2,28 +2,28 @@ using Revise
 using Pkg; Pkg.activate(".")
 using ElectroPhysiology
 using Base.Threads
-import ElectroPhysiology.compute_baseline
 
 #Plotting
 using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
 
 #%% Believe it or not we need to now open up some old ERG data. So lets figure out how to reconfigure add stimulus for the old ERG data
-fn = raw"H:\Data\Two Photon\2025-03-05-GRAB-DA-STRIATUM\grab-da_b4_str_stim500uA_3x_NOMF045.tif"
+fn = raw"F:\Data\Two Photon\2025-03-05-GRAB-DA-STRIATUM\grab-da_b4_str_stim500uA_3x_NOMF045.tif"
 data = readImage(fn)
 deinterleave!(data) #This seperates the movies into two seperate movies
-stimulus_protocol = getStimulusProtocol(data)
 
-import ElectroPhysiology.NA
+x_pixels, y_pixels = getIMG_size(data)
+
+f = mean(data.data_array, dims = 1)[1,:,:]
+
 #%% Make a multi-threading to do median filter
-baselines = compute_baseline(data, kernel_size = 500, channel = -1, border = NA())
+baselines = baseline_median(data, kernel_size = 500, channel = -1, border = NA())
 
 #%%
 fig = Figure()
 ax1 = Axis(fig[1,1])
 ax2 = Axis(fig[2,1])
 
-f = mean(data.data_array, dims = 1)[1,:,:]
 d0 = mean(baselines, dims = 1)[1,:,:]
 lines!(ax1, data.t, f[:,1])
 lines!(ax1, data.t, d0[:,1])

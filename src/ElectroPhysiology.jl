@@ -78,7 +78,7 @@ export mapdata, mapdata!
 export mapframe, mapframe!
 export Kernel
 
-include("ImageMorphology/ImageSegmentation.jl")
+
 
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
@@ -90,8 +90,9 @@ include("Readers/ImageReader/ImageReader.jl")
 export readImage
 export get_frame, get_all_frames
 export getIMG_datetime
+export getIMG_size
 
-include("Readers/ImageReader/ROIReader.jl")
+include("ImageMorphology/ImageSegmentation.jl")
 export recordROI 
 export getROIindexes, getROImask, getROIarr
 export loadROIfn!
