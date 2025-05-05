@@ -1,5 +1,3 @@
-
-
 getROIindexes(exp::Experiment{TWO_PHOTON, T}, label::Int64) where T<:Real = findall(exp.HeaderDict["ROIs"] .== label)
 
 """
