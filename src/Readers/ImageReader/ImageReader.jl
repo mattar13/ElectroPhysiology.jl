@@ -98,3 +98,14 @@ function getIMG_datetime(filename; timestamp_key = "date:create", fmt = dateform
      HeaderDict[timestamp_key] = DateTime(HeaderDict[timestamp_key][1:end-6], fmt)
      return HeaderDict[timestamp_key]
 end
+
+"""
+    getIMG_size(image::AbstractArray{T}) -> Tuple{Int, Int}
+
+Returns the size of the image as a tuple (height, width).
+"""
+function getIMG_size(data2P::Experiment{TWO_PHOTON, T}) where T<:Real
+    x_pixels = data2P.HeaderDict["xrng"] |> length
+    y_pixels = data2P.HeaderDict["yrng"] |> length
+    return (x_pixels, y_pixels)
+end
