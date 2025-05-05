@@ -78,8 +78,6 @@ export mapdata, mapdata!
 export mapframe, mapframe!
 export Kernel
 
-
-
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
 export readABF
@@ -93,6 +91,7 @@ export getIMG_datetime
 export getIMG_size
 
 include("ImageMorphology/ImageSegmentation.jl")
+export pixel_splits, pixel_splits_roi!
 export recordROI 
 export getROIindexes, getROImask, getROIarr
 export loadROIfn!
