@@ -12,23 +12,28 @@ Determines the pixel splitting indices for the image based on `roi_size`.
 """
 function pixel_splits(image_size::Tuple{Int, Int}, roi_size::Int)
     x_pixels, y_pixels = image_size
-    xs = collect(0:roi_size:x_pixels)
-    ys = collect(0:roi_size:y_pixels)
 
-    if xs[end] < x_pixels
-        push!(xs, x_pixels)
-    end
-    if ys[end] < y_pixels
-        push!(ys, y_pixels)
+    #Initialize a ROI mask of zeros
+    roi_mask = zeros(Int64, x_pixels, y_pixels)
+
+    pixel_idx = 1
+    for x_idx in 1:roi_size:x_pixels
+        for y_idx in 1:roi_size:y_pixels
+            #Set the ROI label to the current index
+            roi_mask[x_idx:min(x_idx+roi_size-1, x_pixels), y_idx:min(y_idx+roi_size-1, y_pixels)] .= pixel_idx
+            pixel_idx += 1
+        end
     end
 
-    return (xs, ys)
+    return roi_mask
 end
     
 #Push the pixel splits to the ROI objects
-function push_pixel_splits(exp::Experiment{TWO_PHOTON, T}) where T<:Real
-    exp.HeaderDict["ROIs"] = pixel_splits(getIMG_size(exp), exp.roi_size)
-    return exp
+function pixel_splits_roi!(exp::Experiment{TWO_PHOTON, T}, roi_size) where T<:Real
+    x_pixels, y_pixels = exp.HeaderDict["framesize"]
+    segment_mask = pixel_splits((x_pixels, y_pixels), roi_size) #Create the indexes of pixel splits
+    roi_mask_flat = reshape(segment_mask, segment_mask.size[1] * segment_mask.size[2]) #Reshape the mask to the original size of the image
+    exp.HeaderDict["ROIs"] = roi_mask_flat
 end
 
 #Load a ROI
@@ -56,9 +61,10 @@ function getROImask(exp::Experiment{TWO_PHOTON, T}; reshape_arr = true) where T<
      end
 end
 
-function getROIarr(exp::Experiment{TWO_PHOTON, T}, label::Int64; reshape_arr = true) where T <: Real
+function getROIarr(exp::Experiment{TWO_PHOTON, T}, label::Int64; reshape_arr = false) where T <: Real
      mask = getROImask(exp, label; reshape_arr = false)
-     ROI_arr = exp.data_array .* mask
+     roi_indexs = findall(mask .== 1) #Get the indexes of the mask
+     ROI_arr = exp.data_array[roi_indexs, :, :]
      if reshape_arr
           px_x, px_y = exp.HeaderDict["framesize"]
           return reshape(ROI_arr, (px_x, px_y, size(exp, 2), size(exp,3)))
