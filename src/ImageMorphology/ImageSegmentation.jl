@@ -1,3 +1,38 @@
+#=
+Everything in this file is meant to segment and determine ROIs
+=#
+
+
+#Create new ROIs
+
+"""
+    pixel_splits(image_size::Tuple{Int, Int}, roi_size::Int) -> Tuple{Vector{Int}, Vector{Int}}
+
+Determines the pixel splitting indices for the image based on `roi_size`.
+"""
+function pixel_splits(image_size::Tuple{Int, Int}, roi_size::Int)
+    x_pixels, y_pixels = image_size
+    xs = collect(0:roi_size:x_pixels)
+    ys = collect(0:roi_size:y_pixels)
+
+    if xs[end] < x_pixels
+        push!(xs, x_pixels)
+    end
+    if ys[end] < y_pixels
+        push!(ys, y_pixels)
+    end
+
+    return (xs, ys)
+end
+    
+#Push the pixel splits to the ROI objects
+function push_pixel_splits(exp::Experiment{TWO_PHOTON, T}) where T<:Real
+    exp.HeaderDict["ROIs"] = pixel_splits(getIMG_size(exp), exp.roi_size)
+    return exp
+end
+
+#Load a ROI
+
 getROIindexes(exp::Experiment{TWO_PHOTON, T}, label::Int64) where T<:Real = findall(exp.HeaderDict["ROIs"] .== label)
 
 """

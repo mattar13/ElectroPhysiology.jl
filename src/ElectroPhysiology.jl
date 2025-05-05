@@ -55,17 +55,6 @@ export time_offset, time_offset!
 
 #Image reading utilities
 using OffsetArrays
-include("Experiment/ImageMorphologyUtils.jl")
-export delta_ff, delta_ff!
-export find_boutons
-export project
-export deinterleave!
-export adjustBC!
-export imfilter!, imfilter
-export bin!
-export mapdata, mapdata!
-export mapframe, mapframe!
-export Kernel
 
 include("Experiment/JoiningExperiments.jl") #These files join multiple experiments
 export concat, concat!
@@ -77,6 +66,19 @@ export writeXLSX
 include("Filtering/DeltaFF.jl")
 export baseline_median
 
+include("ImageMorphology/ImageModification.jl")
+export delta_ff, delta_ff!
+export find_boutons
+export project
+export deinterleave!
+export adjustBC!
+export imfilter!, imfilter
+export bin!
+export mapdata, mapdata!
+export mapframe, mapframe!
+export Kernel
+
+include("ImageMorphology/ImageSegmentation.jl")
 
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
