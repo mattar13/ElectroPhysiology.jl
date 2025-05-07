@@ -166,20 +166,33 @@ end
 """
     extract_events(stim::AbstractVector{<:Number}) -> Vector{Tuple{Int,Int}}
 
-Extracts the start and end indices of stimulus events from a binary stimulus waveform.
+Extract start and end indices of stimulus events from a binary stimulus waveform.
 
-A stimulus waveform is represented by a vector of 0s and 1s where 0 indicates no stimulus and 1 indicates 
-the presence of a stimulus. An event is defined as a contiguous sequence of 1s. The function detects transitions 
-from 0 to 1 (event start) and from 1 to 0 (event end), and returns a vector of tuples containing the start and end 
-indices of each event.
+# Details
+A stimulus event is defined as a contiguous sequence of high values (typically 1s) in a binary waveform.
+The function detects transitions from low to high (event start) and high to low (event end).
 
 # Arguments
-- `stim`: A one-dimensional array (or vector) of numbers (typically 0s and 1s) representing the stimulus waveform.
+- `stim`: Binary stimulus waveform (typically 0s and 1s)
 
 # Returns
-- A vector of tuples `(idx_start, idx_end)` where:
-  - `idx_start` is the index at which a stimulus event starts (i.e. where the signal transitions from 0 to 1).
-  - `idx_end` is the index at which that event ends (i.e. where the signal transitions from 1 to 0).
+- Vector of tuples `(start_idx, end_idx)` where:
+    - `start_idx`: Index where stimulus transitions from low to high
+    - `end_idx`: Index where stimulus transitions from high to low
+
+# Examples
+```julia
+# Simple binary stimulus
+stim = [0, 0, 1, 1, 1, 0, 0, 1, 1, 0]
+events = extract_events(stim)
+# Returns: [(3,5), (8,9)]
+
+# From experiment data
+stim_channel = exp.data_array[1,:,3] .> 2.5  # Threshold at 2.5V
+events = extract_events(stim_channel)
+```
+
+See also: [`extractStimulus`](@ref)
 """
 function extract_events(stim::AbstractVector{<:Number})
     n = length(stim)
@@ -198,7 +211,7 @@ function extract_events(stim::AbstractVector{<:Number})
         unshift!(starts, 1)
     end
 
-    # If the last element is 1, then the event hasn’t closed—so end it at the last index.
+    # If the last element is 1, then the event hasn't closed—so end it at the last index.
     if stim[end] == 1
         push!(ends, n)
     end
@@ -276,17 +289,36 @@ convert_stimulus!(exp, n_channel::Int64) = convert_stimulus!(exp, exp.chNames[n_
 
 #This is just a quick auxillary function to extract all points where the stimulus increases or decreases
 """
+    find_stim_index(exp::Experiment; trial=1, channel=3, thresh=2.5, movement=:increase)
+
+Find indices where a stimulus signal crosses a threshold in either direction.
+
+# Arguments
+- `exp`: Experiment object containing the stimulus data
+- `trial`: Trial number to analyze (default: 1)
+- `channel`: Channel number containing stimulus (default: 3)
+- `thresh`: Threshold voltage for detecting transitions (default: 2.5V)
+- `movement`: Direction of threshold crossing
+    - `:increase`: Low to high transitions
+    - `:decrease`: High to low transitions
+
+# Returns
+- Tuple of (timestamps, indices) where threshold crossings occur
+
+# Examples
 ```julia
-    exp = readABF(data_fn)
-    t_episodes, idx_episodes = find_stim_index(exp)
+# Find rising edges in stimulus
+t, idx = find_stim_index(exp, movement=:increase)
+
+# Find falling edges with custom threshold
+t, idx = find_stim_index(exp, 
+    channel=4, 
+    thresh=3.0, 
+    movement=:decrease
+)
 ```
 
-This function takes a voltage range from an .abf file and calculates the interchange from high to low
-    or low to high voltage.
-Normally this should be done on a non-episodic range (so only a single trial)
-Channel in the case of what I am doing normally is 3
-The threshold is 2.5 which is telegraph limit
-movement is going from a low voltage to high voltage
+See also: [`extractStimulus`](@ref)
 """
 function find_stim_index(exp; trial = 1, channel = 3, thresh = 2.5, movement = :increase)
     stimulus = exp.data_array[trial,:,channel]
@@ -310,28 +342,49 @@ end
 
 
 """
-    extractStimulus(abfInfo::Dict{String, Any}; stimulus_name::String="IN 7", stimulus_threshold::Float64=2.5)
-    extractStimulus(abf_path::String; kwargs...)
+    extractStimulus(abfInfo::Dict{String, Any}, stimulus_name::String; stimulus_threshold::Float64=2.5)
+    extractStimulus(abf_path::String, stimulus_name::String; kwargs...)
 
-Extract the stimulus information from the given `abfInfo` dictionary and returns a `StimulusProtocol` object containing stimulus timestamps.
+Extract stimulus information from ABF data and create a StimulusProtocol object.
+
+# Details
+The function analyzes a specified channel in the ABF data to detect stimulus events based on a threshold.
+It creates a StimulusProtocol object containing the timing information for each detected stimulus event.
 
 # Arguments
-- `abfInfo`: A dictionary containing information about the physiological data.
-- `stimulus_name`: (Optional) The name of the stimulus channel. Default is "IN 7".
-- `stimulus_threshold`: (Optional) The threshold for detecting stimulus events in the waveform. Default is 2.5.
+- `abfInfo`: Dictionary containing ABF file information
+- `abf_path`: Path to ABF file
+- `stimulus_name`: Name of the stimulus channel
+- `stimulus_threshold`: Voltage threshold for detecting stimulus events (default: 2.5V)
+
+# Additional Parameters
+- `flatten_episodic`: Whether to treat episodic data as continuous (default: false)
 
 # Returns
-- A `StimulusProtocol` object containing the stimulus timestamps for each trial.
+- StimulusProtocol object containing:
+    - Stimulus name
+    - Vector of (start_time, end_time) tuples for each stimulus event
+    - Additional metadata about the stimulus
 
 # Examples
 ```julia
-abfInfo = loadABF("path/to/abf/file")
-stimuli = extractStimulus(abfInfo)
+# Extract from ABF info dictionary
+stim = extractStimulus(abf_info, "Digital 1", stimulus_threshold=2.5)
+
+# Extract directly from ABF file
+stim = extractStimulus("path/to/file.abf", "Digital 1")
+
+# Access stimulus timing
+start_times = getStimulusStartTime(stim)
+end_times = getStimulusEndTime(stim)
 ```
 
-```julia
-stimuli = extractStimulus("path/to/abf/file")
-```
+# Notes
+- Digital channels typically use TTL signals with 2.5V threshold
+- For analog channels, adjust threshold based on signal characteristics
+- Time values are in the same units as the ABF file (typically seconds)
+
+See also: [`extract_events`](@ref), [`StimulusProtocol`](@ref)
 """
 function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
     stimulus_threshold::Float64=2.5
