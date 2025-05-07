@@ -224,3 +224,185 @@ function mapdata(f, exp::Experiment{TWO_PHOTON, T}, window::Int64; kwargs...) wh
     mapdata!(f, exp_copy, window; kwargs...)
     return exp_copy
 end
+
+"""
+    process_image!(exp::Experiment{TWO_PHOTON}; operation=:map, window=nothing, channels=:all, function_handle=identity, params=Dict())
+
+A unified interface for processing two-photon imaging data with various operations including mapping functions over windows,
+filtering, brightness/contrast adjustments, channel deinterleaving, and data projection.
+
+# Arguments
+- `exp`: The two-photon experiment to process
+- `operation`: Operation type (one of):
+    - `:map`: Apply a function over a window (using mapframe! or mapdata!)
+    - `:filter`: Apply image filtering
+    - `:transform`: Apply brightness/contrast adjustments
+    - `:deinterleave`: Separate interleaved channels
+    - `:project`: Project data along specified dimensions
+    - `:bin`: Bin data along specified dimensions
+- `window`: Window size for operations (if applicable)
+    - For mapframe!: Tuple{Int64,Int64} specifying (height, width)
+    - For mapdata!: Int64 specifying window size
+- `channels`: Channels to process (:all or specific channels)
+- `function_handle`: Processing function for :map operation
+- `params`: Additional parameters specific to each operation
+
+# Operation-specific Parameters
+
+## Map Operation (:map)
+- Requires `window` parameter:
+    - Tuple{Int64,Int64} for mapframe! (2D window)
+    - Int64 for mapdata! (1D window)
+- Uses `function_handle` to apply over window
+
+## Filter Operation (:filter)
+- `kernel`: Required filter kernel (OffsetArray or Array)
+
+## Transform Operation (:transform)
+- `min_val_x`: Minimum input value (:std, :auto, :ci, or numeric)
+- `max_val_x`: Maximum input value (:std, :auto, :ci, or numeric)
+- `std_level`: Standard deviation level for :std mode (default: 1)
+- `min_val_y`: Minimum output value (default: 0.0)
+- `max_val_y`: Maximum output value (default: 1.0)
+- `contrast`: Contrast adjustment (:auto or numeric)
+- `brightness`: Brightness adjustment (:auto or numeric)
+- `n_vals`: Number of values for linear fit (default: 10)
+
+## Deinterleave Operation (:deinterleave)
+- `n_channels`: Number of channels to deinterleave (default: 2)
+- `new_ch_name`: Name for new channel (default: "Alexa 594")
+- `new_ch_unit`: Unit for new channel (default: "px")
+
+## Project Operation (:project)
+- `dims`: Dimension to project along (default: 3)
+
+## Bin Operation (:bin)
+- `dims`: Tuple of dimensions to bin (default: (2,2,1))
+- `function`: Function to apply in binning (default: mean)
+
+# Examples
+```julia
+# Apply median filter over 3x3 window
+process_image!(exp, operation=:map, 
+    window=(3,3), 
+    function_handle=median)
+
+# Apply Gaussian filter
+using Images
+kernel = Kernel.gaussian((3,3))
+process_image!(exp, operation=:filter, 
+    params=Dict(:kernel => kernel))
+
+# Adjust brightness/contrast using standard deviation
+process_image!(exp, operation=:transform, 
+    params=Dict(
+        :min_val_x => :std,
+        :max_val_x => :std,
+        :std_level => 2
+    ))
+
+# Deinterleave two channels
+process_image!(exp, operation=:deinterleave,
+    params=Dict(
+        :n_channels => 2,
+        :new_ch_name => "GFP"
+    ))
+
+# Project along z-axis
+process_image!(exp, operation=:project,
+    params=Dict(:dims => 3))
+
+# Bin data with custom function
+process_image!(exp, operation=:bin,
+    params=Dict(
+        :dims => (2,2,1),
+        :function => maximum
+    ))
+```
+
+# Returns
+- The modified experiment object with processed image data
+"""
+function process_image!(exp::Experiment{TWO_PHOTON,T};
+    operation=:map,
+    window=nothing,
+    channels=:all,
+    function_handle=identity,
+    params=Dict()
+) where T<:Real
+    # Convert channels specification
+    process_channels = if channels == :all
+        1:size(exp, 3)
+    elseif isa(channels, Vector{String})
+        findall(channels .== exp.chNames)
+    else
+        channels
+    end
+
+    if operation == :map
+        if window isa Tuple{Int64,Int64}
+            mapframe!(function_handle, exp, window; channel=process_channels)
+        elseif window isa Int64
+            mapdata!(function_handle, exp, window; channel=process_channels)
+        else
+            error("Window must be either Tuple{Int64,Int64} for mapframe! or Int64 for mapdata!")
+        end
+
+    elseif operation == :filter
+        kernel = get(params, :kernel, nothing)
+        if isnothing(kernel)
+            error("Must provide kernel for filter operation")
+        end
+        imfilter!(exp, kernel; channel=process_channels)
+
+    elseif operation == :transform
+        min_val_x = get(params, :min_val_x, :std)
+        max_val_x = get(params, :max_val_x, :std)
+        std_level = get(params, :std_level, 1)
+        min_val_y = get(params, :min_val_y, 0.0)
+        max_val_y = get(params, :max_val_y, 1.0)
+        contrast = get(params, :contrast, :auto)
+        brightness = get(params, :brightness, :auto)
+        n_vals = get(params, :n_vals, 10)
+
+        adjustBC!(exp;
+            channel=process_channels,
+            min_val_x=min_val_x,
+            max_val_x=max_val_x,
+            std_level=std_level,
+            min_val_y=min_val_y,
+            max_val_y=max_val_y,
+            contrast=contrast,
+            brightness=brightness,
+            n_vals=n_vals
+        )
+
+    elseif operation == :deinterleave
+        n_channels = get(params, :n_channels, 2)
+        new_ch_name = get(params, :new_ch_name, "Alexa 594")
+        new_ch_unit = get(params, :new_ch_unit, "px")
+
+        deinterleave!(exp;
+            n_channels=n_channels,
+            new_ch_name=new_ch_name,
+            new_ch_unit=new_ch_unit
+        )
+
+    elseif operation == :project
+        dims = get(params, :dims, 3)
+        return project(exp; dims=dims)
+
+    elseif operation == :bin
+        dims = get(params, :dims, (2,2,1))
+        fn = get(params, :function, mean)
+        bin!(fn, exp, dims)
+    end
+
+    return exp
+end
+
+function process_image(exp::Experiment{TWO_PHOTON,T}; kwargs...) where T<:Real
+    exp_copy = deepcopy(exp)
+    process_image!(exp_copy; kwargs...)
+    return exp_copy
+end
