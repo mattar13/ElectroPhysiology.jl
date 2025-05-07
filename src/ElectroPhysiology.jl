@@ -64,7 +64,8 @@ include("Experiment/ExportingExperiments.jl")
 export writeXLSX
 
 include("Filtering/DeltaFF.jl")
-export baseline_median
+export baseline_median, baseline_als, baseline_trace, baseline_stack, baseline_stack!
+export moving_average
 
 include("ImageMorphology/ImageModification.jl")
 export delta_ff, delta_ff!
