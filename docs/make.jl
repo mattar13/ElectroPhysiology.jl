@@ -10,6 +10,9 @@ import PhysiologyPlotting: add_scalebar, add_sig_bar, draw_axes_border
 #using GLMakie #OpenGL is not available, so this may be left out for now
 import ElectroPhysiology: Experiment, StimulusProtocol, extractStimulus, setIntensity, getIntensity
 import ElectroPhysiology: Stimulus, Flash
+# Import filtering functions
+import ElectroPhysiology: baseline_median, baseline_als, baseline_trace, baseline_stack, baseline_stack!
+import ElectroPhysiology: moving_average
 
 makedocs(
      sitename = "ElectroPhysiology.jl", 
