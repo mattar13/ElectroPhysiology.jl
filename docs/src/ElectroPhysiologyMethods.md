@@ -56,3 +56,56 @@ readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
     time_unit=:s, #The time unit is s, change to ms
 ) where {T<:Real}
 ```
+
+### Signal Processing and Filtering
+
+#### Baseline Correction
+The package provides several methods for baseline correction and ΔF/F calculations, particularly useful for fluorescence imaging data.
+
+```@docs
+baseline_median
+```
+
+```@docs
+baseline_als
+```
+
+```@docs
+baseline_trace
+```
+
+```@docs
+baseline_stack
+```
+
+```@docs
+baseline_stack!
+```
+
+#### Moving Average Functions
+Functions for smoothing data using moving averages.
+
+```@docs
+moving_average(::Vector)
+```
+
+```@docs
+moving_average(::AbstractMatrix)
+```
+
+#### Example Usage
+
+```julia
+# Compute baseline using median filter
+baselines = baseline_median(exp_data, kernel_size=51)
+
+# Apply asymmetric least squares baseline correction
+corrected = baseline_als(signal, lam=1e7, p=0.075)
+
+# Compute ΔF/F for a stack of images
+dff = baseline_stack(image_stack, window=15)
+
+# Smooth data using moving average
+smoothed = moving_average(data, window=31)
+```
+
