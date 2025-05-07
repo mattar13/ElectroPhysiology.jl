@@ -70,48 +70,96 @@ include("ReadHeaders.jl")
 
 #println("ABF utilites imported")
 """
-    readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
+    readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
         trials::Union{Int64,Vector{Int64}}=-1,
-        channels::Union{Int64, Vector{String}}=["Vm_prime", "Vm_prime4"],
+        channels::Union{Int64, String, Vector{String}, Nothing}=nothing,
         average_trials::Bool=false,
-        stimulus_name::Union{String, Vector{String}, Nothing}="IN 7",
+        stimulus_name::Union{String, Vector{String}, Nothing}=nothing,
         stimulus_threshold::T=2.5,
         warn_bad_channel=false,
         flatten_episodic::Bool=false,
-        time_unit=:s,
+        time_unit=:s
     ) where {T<:Real}
 
-Read an Axon Binary File (ABF) and return an `Experiment` object. The function extracts data
-for the specified trials and channels, and optionally averages trials or flattens episodic data.
+Read and parse Axon Binary Format (ABF) files, returning an Experiment object containing the electrophysiology data
+and associated metadata.
 
 # Arguments
-- `abf_data`: A `String` representing the ABF file path or a `Vector{UInt8}` containing the ABF file content.
-- `trials`: An `Int64` or a `Vector{Int64}` specifying the trials to extract. Default is -1 (all trials).
-- `channels`: An `Int64` or a `Vector{String}` specifying the channels to extract. Default is ["Vm_prime", "Vm_prime4"].
-- `average_trials`: A `Bool` specifying whether to average the trials. Default is `false`.
-- `stimulus_name`: A `String`, `Vector{String}`, or `Nothing` specifying the stimulus name(s). Default is "IN 7".
-- `stimulus_threshold`: A threshold value of type `T` for the stimulus. Default is 2.5.
-- `warn_bad_channel`: A `Bool` specifying whether to warn if a channel is improper. Default is `false`.
-- `flatten_episodic`: A `Bool` specifying whether to flatten episodic stimulation to be continuous. Default is `false`.
-- `time_unit`: A `Symbol` specifying the time unit. Default is `:s` (seconds).
+- `T`: The numeric type for the data (e.g., Float32, Float64)
+- `FORMAT`: The format type of the experiment
+- `abf_data`: Either a file path to the ABF file or raw ABF data as a byte vector
+
+# Optional Arguments
+- `trials`: Trial selection
+    - `-1`: All trials (default)
+    - `Int64`: Single trial
+    - `Vector{Int64}`: Multiple specific trials
+- `channels`: Channel selection
+    - `nothing`: All channels (default)
+    - `Int64`: Single channel by index
+    - `String`: Single channel by name
+    - `Vector{String}`: Multiple channels by name
+- `average_trials`: Whether to average across trials (default: false)
+- `stimulus_name`: Name of stimulus channel(s)
+    - `nothing`: No stimulus (default)
+    - `String`: Single stimulus channel
+    - `Vector{String}`: Multiple stimulus channels
+- `stimulus_threshold`: Threshold for detecting digital stimulus events (default: 2.5)
+- `warn_bad_channel`: Whether to warn about invalid channels (default: false)
+- `flatten_episodic`: Whether to flatten episodic data into continuous data (default: false)
+- `time_unit`: Time unit for the data
+    - `:s`: Seconds (default)
+    - `:ms`: Milliseconds
 
 # Returns
-- An `Experiment` object containing the extracted data, along with metadata.
+- An Experiment object containing:
+    - Raw data array
+    - Time vector
+    - Channel names and units
+    - Stimulus protocol (if specified)
+    - Original ABF metadata in HeaderDict
 
-# Example
+# Channel Naming Conventions
+1. ADC channels: Use exact names from recording (e.g., "Vm_prime", "IN 7")
+2. Analog channels: "A1", "A2", etc. or "Analog 1", "Analog 2", etc.
+3. Digital channels: "D1", "D2", etc. or "Digital 1", "Digital 2", etc.
+
+# Examples
 ```julia
-exp = readABF(Float32, "path/to/abf_file.abf")
+# Basic usage - read all channels and trials
+exp = readABF(Float32, "path/to/file.abf")
+
+# Read specific channels and average trials
+exp = readABF(Float32, "path/to/file.abf",
+    channels=["Vm_prime", "IN 7"],
+    average_trials=true)
+
+# Read with stimulus extraction
+exp = readABF(Float32, "path/to/file.abf",
+    stimulus_name="Digital 1",
+    stimulus_threshold=2.5)
+
+# Read specific trials and flatten episodic data
+exp = readABF(Float32, "path/to/file.abf",
+    trials=1:5,
+    flatten_episodic=true)
+
+# Read with time in milliseconds
+exp = readABF(Float32, "path/to/file.abf",
+    time_unit=:ms)
 ```
+
+See also: [`parseABF`](@ref), [`getWaveform`](@ref), [`extractStimulus`](@ref)
 """
 function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
     trials::Union{Int64,Vector{Int64}}=-1,
     channels::Union{Int64, String, Vector{String}, Nothing}=nothing,
     average_trials::Bool=false,
-    stimulus_name::Union{String, Vector{String}, Nothing}=nothing,  #One of the best places to store digital stimuli
-    stimulus_threshold::T=2.5, #This is the normal voltage rating on digital stimuli
-    warn_bad_channel=false, #This will warn if a channel is improper
-    flatten_episodic::Bool=false, #If the stimulation is episodic and you want it to be continuous
-    time_unit=:s, #The time unit is s, change to ms
+    stimulus_name::Union{String, Vector{String}, Nothing}=nothing,
+    stimulus_threshold::T=2.5,
+    warn_bad_channel=false,
+    flatten_episodic::Bool=false,
+    time_unit=:s
 ) where {T<:Real}
     # Read ABF header information
     HeaderDict = readABFInfo(abf_data, flatten_episodic = flatten_episodic)
@@ -188,24 +236,34 @@ end
 """
     parseABF(super_folder::String; extension::String=".abf")
 
-Search for files with a specific extension (default is ".abf") in a given directory
-and its subdirectories. Returns a list of file paths for all matching files.
+Recursively search for ABF files in a directory and its subdirectories.
 
 # Arguments
-- `super_folder`: A string representing the path to the root directory to search for files.
-- `extension`: (Optional) A string representing the file extension to search for (default is ".abf").
+- `super_folder`: Root directory to start the search
+- `extension`: File extension to search for (default: ".abf")
 
 # Returns
-- `file_list`: An array of strings representing the file paths of all matching files.
-
-# Throws
-- `ArgumentError`: If no matching files are found in the given directory.
+- Vector of file paths to all found ABF files
 
 # Examples
 ```julia
-file_list = parseABF("path/to/folder")
-file_list = parseABF("path/to/folder", extension=".txt")
+# Find all ABF files in current directory and subdirectories
+files = parseABF(".")
+
+# Find files with custom extension
+files = parseABF("data/", extension=".dat")
+
+# Process multiple files
+for file in parseABF("experiment_data/")
+    exp = readABF(Float32, file)
+    process_experiment(exp)
+end
 ```
+
+# Throws
+- `ArgumentError`: If no matching files are found in the directory
+
+See also: [`readABF`](@ref)
 """
 function parseABF(super_folder::String; extension::String=".abf")
     # Initialize an empty array to store the matching file paths
