@@ -109,3 +109,76 @@ dff = baseline_stack(image_stack, window=15)
 smoothed = moving_average(data, window=31)
 ```
 
+### Image Processing
+
+The package provides several methods for processing two-photon imaging data, including channel manipulation, projection, and filtering operations.
+
+#### Channel Operations
+```@docs
+deinterleave!(exp::Experiment{TWO_PHOTON, T}; n_channels=2, new_ch_name="Alexa 594", new_ch_unit="px") where T<:Real
+```
+
+#### Image Projection and Statistics
+```@docs
+project(exp::Experiment{TWO_PHOTON, T}; dims=3) where T<:Real
+```
+
+#### Brightness and Contrast Adjustment
+```@docs
+adjustBC!(exp::Experiment{TWO_PHOTON}; channel=nothing, min_val_y=0.0, max_val_y=1.0, std_level=1, min_val_x=:std, max_val_x=:std, contrast=:auto, brightness=:auto, n_vals=10)
+```
+
+#### Data Binning
+```@docs
+bin!(fn, exp::Experiment{TWO_PHOTON}, dims::Tuple{Int, Int, Int})
+```
+
+#### Window Operations
+```@docs
+mapframe!(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; channel=nothing, border="symmetric") where {T<:Real}
+```
+
+```@docs
+mapframe(f, exp::Experiment{TWO_PHOTON, T}, window::Tuple{Int64, Int64}; kwargs...) where {T<:Real}
+```
+
+#### Example Usage
+
+```julia
+# Deinterleave channels in a two-photon experiment
+deinterleave!(exp, n_channels=2)
+
+# Project data along a specific dimension
+projected_data = project(exp, dims=3)
+
+# Adjust brightness and contrast
+adjustBC!(exp, channel=1, min_val_x=:std, max_val_x=:std, std_level=2)
+
+# Bin data using mean function
+bin!(mean, exp, (2,2,2))
+
+# Apply a custom function over a window
+mapframe!(median, exp, (3,3), channel=1)
+```
+
+#### Suggested Reorganization
+
+The current `imfilter!` functionality can be replaced with more specialized functions in DeltaFF.jl:
+
+1. For temporal filtering:
+   - Use `baseline_median` for median filtering
+   - Use `moving_average` for mean filtering
+   - Add new specialized temporal filters as needed
+
+2. For spatial filtering:
+   - Move spatial filtering operations to a new module (e.g., `SpatialFilters.jl`)
+   - Implement common 2D filters (Gaussian, median, mean) as standalone functions
+   - Consider using specialized image processing libraries for complex operations
+
+3. For combined spatiotemporal filtering:
+   - Create dedicated functions for specific use cases
+   - Use `mapframe!` for custom window operations
+   - Implement common operations (e.g., 3D Gaussian) as standalone functions
+
+This reorganization would make the codebase more maintainable and easier to understand, while also providing more specialized and optimized implementations for common operations.
+

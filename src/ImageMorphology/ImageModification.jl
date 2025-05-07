@@ -1,11 +1,24 @@
-#These functions are for the opening algorithim
-function disk_se(radius)
-    dims = (2*radius+1, 2*radius+1)
-    center = (radius+1, radius+1)
-    arr = [sqrt((i-center[1])^2 + (j-center[2])^2) <= radius for i in 1:dims[1], j in 1:dims[2]]
-    return centered(arr)
-end
 
+
+"""
+    deinterleave!(exp::Experiment{TWO_PHOTON, T}; n_channels=2, new_ch_name="Alexa 594", new_ch_unit="px") where T<:Real
+
+Separate interleaved channels in a two-photon experiment into separate channels.
+
+# Arguments
+- `exp::Experiment{TWO_PHOTON, T}`: The experiment containing interleaved channels
+- `n_channels::Int=2`: Number of interleaved channels to separate
+- `new_ch_name::String="Alexa 594"`: Name for the new channel
+- `new_ch_unit::String="px"`: Unit for the new channel
+
+# Details
+This function is commonly used when channels are acquired in an interleaved fashion,
+where frames alternate between different channels. The function separates these frames
+into distinct channels within the experiment.
+
+# Returns
+- Modified experiment with deinterleaved channels
+"""
 function deinterleave!(exp::Experiment{TWO_PHOTON, T}; 
     n_channels = 2,
     new_ch_name = "Alexa 594", new_ch_unit = "px"
