@@ -63,21 +63,17 @@ export create_signal_waveform!
 include("Experiment/ExportingExperiments.jl")
 export writeXLSX
 
-include("Filtering/DeltaFF.jl")
-export baseline_median, baseline_als, baseline_trace, baseline_stack, baseline_stack!
-export moving_average
+include("ImageMorphology/DeltaFF.jl")
+export baseline_median
 
 include("ImageMorphology/ImageModification.jl")
-export delta_ff, delta_ff!
 export find_boutons
 export project
 export deinterleave!
 export adjustBC!
-export imfilter!, imfilter
 export bin!
 export mapdata, mapdata!
 export mapframe, mapframe!
-export Kernel
 
 #=Import all readers======================#
 include("Readers/ABFReader/ABFReader.jl") #This file contains some binary extras
