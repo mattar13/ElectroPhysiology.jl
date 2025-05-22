@@ -229,34 +229,269 @@ function reverse!(exp::Experiment; kwargs...)
 end
 
 # These items all come from the channel properties
+"""
+    getSampleFreq(exp::Experiment)
+
+Get the sampling frequency of the experiment in Hz.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- The sampling frequency calculated as 1/dt where dt is the time step between data points
+
+# Example
+```julia
+exp = Experiment(data_array)
+fs = getSampleFreq(exp)  # Returns sampling frequency in Hz
+```
+"""
 getSampleFreq(exp::Experiment) = 1/exp.dt
 
+"""
+    getChannelNames(exp::Experiment)
+
+Get the names of all channels in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of strings containing the names of all channels
+
+# Example
+```julia
+exp = Experiment(data_array)
+channel_names = getChannelNames(exp)
+```
+"""
 getChannelNames(exp::Experiment) = exp.chNames
 
+"""
+    getChannelUnite(exp::Experiment)
+
+Get the units of measurement for all channels in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of strings containing the units for each channel
+
+# Example
+```julia
+exp = Experiment(data_array)
+channel_units = getChannelUnite(exp)
+```
+"""
 getChannelUnite(exp::Experiment) = exp.chUnits
 
+"""
+    getGains(exp::Experiment)
+
+Get the gain values for all channels in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of real numbers containing the gain values for each channel
+
+# Example
+```julia
+exp = Experiment(data_array)
+channel_gains = getGains(exp)
+```
+"""
 getGains(exp::Experiment) = exp.chGains
 
+"""
+    addStimulus!(exp::Experiment, protocol::StimulusProtocol)
+
+Add a stimulus protocol to the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+- `protocol`: A `StimulusProtocol` object containing the stimulus information
+
+# Example
+```julia
+exp = Experiment(data_array)
+protocol = StimulusProtocol()
+addStimulus!(exp, protocol)
+```
+"""
 addStimulus!(exp::Experiment, protocol::StimulusProtocol) = exp.HeaderDict["StimulusProtocol"] = protocol
 
-#This function is used if the stimulus channel is in a different file
+"""
+    addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; kwargs...)
+
+Add a stimulus protocol to the experiment from a file.
+
+# Arguments
+- `exp`: An `Experiment` object
+- `protocol_fn`: Path to the file containing stimulus protocol
+- `stim_channel`: Name of the stimulus channel
+- `kwargs...`: Additional keyword arguments passed to `extractStimulus`
+
+# Example
+```julia
+exp = Experiment(data_array)
+addStimulus!(exp, "stimulus.abf", "IN 7")
+```
+"""
 addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; kwargs...) = 
     addStimulus!(exp, extractStimulus(protocol_fn, stim_channel; kwargs...))
 
-#This function is used if the stimulus channel is present in the recording
+"""
+    addStimulus!(exp::Experiment, stim_channel::String; kwargs...)
+
+Add a stimulus protocol to the experiment from the recording data.
+
+# Arguments
+- `exp`: An `Experiment` object
+- `stim_channel`: Name of the stimulus channel in the recording
+- `kwargs...`: Additional keyword arguments passed to `extractStimulus`
+
+# Example
+```julia
+exp = Experiment(data_array)
+addStimulus!(exp, "IN 7")
+```
+"""
 addStimulus!(exp::Experiment, stim_channel::String; kwargs...) = 
     addStimulus!(exp, extractStimulus(exp.HeaderDict, stim_channel; kwargs...))
 
+"""
+    setIntensity(exp::Experiment, photons)
 
+Set the intensity of the stimulus protocol.
+
+# Arguments
+- `exp`: An `Experiment` object
+- `photons`: The intensity value to set
+
+# Example
+```julia
+exp = Experiment(data_array)
+setIntensity(exp, 1.0)
+```
+"""
 setIntensity(exp::Experiment, photons) = setIntensity(exp.HeaderDict["StimulusProtocol"], photons)
 
+"""
+    getIntensity(exp::Experiment)
+
+Get the intensity of the stimulus protocol.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- The current intensity value of the stimulus protocol
+
+# Example
+```julia
+exp = Experiment(data_array)
+intensity = getIntensity(exp)
+```
+"""
 getIntensity(exp::Experiment) = getIntensity(exp.HeaderDict["StimulusProtocol"])
 
+"""
+    getStimulusProtocol(exp::Experiment)
+
+Get the stimulus protocol associated with the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- The `StimulusProtocol` object if one exists, `nothing` otherwise
+
+# Example
+```julia
+exp = Experiment(data_array)
+protocol = getStimulusProtocol(exp)
+```
+"""
 getStimulusProtocol(exp::Experiment) = haskey(exp.HeaderDict, "StimulusProtocol") ? exp.HeaderDict["StimulusProtocol"] : nothing
+
+"""
+    getStimulusStartTime(exp::Experiment)
+
+Get the start times of all stimulus events in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of start times for each stimulus event
+
+# Example
+```julia
+exp = Experiment(data_array)
+start_times = getStimulusStartTime(exp)
+```
+"""
 getStimulusStartTime(exp::Experiment) = getStimulusStartTime(getStimulusProtocol(exp))
+
+"""
+    getStimulusEndTime(exp::Experiment)
+
+Get the end times of all stimulus events in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of end times for each stimulus event
+
+# Example
+```julia
+exp = Experiment(data_array)
+end_times = getStimulusEndTime(exp)
+```
+"""
 getStimulusEndTime(exp::Experiment) = getStimulusEndTime(getStimulusProtocol(exp))
 
+"""
+    round_nanosecond(time::T) where {T<:Real}
+    round_nanosecond(time_series::Vector{T}) where {T<:Real}
+
+Round a time value or vector of time values to the nearest nanosecond.
+
+# Arguments
+- `time`: A real number representing time in seconds
+- `time_series`: A vector of real numbers representing time points
+
+# Returns
+- A `Nanosecond` value or vector of `Nanosecond` values
+
+# Example
+```julia
+time_ns = round_nanosecond(1.5)  # Returns Nanosecond(1500000000)
+times_ns = round_nanosecond([1.5, 2.5])  # Returns [Nanosecond(1500000000), Nanosecond(2500000000)]
+```
+"""
 round_nanosecond(time::T) where {T<:Real} = Nanosecond(round(Int64, time * 1e9))
 round_nanosecond(time_series::Vector{T}) where {T<:Real} = map(time -> round_nanosecond(time), time_series)
 
+"""
+    getRealTime(exp::Experiment)
+
+Get the real-world timestamps for all time points in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of `DateTime` values representing the real-world time for each data point
+
+# Example
+```julia
+exp = Experiment(data_array)
+real_times = getRealTime(exp)
+```
+"""
 getRealTime(exp::Experiment) = exp.HeaderDict["FileStartDateTime"] .+ round_nanosecond(exp.t)
