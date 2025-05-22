@@ -7,14 +7,6 @@ using Base.Threads
 using Pkg; Pkg.activate("test")
 using GLMakie, PhysiologyPlotting
 
-#%% Believe it or not we need to now open up some old ERG data. So lets figure out how to reconfigure add stimulus for the old ERG data
-fn = raw"F:\Data\Two Photon\2025-03-05-GRAB-DA-STRIATUM\grab-da_b4_str_stim500uA_3x_NOMF045.tif"
-data = readImage(fn)
-deinterleave!(data) #This seperates the movies into two seperate movies
-
-x_pixels, y_pixels = getIMG_size(data)
-
-f = mean(data.data_array, dims = 1)[1,:,:]
 
 #%% Make a multi-threading to do median filter
 baselines = baseline_median(data, kernel_size = 500, channel = -1, border = NA())
