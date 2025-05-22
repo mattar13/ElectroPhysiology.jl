@@ -495,3 +495,108 @@ real_times = getRealTime(exp)
 ```
 """
 getRealTime(exp::Experiment) = exp.HeaderDict["FileStartDateTime"] .+ round_nanosecond(exp.t)
+
+"""
+    convert_channel_to_stimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; 
+        threshold::Real=2.5, channel_name::String="Converted Stimulus")
+
+Convert a channel from a source experiment into a stimulus protocol for a target experiment.
+
+# Arguments
+- `target_exp`: The experiment to add the stimulus protocol to
+- `source_exp`: The experiment containing the channel to convert
+- `source_channel`: The channel to convert, can be either:
+    - An integer index
+    - A string channel name
+    - A vector of indices or names for multiple channels
+
+# Keyword Arguments
+- `threshold`: The voltage threshold for detecting stimulus events (default: 2.5V)
+- `channel_name`: Name to give the stimulus channel (default: "Converted Stimulus")
+
+# Example
+```julia
+# Convert channel 3 from source experiment to stimulus protocol
+convert_channel_to_stimulus!(target_exp, source_exp, 3)
+
+# Convert channel named "IN 7" with custom threshold
+convert_channel_to_stimulus!(target_exp, source_exp, "IN 7", threshold=3.0)
+
+# Convert multiple channels
+convert_channel_to_stimulus!(target_exp, source_exp, ["IN 7", "IN 8"])
+```
+"""
+function convert_channel_to_stimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; 
+    threshold::Real=2.5, channel_name::String="Converted Stimulus")
+    
+    # Handle different types of source_channel input
+    if isa(source_channel, String)
+        ch_idx = findfirst(isequal(source_channel), source_exp.chNames)
+        if isnothing(ch_idx)
+            throw(ArgumentError("Channel name '$source_channel' not found in source experiment"))
+        end
+        channels = [ch_idx]
+    elseif isa(source_channel, Vector{String})
+        channels = map(ch -> findfirst(isequal(ch), source_exp.chNames), source_channel)
+        if any(isnothing, channels)
+            throw(ArgumentError("One or more channel names not found in source experiment"))
+        end
+    elseif isa(source_channel, Integer)
+        channels = [source_channel]
+    elseif isa(source_channel, Vector{<:Integer})
+        channels = source_channel
+    else
+        throw(ArgumentError("source_channel must be a string, integer, or vector of strings/integers"))
+    end
+
+    # Create a new stimulus protocol
+    protocol = StimulusProtocol(channel_name)
+    
+    # For each trial in the source experiment
+    for trial in axes(source_exp, 1)
+        # Get the stimulus waveform for the current trial
+        stim_wave = source_exp[trial, :, channels] .> threshold
+        
+        # Find the start and end times of stimulus events
+        start_events = getStimulusStartTime(source_exp)
+        end_events = getStimulusEndTime(source_exp)
+        
+        # Add each event to the protocol
+        for (i, start_time) in enumerate(start_events)
+            end_time = end_events[i]
+            push!(protocol, (start_time, end_time))
+        end
+    end
+    
+    # Add the protocol to the target experiment
+    addStimulus!(target_exp, protocol)
+end
+
+"""
+    convert_channel_to_stimulus(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
+
+Non-mutating version of `convert_channel_to_stimulus!`. Returns a new experiment with the converted stimulus protocol.
+
+# Arguments
+- `target_exp`: The experiment to add the stimulus protocol to
+- `source_exp`: The experiment containing the channel to convert
+- `source_channel`: The channel to convert (see `convert_channel_to_stimulus!` for details)
+
+# Keyword Arguments
+- `threshold`: The voltage threshold for detecting stimulus events (default: 2.5V)
+- `channel_name`: Name to give the stimulus channel (default: "Converted Stimulus")
+
+# Returns
+- A new `Experiment` object with the converted stimulus protocol
+
+# Example
+```julia
+# Convert channel 3 from source experiment to stimulus protocol
+new_exp = convert_channel_to_stimulus(target_exp, source_exp, 3)
+```
+"""
+function convert_channel_to_stimulus(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
+    new_exp = deepcopy(target_exp)
+    convert_channel_to_stimulus!(new_exp, source_exp, source_channel; kwargs...)
+    return new_exp
+end
