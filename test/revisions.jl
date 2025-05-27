@@ -11,9 +11,24 @@ using GLMakie, PhysiologyPlotting
 fn = raw"F:\Data\Two Photon\2025-03-05-GRAB-DA-STRIATUM\grab-da_b4_str_stim500uA_3x_NOMF045.tif"
 data = readImage(fn)
 deinterleave!(data) #This seperates the movies into two seperate movies
+pixel_splits_roi!(data, 8) #Push the pixel splits to the ROI objects
+getROIarr(data, 1)
 
-x_pixels, y_pixels = getIMG_size(data)
+img_fn = raw"F:\Data\Two Photon\2025-05-02-GRAB-DA-nirCAT-STR\grab-nircat-str-20hz-100uA001.tif"
+stim_fn = raw"F:\Data\Patching\2025-05-02-GRAB-DA-STR\25502000.abf"
 
+data2P = readImage(img_fn);
+deinterleave!(data2P) #This seperates the movies into two seperate movies
+
+#If we have a electrical stimulus we need to do the spike train analysis
+addStimulus!(data2P, stim_fn, "IN 3", flatten_episodic = true, stimulus_threshold = 0.5)
+stim_protocol = getStimulusProtocol(data2P)
+#In the PhysiologyAnalysis package what we will do next is to iterate through the ROIs
+stim_protocol
+extractStimulus(stim_fn, "IN 3", flatten_episodic = true)
+
+
+#%%
 f = mean(data.data_array, dims = 1)[1,:,:]
 
 #%% Make a multi-threading to do median filter
