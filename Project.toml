@@ -1,7 +1,7 @@
 name = "ElectroPhysiology"
 uuid = "da7a9670-f599-43ac-b818-143f8bf87d45"
 authors = ["mattar13 <mtarchick13@gmail.com> and contributors"]
-version = "0.5.40"
+version = "0.5.41"
 
 [deps]
 CurveFit = "5a033b19-8c74-5913-a970-47c3779ef25c"
