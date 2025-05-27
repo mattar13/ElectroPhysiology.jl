@@ -256,6 +256,9 @@ getStimulusProtocol(exp::Experiment) = haskey(exp.HeaderDict, "StimulusProtocol"
 getStimulusStartTime(exp::Experiment) = getStimulusStartTime(getStimulusProtocol(exp))
 getStimulusEndTime(exp::Experiment) = getStimulusEndTime(getStimulusProtocol(exp))
 
+getStimulusEndIndex(exp::Experiment) = round(Int64, getStimulusEndTime(exp) ./ exp.dt)
+getStimulusStartIndex(exp::Experiment) = round(Int64, getStimulusStartTime(exp) ./ exp.dt)
+
 round_nanosecond(time::T) where {T<:Real} = Nanosecond(round(Int64, time * 1e9))
 round_nanosecond(time_series::Vector{T}) where {T<:Real} = map(time -> round_nanosecond(time), time_series)
 
