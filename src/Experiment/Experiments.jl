@@ -229,37 +229,377 @@ function reverse!(exp::Experiment; kwargs...)
 end
 
 # These items all come from the channel properties
+"""
+    getSampleFreq(exp::Experiment)
+
+Get the sampling frequency of the experiment in Hz.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- The sampling frequency calculated as 1/dt where dt is the time step between data points
+
+# Example
+```julia
+exp = Experiment(data_array)
+fs = getSampleFreq(exp)  # Returns sampling frequency in Hz
+```
+"""
 getSampleFreq(exp::Experiment) = 1/exp.dt
 
+"""
+    getChannelNames(exp::Experiment)
+
+Get the names of all channels in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of strings containing the names of all channels
+
+# Example
+```julia
+exp = Experiment(data_array)
+channel_names = getChannelNames(exp)
+```
+"""
 getChannelNames(exp::Experiment) = exp.chNames
 
+"""
+    getChannelUnite(exp::Experiment)
+
+Get the units of measurement for all channels in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of strings containing the units for each channel
+
+# Example
+```julia
+exp = Experiment(data_array)
+channel_units = getChannelUnite(exp)
+```
+"""
 getChannelUnite(exp::Experiment) = exp.chUnits
 
+"""
+    getGains(exp::Experiment)
+
+Get the gain values for all channels in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of real numbers containing the gain values for each channel
+
+# Example
+```julia
+exp = Experiment(data_array)
+channel_gains = getGains(exp)
+```
+"""
 getGains(exp::Experiment) = exp.chGains
 
+"""
+    addStimulus!(exp::Experiment, protocol::StimulusProtocol)
+
+Add a stimulus protocol to the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+- `protocol`: A `StimulusProtocol` object containing the stimulus information
+
+# Example
+```julia
+exp = Experiment(data_array)
+protocol = StimulusProtocol()
+addStimulus!(exp, protocol)
+```
+"""
 addStimulus!(exp::Experiment, protocol::StimulusProtocol) = exp.HeaderDict["StimulusProtocol"] = protocol
 
-#This function is used if the stimulus channel is in a different file
+"""
+    addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; kwargs...)
+
+Add a stimulus protocol to the experiment from a file.
+
+# Arguments
+- `exp`: An `Experiment` object
+- `protocol_fn`: Path to the file containing stimulus protocol
+- `stim_channel`: Name of the stimulus channel
+- `kwargs...`: Additional keyword arguments passed to `extractStimulus`
+
+# Example
+```julia
+exp = Experiment(data_array)
+addStimulus!(exp, "stimulus.abf", "IN 7")
+```
+"""
 addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; kwargs...) = 
     addStimulus!(exp, extractStimulus(protocol_fn, stim_channel; kwargs...))
 
-#This function is used if the stimulus channel is present in the recording
+"""
+    addStimulus!(exp::Experiment, stim_channel::String; kwargs...)
+
+Add a stimulus protocol to the experiment from the recording data.
+
+# Arguments
+- `exp`: An `Experiment` object
+- `stim_channel`: Name of the stimulus channel in the recording
+- `kwargs...`: Additional keyword arguments passed to `extractStimulus`
+
+# Example
+```julia
+exp = Experiment(data_array)
+addStimulus!(exp, "IN 7")
+```
+"""
 addStimulus!(exp::Experiment, stim_channel::String; kwargs...) = 
     addStimulus!(exp, extractStimulus(exp.HeaderDict, stim_channel; kwargs...))
 
+"""
+    setIntensity(exp::Experiment, photons)
 
+Set the intensity of the stimulus protocol.
+
+# Arguments
+- `exp`: An `Experiment` object
+- `photons`: The intensity value to set
+
+# Example
+```julia
+exp = Experiment(data_array)
+setIntensity(exp, 1.0)
+```
+"""
 setIntensity(exp::Experiment, photons) = setIntensity(exp.HeaderDict["StimulusProtocol"], photons)
 
+"""
+    getIntensity(exp::Experiment)
+
+Get the intensity of the stimulus protocol.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- The current intensity value of the stimulus protocol
+
+# Example
+```julia
+exp = Experiment(data_array)
+intensity = getIntensity(exp)
+```
+"""
 getIntensity(exp::Experiment) = getIntensity(exp.HeaderDict["StimulusProtocol"])
 
+"""
+    getStimulusProtocol(exp::Experiment)
+
+Get the stimulus protocol associated with the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- The `StimulusProtocol` object if one exists, `nothing` otherwise
+
+# Example
+```julia
+exp = Experiment(data_array)
+protocol = getStimulusProtocol(exp)
+```
+"""
 getStimulusProtocol(exp::Experiment) = haskey(exp.HeaderDict, "StimulusProtocol") ? exp.HeaderDict["StimulusProtocol"] : nothing
+
+"""
+    getStimulusStartTime(exp::Experiment)
+
+Get the start times of all stimulus events in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of start times for each stimulus event
+
+# Example
+```julia
+exp = Experiment(data_array)
+start_times = getStimulusStartTime(exp)
+```
+"""
 getStimulusStartTime(exp::Experiment) = getStimulusStartTime(getStimulusProtocol(exp))
+
+"""
+    getStimulusEndTime(exp::Experiment)
+
+Get the end times of all stimulus events in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of end times for each stimulus event
+
+# Example
+```julia
+exp = Experiment(data_array)
+end_times = getStimulusEndTime(exp)
+```
+"""
 getStimulusEndTime(exp::Experiment) = getStimulusEndTime(getStimulusProtocol(exp))
 
 getStimulusEndIndex(exp::Experiment) = round(Int64, getStimulusEndTime(exp) ./ exp.dt)
 getStimulusStartIndex(exp::Experiment) = round(Int64, getStimulusStartTime(exp) ./ exp.dt)
 
+"""
+    round_nanosecond(time::T) where {T<:Real}
+    round_nanosecond(time_series::Vector{T}) where {T<:Real}
+
+Round a time value or vector of time values to the nearest nanosecond.
+
+# Arguments
+- `time`: A real number representing time in seconds
+- `time_series`: A vector of real numbers representing time points
+
+# Returns
+- A `Nanosecond` value or vector of `Nanosecond` values
+
+# Example
+```julia
+time_ns = round_nanosecond(1.5)  # Returns Nanosecond(1500000000)
+times_ns = round_nanosecond([1.5, 2.5])  # Returns [Nanosecond(1500000000), Nanosecond(2500000000)]
+```
+"""
 round_nanosecond(time::T) where {T<:Real} = Nanosecond(round(Int64, time * 1e9))
 round_nanosecond(time_series::Vector{T}) where {T<:Real} = map(time -> round_nanosecond(time), time_series)
 
+"""
+    getRealTime(exp::Experiment)
+
+Get the real-world timestamps for all time points in the experiment.
+
+# Arguments
+- `exp`: An `Experiment` object
+
+# Returns
+- Vector of `DateTime` values representing the real-world time for each data point
+
+# Example
+```julia
+exp = Experiment(data_array)
+real_times = getRealTime(exp)
+```
+"""
 getRealTime(exp::Experiment) = exp.HeaderDict["FileStartDateTime"] .+ round_nanosecond(exp.t)
+
+"""
+    convert_channel_to_stimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; 
+        threshold::Real=2.5, channel_name::String="Converted Stimulus")
+
+Convert a channel from a source experiment into a stimulus protocol for a target experiment.
+
+# Arguments
+- `target_exp`: The experiment to add the stimulus protocol to
+- `source_exp`: The experiment containing the channel to convert
+- `source_channel`: The channel to convert, can be either:
+    - An integer index
+    - A string channel name
+    - A vector of indices or names for multiple channels
+
+# Keyword Arguments
+- `threshold`: The voltage threshold for detecting stimulus events (default: 2.5V)
+- `channel_name`: Name to give the stimulus channel (default: "Converted Stimulus")
+
+# Example
+```julia
+# Convert channel 3 from source experiment to stimulus protocol
+convert_channel_to_stimulus!(target_exp, source_exp, 3)
+
+# Convert channel named "IN 7" with custom threshold
+convert_channel_to_stimulus!(target_exp, source_exp, "IN 7", threshold=3.0)
+
+# Convert multiple channels
+convert_channel_to_stimulus!(target_exp, source_exp, ["IN 7", "IN 8"])
+```
+"""
+function convert_channel_to_stimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; 
+    threshold::Real=2.5, channel_name::String="Converted Stimulus")
+    
+    # Handle different types of source_channel input
+    if isa(source_channel, String)
+        ch_idx = findfirst(isequal(source_channel), source_exp.chNames)
+        if isnothing(ch_idx)
+            throw(ArgumentError("Channel name '$source_channel' not found in source experiment"))
+        end
+        channels = [ch_idx]
+    elseif isa(source_channel, Vector{String})
+        channels = map(ch -> findfirst(isequal(ch), source_exp.chNames), source_channel)
+        if any(isnothing, channels)
+            throw(ArgumentError("One or more channel names not found in source experiment"))
+        end
+    elseif isa(source_channel, Integer)
+        channels = [source_channel]
+    elseif isa(source_channel, Vector{<:Integer})
+        channels = source_channel
+    else
+        throw(ArgumentError("source_channel must be a string, integer, or vector of strings/integers"))
+    end
+
+    # Create a new stimulus protocol
+    protocol = StimulusProtocol(channel_name)
+    
+    # For each trial in the source experiment
+    for trial in axes(source_exp, 1)
+        # Get the stimulus waveform for the current trial
+        stim_wave = source_exp[trial, :, channels] .> threshold
+        
+        # Find the start and end times of stimulus events
+        start_events = getStimulusStartTime(source_exp)
+        end_events = getStimulusEndTime(source_exp)
+        
+        # Add each event to the protocol
+        for (i, start_time) in enumerate(start_events)
+            end_time = end_events[i]
+            push!(protocol, (start_time, end_time))
+        end
+    end
+    
+    # Add the protocol to the target experiment
+    addStimulus!(target_exp, protocol)
+end
+
+"""
+    convert_channel_to_stimulus(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
+
+Non-mutating version of `convert_channel_to_stimulus!`. Returns a new experiment with the converted stimulus protocol.
+
+# Arguments
+- `target_exp`: The experiment to add the stimulus protocol to
+- `source_exp`: The experiment containing the channel to convert
+- `source_channel`: The channel to convert (see `convert_channel_to_stimulus!` for details)
+
+# Keyword Arguments
+- `threshold`: The voltage threshold for detecting stimulus events (default: 2.5V)
+- `channel_name`: Name to give the stimulus channel (default: "Converted Stimulus")
+
+# Returns
+- A new `Experiment` object with the converted stimulus protocol
+
+# Example
+```julia
+# Convert channel 3 from source experiment to stimulus protocol
+new_exp = convert_channel_to_stimulus(target_exp, source_exp, 3)
+```
+"""
+function convert_channel_to_stimulus(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
+    new_exp = deepcopy(target_exp)
+    convert_channel_to_stimulus!(new_exp, source_exp, source_channel; kwargs...)
+    return new_exp
+end
