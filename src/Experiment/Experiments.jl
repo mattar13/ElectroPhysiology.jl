@@ -519,7 +519,7 @@ real_times = getRealTime(exp)
 getRealTime(exp::Experiment) = exp.HeaderDict["FileStartDateTime"] .+ round_nanosecond(exp.t)
 
 """
-    convert_channel_to_stimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; 
+    addStimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; 
         threshold::Real=2.5, channel_name::String="Converted Stimulus")
 
 Convert a channel from a source experiment into a stimulus protocol for a target experiment.
@@ -539,13 +539,13 @@ Convert a channel from a source experiment into a stimulus protocol for a target
 # Example
 ```julia
 # Convert channel 3 from source experiment to stimulus protocol
-convert_channel_to_stimulus!(target_exp, source_exp, 3)
+addStimulus!(target_exp, source_exp, 3)
 
 # Convert channel named "IN 7" with custom threshold
-convert_channel_to_stimulus!(target_exp, source_exp, "IN 7", threshold=3.0)
+addStimulus!(target_exp, source_exp, "IN 7", threshold=3.0)
 
 # Convert multiple channels
-convert_channel_to_stimulus!(target_exp, source_exp, ["IN 7", "IN 8"])
+addStimulus!(target_exp, source_exp, ["IN 7", "IN 8"])
 ```
 """
 function addStimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; 
@@ -595,9 +595,9 @@ function addStimulus!(target_exp::Experiment, source_exp::Experiment, source_cha
 end
 
 """
-    convert_channel_to_stimulus(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
+    addStimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
 
-Non-mutating version of `convert_channel_to_stimulus!`. Returns a new experiment with the converted stimulus protocol.
+Non-mutating version of `addStimulus!`. Returns a new experiment with the converted stimulus protocol.
 
 # Arguments
 - `target_exp`: The experiment to add the stimulus protocol to
@@ -614,7 +614,7 @@ Non-mutating version of `convert_channel_to_stimulus!`. Returns a new experiment
 # Example
 ```julia
 # Convert channel 3 from source experiment to stimulus protocol
-new_exp = convert_channel_to_stimulus(target_exp, source_exp, 3)
+new_exp = addStimulus!(target_exp, source_exp, 3)
 ```
 """
 function addStimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
