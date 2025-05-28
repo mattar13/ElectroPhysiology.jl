@@ -617,7 +617,7 @@ Non-mutating version of `addStimulus!`. Returns a new experiment with the conver
 new_exp = addStimulus!(target_exp, source_exp, 3)
 ```
 """
-function addStimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
+function addStimulus(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
     new_exp = deepcopy(target_exp)
     addStimulus!(new_exp, source_exp, source_channel; kwargs...)
     return new_exp
