@@ -340,8 +340,20 @@ exp = Experiment(data_array)
 addStimulus!(exp, "stimulus.abf", "IN 7")
 ```
 """
-addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; kwargs...) = 
-    addStimulus!(exp, extractStimulus(protocol_fn, stim_channel; kwargs...))
+function addStimulus!(exp::Experiment, protocol_fn::String, stim_channel::String; 
+    align_timestamps::Bool=true, kwargs...
+)
+    if haskey(exp.HeaderDict, "StimulusProtocol")
+        throw(ArgumentError("Stimulus protocol already exists"))
+    end
+    #We have to configure the stimulus offset
+    if align_timestamps
+        stim = extractStimulus(protocol_fn, stim_channel; kwargs...)
+    else
+        stim = extractStimulus(protocol_fn, stim_channel; kwargs...)
+    end
+    addStimulus!(exp, stim)
+end
 
 """
     addStimulus!(exp::Experiment, stim_channel::String; kwargs...)
@@ -359,8 +371,15 @@ exp = Experiment(data_array)
 addStimulus!(exp, "IN 7")
 ```
 """
-addStimulus!(exp::Experiment, stim_channel::String; kwargs...) = 
-    addStimulus!(exp, extractStimulus(exp.HeaderDict, stim_channel; kwargs...))
+function addStimulus!(exp::Experiment, stim_channel::String; kwargs...)
+    if haskey(exp.HeaderDict, "StimulusProtocol")
+        throw(ArgumentError("Stimulus protocol already exists"))
+    end
+    #We have to configure the stimulus offset
+    stim = extractStimulus(exp.HeaderDict, stim_channel; kwargs...)
+    
+    addStimulus!(exp, stim)
+end
 
 """
     setIntensity(exp::Experiment, photons)
@@ -529,7 +548,7 @@ convert_channel_to_stimulus!(target_exp, source_exp, "IN 7", threshold=3.0)
 convert_channel_to_stimulus!(target_exp, source_exp, ["IN 7", "IN 8"])
 ```
 """
-function convert_channel_to_stimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; 
+function addStimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; 
     threshold::Real=2.5, channel_name::String="Converted Stimulus")
     
     # Handle different types of source_channel input
@@ -598,8 +617,8 @@ Non-mutating version of `convert_channel_to_stimulus!`. Returns a new experiment
 new_exp = convert_channel_to_stimulus(target_exp, source_exp, 3)
 ```
 """
-function convert_channel_to_stimulus(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
+function addStimulus!(target_exp::Experiment, source_exp::Experiment, source_channel; kwargs...)
     new_exp = deepcopy(target_exp)
-    convert_channel_to_stimulus!(new_exp, source_exp, source_channel; kwargs...)
+    addStimulus!(new_exp, source_exp, source_channel; kwargs...)
     return new_exp
 end
