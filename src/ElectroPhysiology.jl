@@ -30,7 +30,6 @@ export std,mean
 export addStimulus! #This allows us to either add a stimulus from a StimulusProtocol object or from a file
 export getStimulusStartTime, getStimulusEndTime
 export getStimulusStartIndex, getStimulusEndIndex
-export convert_channel_to_stimulus!
 
 include("Experiment/IterateExperiments.jl")
 export getdata, getchannel, eachchannel, eachtrial
