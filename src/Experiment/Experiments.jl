@@ -622,3 +622,17 @@ function addStimulus(target_exp::Experiment, source_exp::Experiment, source_chan
     addStimulus!(new_exp, source_exp, source_channel; kwargs...)
     return new_exp
 end
+
+spike_train_group!(exp::Experiment, group_time) = spike_train_group!(exp.HeaderDict["StimulusProtocol"], group_time)
+
+#Here we should alter the addStimulus! function to allow for file to be converted to a stimulus protocol
+function addStimulus!(target_exp::Experiment, source_fn::String, source_channel::String; kwargs...)
+    source_exp = readABF(source_fn)
+    addStimulus!(target_exp, source_exp, source_channel; kwargs...)
+end
+
+function addStimulus(target_exp::Experiment, source_fn::String, source_channel::String; kwargs...)
+    new_exp = deepcopy(target_exp)
+    addStimulus!(new_exp, source_fn, source_channel; kwargs...)
+    return new_exp
+end
