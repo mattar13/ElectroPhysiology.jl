@@ -1,18 +1,27 @@
 using Revise
 using Pkg; Pkg.activate(".")
 using ElectroPhysiology
-using Base.Threads
 
-#Plotting
-using Pkg; Pkg.activate("test")
-using GLMakie, PhysiologyPlotting
+#Plots is added globally
+using Plots
+#Want to load the stimulus d
 
-#%% Believe it or not we need to now open up some old ERG data. So lets figure out how to reconfigure add stimulus for the old ERG data
-fn = raw"F:\Data\Two Photon\2025-03-05-GRAB-DA-STRIATUM\grab-da_b4_str_stim500uA_3x_NOMF045.tif"
+
+fn = raw"G:\Data\Two Photon\2025-03-05-GRAB-DA-STRIATUM\grab-da_b4_str_stim500uA_3x_NOMF045.tif"
 data = readImage(fn)
 deinterleave!(data) #This seperates the movies into two seperate movies
-pixel_splits_roi!(data, 8) #Push the pixel splits to the ROI objects
+#pixel_splits_roi!(data, 8) #Push the pixel splits to the ROI objects
 getROIarr(data, 1)
+
+ElectroPhysiology.make_circular_roi!(data, (100, 100), 100)
+mask = getROImask(data)
+
+vals = getROIarr(data, 1)
+
+#%%
+
+
+
 
 img_fn = raw"F:\Data\Two Photon\2025-05-02-GRAB-DA-nirCAT-STR\grab-nircat-str-20hz-100uA001.tif"
 stim_fn = raw"F:\Data\Patching\2025-05-02-GRAB-DA-STR\25502000.abf"
