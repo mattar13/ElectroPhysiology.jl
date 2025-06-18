@@ -93,6 +93,7 @@ export pixel_splits, pixel_splits_roi!
 export recordROI 
 export getROIindexes, getROImask, getROIarr
 export loadROIfn!
+export make_circular_roi!
 
 #For some reason this is starting
 function OLD__init__()    
