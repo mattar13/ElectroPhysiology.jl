@@ -36,6 +36,33 @@ function pixel_splits_roi!(exp::Experiment{TWO_PHOTON, T}, roi_size) where T<:Re
     exp.HeaderDict["ROIs"] = roi_mask_flat
 end
 
+#Make a function that will make a circular ROI
+function make_circular_roi!(exp::Experiment{TWO_PHOTON, T}, center::Tuple{Int64, Int64}, radius::Int64) where T<:Real
+    x_pixels, y_pixels = exp.HeaderDict["framesize"]
+    
+    #Create a mask of zeros
+    roi_mask = zeros(Int64, x_pixels, y_pixels)
+    
+    #Create a circular ROI using the circle equation: (x-h)² + (y-k)² = r²
+    #where (h,k) is the center and r is the radius
+    center_x, center_y = center
+    
+    #Iterate through all pixels in the image
+    for x in 1:x_pixels
+        for y in 1:y_pixels
+            #Check if the pixel is within the circle using distance formula
+            distance_squared = (x - center_x)^2 + (y - center_y)^2
+            if distance_squared <= radius^2
+                roi_mask[x, y] = 1
+            end
+        end
+    end
+    
+    #Reshape the mask to the flattened format expected by the experiment
+    roi_mask_flat = reshape(roi_mask, x_pixels * y_pixels)
+    exp.HeaderDict["ROIs"] = roi_mask_flat
+end
+
 #Load a ROI
 
 getROIindexes(exp::Experiment{TWO_PHOTON, T}, label::Int64) where T<:Real = findall(exp.HeaderDict["ROIs"] .== label)
