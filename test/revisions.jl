@@ -15,13 +15,10 @@ getROIarr(data, 1)
 
 ElectroPhysiology.make_circular_roi!(data, (100, 100), 100)
 mask = getROImask(data)
-
 vals = getROIarr(data, 1)
 
+
 #%%
-
-
-
 
 img_fn = raw"F:\Data\Two Photon\2025-05-02-GRAB-DA-nirCAT-STR\grab-nircat-str-20hz-100uA001.tif"
 stim_fn = raw"F:\Data\Patching\2025-05-02-GRAB-DA-STR\25502000.abf"
