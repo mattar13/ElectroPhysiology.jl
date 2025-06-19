@@ -15,14 +15,6 @@ using ProgressMeter
 #Also make sure to move this eventually
 # using DSP #Used for lowpass, highpass, EI, and notch filtering
 
-include("Stimulus/StimulusProtocol.jl")
-export StimulusProtocol
-export setindex!, getindex
-export getStimulusProtocol
-export extractStimulus, setIntensity, getIntensity
-export find_stim_index
-export spike_train_group!
-
 include("Experiment/Experiments.jl") #This file contains the Experiment structure. 
 export getSampleFreq
 export abs 
@@ -30,6 +22,14 @@ export std,mean
 export addStimulus! #This allows us to either add a stimulus from a StimulusProtocol object or from a file
 export getStimulusStartTime, getStimulusEndTime
 export getStimulusStartIndex, getStimulusEndIndex
+
+include("Stimulus/StimulusProtocol.jl")
+export StimulusProtocol
+export setindex!, getindex
+export getStimulusProtocol
+export extractStimulus, setIntensity, getIntensity
+export find_stim_index
+export spike_train_group!
 
 include("Experiment/IterateExperiments.jl")
 export getdata, getchannel, eachchannel, eachtrial
