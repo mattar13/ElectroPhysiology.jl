@@ -7,26 +7,28 @@ using Plots
 #Want to load the stimulus d
 
 #Fix truncate so it cuts off stimulus not in the window
+img_fn3 = raw"F:\Data\Two Photon\2025-05-15-GRAB-DA_STR\b5_grabda-nircat-300uA_pulse014.tif"
 stim_fn3 = raw"F:\Data\Patching\2025-05-15-GRAB-DA-STR\25515021.abf"
+
+data_img = readImage(img_fn3)
+deinterleave!(data_img)
 stimulus = readABF(stim_fn3, stimulus_name = "IN 3", stimulus_threshold = 0.5, flatten_episodic = true)
 spike_train_group!(stimulus, 1.0)
-stim_end_times = getStimulusEndTime(stimulus)
-stim_end_idxs = round.(Int, stim_end_times ./ stimulus.dt)
+addStimulus!(data_img, stimulus, "IN 3")
+truncate_data!(data_img, 0.0, 400.0)
 
-trunc_start = stimulus.t[140000]
-stim_time = stimulus.t[stim_end_idxs[2]]
-trunc_end = stimulus.t[340000]
+stimulus_idx = 2
+main_t_stim = getStimulusEndTime(data_img)[stimulus_idx]
+trunc_start = main_t_stim - 40
+trunc_end = main_t_stim + 120
 
-trunc_start = 20.0
-trunc_end = 40.0
+stim_2 = truncate_data(data_img, trunc_start, trunc_end)
+t_stim = getStimulusEndTime(stim_2)[1]
+stim_frame = round(Int, t_stim ./ stim_2.dt)
 
-stim_protocol = getStimulusProtocol(stimulus)
-stim_protocol[2]
+pixel_splits_roi!(stim_2, 8)
 
-getStimulusEndTime(stimulus)
-stim_2 = truncate_data(stimulus, trunc_start, trunc_end, truncate_based_on = :stimulus_end)
-getStimulusEndTime(stim_2)
-
+getROIarr(stim_2, [1,2, 3])
 
 #%%
 
