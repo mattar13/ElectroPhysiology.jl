@@ -235,6 +235,16 @@ function getROIarr(exp::Experiment{TWO_PHOTON, T}, label::Int64; reshape_arr = f
      end
 end
 
+function getROIarr(exp::Experiment{TWO_PHOTON, T}, labels::Vector{Int64}; reshape_arr = false) where T <: Real
+    
+    all_roi_arr = []
+    for label in labels
+        roi_arr = getROIarr(exp, label; reshape_arr = reshape_arr)
+        push!(all_roi_arr, roi_arr)
+    end
+    return cat(all_roi_arr..., dims = 1)
+end
+
 """
     getROIarr(exp::Experiment{TWO_PHOTON, T}; reshape_arr = true) where T<:Real -> Array{T, 4}
 
