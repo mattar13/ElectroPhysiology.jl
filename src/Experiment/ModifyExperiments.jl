@@ -162,8 +162,6 @@ Truncate data in the `Experiment` object, in-place, either based on the stimulus
 
 # Arguments
 - `trace`: An `Experiment` object containing the experimental data.
-- `t_pre`: (Optional) Time before the stimulus to truncate the data. Default is 1.0.
-- `t_post`: (Optional) Time after the stimulus to truncate the data. Default is 4.0.
 - `t_begin`: (Optional) Start time of the time range for truncation.
 - `t_end`: (Optional) End time of the time range for truncation.
 - `truncate_based_on`: (Optional) A symbol specifying the truncation method. Can be `:stimulus_beginning`, `:stimulus_end`, or `:time_range`. Default is `:stimulus_beginning`.
@@ -179,10 +177,9 @@ exp = Experiment(data_array)
 truncated_exp = truncate_data(exp, t_pre=0.5, t_post=2.5)
 ```
 """
-function truncate_data!(trace::Experiment{F, T}; 
-    t_pre=1.0, t_post=5.0, 
-    t_begin = 0.0, t_end = 1000.0, 
+function truncate_data!(trace::Experiment{F, T}, t_begin, t_end;
     truncate_based_on=:time_range, 
+    stimulus_index = 1, #If :stimulus is selected for truncate_based_on, this is the index of the stimulus to truncate
     time_zero = false
 ) where {F, T<:Real}
     dt = trace.dt
@@ -196,11 +193,21 @@ function truncate_data!(trace::Experiment{F, T};
         trace.t = trace.t[start_rng:end_rng] .- trace.t[start_rng]
         
         try
+            #Want to find only the stimulus that is within the (t_begin, t_end) range
             stim_protocol = getStimulusProtocol(trace)
-            stim_protocol.timestamps = [(stim_protocol.timestamps[1][1]-t_begin, stim_protocol.timestamps[1][2]-t_begin)]
-
+            stim_in_range = findall(x -> x[1] >= t_begin && x[2] <= t_end, stim_protocol.timestamps)
+            #Then assign the only stims in range to the new stim_protocl
+            stim_protocol.timestamps = stim_protocol.timestamps[stim_in_range]
+            #Now we need to subtract the t_begin from the stimulus timestamps
+            for (idx, stim) in enumerate(stim_protocol.timestamps)
+                new_start = stim[1] .- t_begin
+                new_end = stim[2] .- t_begin
+                stim_protocol.timestamps[idx] = (new_start, new_end)
+            end
         catch error
+            println(error)
             println("No stimulus protocol exists")
+            throw(error)
         end
 
     elseif isnothing(getStimulusProtocol(trace))
@@ -208,81 +215,43 @@ function truncate_data!(trace::Experiment{F, T};
         size_of_array = round(Int64, t_post / dt)
         trace.data_array = trace.data_array[:, 1:size_of_array, :] #remake the array with only the truncated data
         trace.t = range(0.0, t_post, length=size_of_array)
-    else
-        for swp in axes(trace, 1)
+    elseif truncate_based_on == :stimulus_beginning || truncate_based_on == :stimulus_end
+        #We need to work on this a little bit. It no longer works the way I want it to. 
+        try
             stim_protocol = getStimulusProtocol(trace)
-            tstamps = stim_protocol.timestamps[swp]
-
-            idx_range = round.(Int64, tstamps ./ dt)
             if truncate_based_on == :stimulus_beginning
-                #This will set the beginning of the stimulus as the truncation location
-                #tstamps = stimulus_protocol[swp]
-                truncate_loc = idx_range[1]
-                t_begin_adjust = 0.0
-                t_end_adjust = tstamps[2] - tstamps[1]
+                stimulus_time = stim_protocol[stimulus_index][1][1]
             elseif truncate_based_on == :stimulus_end
-                #This will set the beginning of the simulus as the truncation 
-                truncate_loc = idx_range[2]
-                t_begin_adjust = tstamps[1] - tstamps[2]
-                t_end_adjust = 0.0
+                stimulus_time = stim_protocol[stimulus_index][1][2]
             end
-            #println((t_begin_adjust, t_end_adjust))
-            stim_protocol.timestamps[swp] = (t_begin_adjust, t_end_adjust)
+            #In this case, t_begin becomes relative to the stimulus and subtracted from it
+            t_pre = max(0.0, stimulus_time - t_begin) #We want this to be positive however
+            t_post = min(trace.t[end], stimulus_time + t_end) #We want this to be positive however
 
-            #First lets calculate how many indexes we need before the stimulus
-            needed_before = round(Int, t_pre / dt)
-            needed_after = round(Int, t_post / dt)
-            
-            #println("We need $needed_before and $needed_after indexes before and after")
-            have_before = truncate_loc
-            have_after = size(trace, 2) - truncate_loc
-            #println("We have $have_before and $have_after indexes before and after")
-            if needed_before > have_before
-                #println("Not enough indexes preceed the stimulus point")
-                extra_indexes = needed_before - have_before
-                overrun_time = extra_indexes * dt
-                #println("t_pre goes $extra_indexes indexes too far")
-                idxs_begin = 1
-                stim_begin_adjust = idx_range[1]
-            else
-                #println("Enough indexes preceed the stimulus point")
-                idxs_begin = truncate_loc - round(Int, t_pre / dt) +1
-                stim_begin_adjust = round(Int, t_pre / dt) 
-            end
+            start_rng = round(Int64, t_pre / dt)+1
+            end_rng = round(Int64, t_post / dt)
+            trace.data_array = trace.data_array[:, start_rng:end_rng, :]
+            trace.t = trace.t[start_rng:end_rng] .- trace.t[start_rng]
 
-            if needed_after > have_after
-                #println("Not enough indexes proceed the stimulus point")
-                idxs_end = size(trace, 2)
-            else
-                #println("Enough indexes proceed the stimulus point")
-                idxs_end = truncate_loc + round(Int, t_post / dt)+1
+            stim_in_range = findall(x -> x[1] >= t_pre && x[2] <= t_post, stim_protocol.timestamps)
+            stim_protocol.timestamps = stim_protocol.timestamps[stim_in_range]
+            for (idx, stim) in enumerate(stim_protocol.timestamps)
+                new_start = stim[1] .- t_pre
+                new_end = stim[2] .- t_pre
+                stim_protocol.timestamps[idx] = (new_start, new_end)
             end
-            idxs_end = idxs_end < size(trace, 2) ? idxs_end : size(trace, 2)
-            if size_of_array == 0
-                size_of_array = (idxs_end - idxs_begin)+1
-            end
-            trace.data_array[swp, 1:size_of_array, :] .= trace.data_array[swp, idxs_begin:idxs_end, :]
-
-            #println(size_of_array)
-        end
-        trace.data_array = trace.data_array[:, 1:size_of_array, :] #remake the array with only the truncated data
-        trace.t = range(-t_pre + overrun_time, t_post, length=size_of_array)
-        if time_zero
-            min_time = minimum(trace.t)
-            trace.t .-= min_time
-            for swp in axes(trace, 1)
-                stim_protocol = getStimulusProtocol(trace)
-                tstamps = stim_protocol.timestamps[swp]
-                stim_protocol.timestamps[swp] = (tstamps[1] - min_time, tstamps[2] - min_time)
-            end
+        catch error
+            #println(error)
+            println("No stimulus protocol exists")
+            throw(error)
         end
     end
     return trace
 end
 
-function truncate_data(trace::Experiment{F, T}; kwargs...) where {F, T<:Real} 
+function truncate_data(trace::Experiment{F, T}, t_begin, t_end; kwargs...) where {F, T<:Real} 
     data = deepcopy(trace)
-    truncate_data!(data; kwargs...)
+    truncate_data!(data, t_begin, t_end; kwargs...)
     return data
 end
 

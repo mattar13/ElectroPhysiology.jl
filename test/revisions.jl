@@ -6,16 +6,26 @@ using ElectroPhysiology
 using Plots
 #Want to load the stimulus d
 
+#Fix truncate so it cuts off stimulus not in the window
+stim_fn3 = raw"F:\Data\Patching\2025-05-15-GRAB-DA-STR\25515021.abf"
+stimulus = readABF(stim_fn3, stimulus_name = "IN 3", stimulus_threshold = 0.5, flatten_episodic = true)
+spike_train_group!(stimulus, 1.0)
+stim_end_times = getStimulusEndTime(stimulus)
+stim_end_idxs = round.(Int, stim_end_times ./ stimulus.dt)
 
-fn = raw"G:\Data\Two Photon\2025-03-05-GRAB-DA-STRIATUM\grab-da_b4_str_stim500uA_3x_NOMF045.tif"
-data = readImage(fn)
-deinterleave!(data) #This seperates the movies into two seperate movies
-#pixel_splits_roi!(data, 8) #Push the pixel splits to the ROI objects
-getROIarr(data, 1)
+trunc_start = stimulus.t[140000]
+stim_time = stimulus.t[stim_end_idxs[2]]
+trunc_end = stimulus.t[340000]
 
-ElectroPhysiology.make_circular_roi!(data, (100, 100), 100)
-mask = getROImask(data)
-vals = getROIarr(data, 1)
+trunc_start = 20.0
+trunc_end = 40.0
+
+stim_protocol = getStimulusProtocol(stimulus)
+stim_protocol[2]
+
+getStimulusEndTime(stimulus)
+stim_2 = truncate_data(stimulus, trunc_start, trunc_end, truncate_based_on = :stimulus_end)
+getStimulusEndTime(stim_2)
 
 
 #%%
