@@ -98,12 +98,13 @@ function make_circular_roi!(exp::Experiment{TWO_PHOTON, T}, center::Tuple{Real, 
     dy = yrng[2] - yrng[1]
 
     #Convert the center to pixel coordinates
-    center_x = round(Int, (center[1] - xrng[1]) / dx * x_pixels)
-    center_y = round(Int, (center[2] - yrng[1]) / dy * y_pixels)
+    center_x = round(Int, (center[1] - xrng[1]) / dx)
+    center_y = round(Int, (center[2] - yrng[1]) / dy)
 
     #convert the radius to pixel coordinates
-    radius_px = round(Int, radius / dx * x_pixels)
+    radius_px = round(Int, radius / dx)
 
+    # println("center_x: $center_x, center_y: $center_y, radius_px: $radius_px")
     #Create a mask of zeros
     roi_mask = zeros(Int64, x_pixels, y_pixels)
     
