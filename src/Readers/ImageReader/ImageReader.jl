@@ -56,6 +56,7 @@ function readImage(::Type{T}, filename;
      HeaderDict["y_pixels"] = px_x
      HeaderDict["xrng"] = LinRange(0, fov/zoom, px_y)
      HeaderDict["yrng"] = LinRange(0, fov/zoom, px_x)
+     println(HeaderDict["xrng"])
      sampling_rate = HeaderDict["state.acq.frameRate"]
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
