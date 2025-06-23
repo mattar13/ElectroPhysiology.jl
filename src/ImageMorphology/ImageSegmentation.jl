@@ -89,22 +89,33 @@ Uses the circle equation (x-h)² + (y-k)² = r² to determine which pixels fall 
 make_circular_roi!(experiment, (50, 50), 20)
 ```
 """
-function make_circular_roi!(exp::Experiment{TWO_PHOTON, T}, center::Tuple{Int64, Int64}, radius::Int64) where T<:Real
+function make_circular_roi!(exp::Experiment{TWO_PHOTON, T}, center::Tuple{Real, Real}, radius::Real) where T<:Real
     x_pixels, y_pixels = exp.HeaderDict["framesize"]
-    
+    #Eventually we want to make this a function of real image size vs pixel size
+    xrng = exp.HeaderDict["xrng"]
+    yrng = exp.HeaderDict["yrng"]
+    dx = xrng[2] - xrng[1]
+    dy = yrng[2] - yrng[1]
+
+    #Convert the center to pixel coordinates
+    center_x = round(Int, (center[1] - xrng[1]) / dx * x_pixels)
+    center_y = round(Int, (center[2] - yrng[1]) / dy * y_pixels)
+
+    #convert the radius to pixel coordinates
+    radius_px = round(Int, radius / dx * x_pixels)
+
     #Create a mask of zeros
     roi_mask = zeros(Int64, x_pixels, y_pixels)
     
     #Create a circular ROI using the circle equation: (x-h)² + (y-k)² = r²
     #where (h,k) is the center and r is the radius
-    center_x, center_y = center
     
     #Iterate through all pixels in the image
     for x in 1:x_pixels
         for y in 1:y_pixels
             #Check if the pixel is within the circle using distance formula
             distance_squared = (x - center_x)^2 + (y - center_y)^2
-            if distance_squared <= radius^2
+            if distance_squared <= radius_px^2
                 roi_mask[x, y] = 1
             end
         end
