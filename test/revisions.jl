@@ -29,7 +29,7 @@ stim_frame = round(Int, t_stim ./ stim_2.dt)
 pixel_splits_roi!(stim_2, 8)
 
 getROIarr(stim_2, [1,2, 3])
-
+getROImask(stim_2, [1,2, 3])
 #%%
 
 img_fn = raw"F:\Data\Two Photon\2025-05-02-GRAB-DA-nirCAT-STR\grab-nircat-str-20hz-100uA001.tif"
