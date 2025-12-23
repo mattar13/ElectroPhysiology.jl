@@ -1,7 +1,7 @@
 name = "ElectroPhysiology"
 uuid = "da7a9670-f599-43ac-b818-143f8bf87d45"
-authors = ["mattar13 <mtarchick13@gmail.com> and contributors"]
 version = "0.5.50"
+authors = ["mattar13 <mtarchick13@gmail.com> and contributors"]
 
 [deps]
 CurveFit = "5a033b19-8c74-5913-a970-47c3779ef25c"
@@ -20,7 +20,7 @@ TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 
 [compat]
 CurveFit = "0.6.0"
-DSP = "^0.7"
+DSP = "^0.7, 0.8"
 FileIO = "1"
 ImageMagick = "1"
 Images = "0.26"
