@@ -1,5 +1,5 @@
-## PhysiologyAnalysis methods
+# PhysiologyAnalysis Methods (Legacy Page)
 
-```@docs
-calculate_threshold(x::Array{T, N}; Z = 4.0, dims = -1) where {T <: Real, N}
-```
+PhysiologyAnalysis method documentation should live in the `PhysiologyAnalysis.jl` repository.
+
+This page is intentionally minimal to avoid stale cross-package API references in this package docs build.

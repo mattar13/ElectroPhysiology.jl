@@ -1,27 +1,29 @@
 # Installation
 
-## Making an analysis environment (OPTIONAL)
-While it is not necessary to create a seperate environment, this helps to isolate packages and prevent cross-contamination of packages. 
+## Recommended: Use a Dedicated Environment
 
-In order to create a new environment use this code: 
-```
-using Pkg; Pkg.activate("Analysis")
-```
+Using a dedicated environment avoids dependency conflicts.
 
-Each time you run julia you will need to run this line first. 
-
-## Installing ElectroPhysiology.jl
-
-```
-using Pkg; Pkg.add("ElectroPhysiology")
+```julia
+using Pkg
+Pkg.activate("Analysis")
 ```
 
-## Installing the PhysiologyAnalysis.jl toolkit
-```
-using Pkg; Pkg.add("PhysiologyAnalysis")
+Run `Pkg.activate("Analysis")` each session before loading packages.
+
+## Install ElectroPhysiology.jl
+
+```julia
+using Pkg
+Pkg.add("ElectroPhysiology")
 ```
 
-## Installing the PhysiologyPlotting.jl toolkit
+## Optional Companion Packages
+
+```julia
+using Pkg
+Pkg.add("PhysiologyAnalysis")
+Pkg.add("PhysiologyPlotting")
 ```
-using Pkg; Pkg.add("PhysiologyPlotting")
-```
+
+See also: [Tutorial](tutorial.md), [API Reference](API.md).

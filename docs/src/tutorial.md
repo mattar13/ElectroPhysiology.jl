@@ -1,42 +1,63 @@
-# ElectroPhysiology.jl Tutorial
+# Tutorial
 
-### A tutorial is provided in the github repo
+This tutorial shows a practical baseline workflow with the currently loaded APIs.
 
-https://github.com/mattar13/PhysiologyInterface.jl
+## 1) Load ABF data
 
-## The experiment is the universal experiment container
-At the base of the ElectroPhysiology.jl package (PhysigologyAnalysis.jl, and PhysiologyModeling.jl). Is the Experiment object: [`Experiment`](@ref). This object contains all relevant information about the data. The easiest way to get your data into an Experiment is to extract it. 
+```julia
+using ElectroPhysiology
 
-
-# Opening Axon Binary Format files (.abf)
-Currently, this package only opens this can only be done through 
-
-```@example
-test_file = "test\\to_filter.abf"
-data = readABF(test_file)
-println(size(data))
-
+exp = readABF("my_recording.abf"; stimulus_name = "IN 7")
+size(exp)           # (trials, timepoints, channels)
+getSampleFreq(exp)  # Hz
 ```
 
+## 2) Inspect and slice data
 
-```@docs
-readABF(::Type{T}, abf_data::Union{String,Vector{UInt8}};
-    trials::Union{Int64,Vector{Int64}}=-1,
-    channels::Union{Int64, String, Vector{String}}=["Vm_prime", "Vm_prime4"],
-    average_trials::Bool=false,
-    stimulus_name::Union{String, Vector{String}, Nothing}="IN 7",  #One of the best places to store digital stimuli
-    stimulus_threshold::T=2.5, #This is the normal voltage rating on digital stimuli
-    warn_bad_channel=false, #This will warn if a channel is improper
-    flatten_episodic::Bool=false, #If the stimulation is episodic and you want it to be continuous
-    time_unit=:s, #The time unit is s, change to ms
-) where {T<:Real}
+```julia
+first_trial_first_channel = exp[1, :, 1]
+ch1 = getchannel(exp, 1)
+first_two_trials = getdata(exp, 1:2, :, 1:size(exp, 3))
 ```
 
-# Modification of Experiment files
-Once the data is open. We can do several things to modify it. 
+## 3) Attach or inspect stimulus protocol
 
-# Extracting data and metadata from a system of file names
+```julia
+stim = getStimulusProtocol(exp)
+starts = getStimulusStartTime(exp)
+ends = getStimulusEndTime(exp)
+```
 
-PhysiologyAnalysis.jl has some methods that make the extraction of file information easier. These are really just convienance functions. Because some experiments are really different, these may or may not be helpful. 
+To add stimulus from a channel:
 
-## Making a dataframe that includes all trials in a experiment
+```julia
+addStimulus!(exp, "IN 7")
+```
+
+## 4) Common preprocessing
+
+```julia
+exp2 = downsample(exp, 1000.0)
+exp3 = truncate_data(exp2, 0.0, 1.0; truncate_based_on = :time_range)
+exp4 = baseline_adjust(exp3)
+avg = average_trials(exp4)
+```
+
+## 5) Two-photon workflow (image stack)
+
+```julia
+img = readImage("my_stack.tif")
+deinterleave!(img, n_channels = 2)
+pixel_splits_roi!(img, 16)
+
+roi_mask = getROImask(img, 1)
+roi_trace = getROIarr(img, 1)
+```
+
+## 6) Export
+
+```julia
+writeXLSX("processed.xlsx", avg)
+```
+
+For complete signatures and caveats, see [API Reference](API.md).

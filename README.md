@@ -15,21 +15,57 @@
 
 ## Overview
 
-ElectroPhysiology.jl is a comprehensive Julia package for loading, analyzing, and plotting neuroscience and physiology data. It provides a robust framework for handling various types of electrophysiological experiments, including ERG (Electroretinogram), whole-cell recordings, and two-photon imaging data.
+ElectroPhysiology.jl is the core data layer for electrophysiology workflows in Julia.
+It provides:
+
+- File readers for ABF and two-photon image stacks
+- A shared `Experiment` container (`trial x time x channel`)
+- Stimulus protocol extraction and attachment
+- Core trial/time/channel manipulation utilities
+- ROI and image utility methods for two-photon data
 
 ## Installation
 
-To install ElectroPhysiology.jl, open the Julia REPL and enter:
+Install from the Julia REPL:
 
 ```julia
 using Pkg
 Pkg.add("ElectroPhysiology")
 ```
 
-Or add it to your project's dependencies:
+Or in package mode:
 
 ```julia
 pkg> add ElectroPhysiology
+```
+
+## Quick Start
+
+### Read ABF data
+
+```julia
+using ElectroPhysiology
+
+exp = readABF("example.abf"; stimulus_name = "IN 7")
+println(size(exp))       # (n_trials, n_timepoints, n_channels)
+println(getSampleFreq(exp))
+```
+
+### Basic processing
+
+```julia
+exp2 = downsample(exp, 1000.0)
+exp3 = truncate_data(exp2, 0.0, 1.0)
+avg = average_trials(exp3)
+```
+
+### Two-photon workflow
+
+```julia
+img = readImage("stack.tif")
+deinterleave!(img, n_channels = 2)
+pixel_splits_roi!(img, 16)
+roi = getROIarr(img, 1)
 ```
 
 ## Related Packages
@@ -42,30 +78,10 @@ A package for advanced analysis of physiological data. See documentation [here](
 ### PhysiologyPlotting.jl
 A package for creating publication-quality plots of physiological data. See documentation [here](https://github.com/mattar13/PhysiologyPlotting.jl)
 
-## Basic Usage
+## Documentation
 
-```julia
-using ElectroPhysiology
-
-# Create a basic experiment
-data_array = rand(10, 1000, 2)  # 10 trials, 1000 timepoints, 2 channels
-exp = Experiment(data_array)
-
-# Access data
-data = exp[1, :, 1]  # Get first trial, all timepoints, first channel
-
-# Basic operations
-mean_response = mean(exp, dims=1)  # Average across trials
-```
-
-## Features
-
-- Support for multiple experiment types (ERG, Whole-cell, Two-photon)
-- Flexible data structure for handling multi-channel recordings
-- Built-in functions for common analysis tasks
-- Integration with stimulus protocols
-- Time series manipulation and analysis
-- Channel management and metadata handling
+- Package docs: [mattar13.github.io/ElectroPhysiology.jl/dev](https://mattar13.github.io/ElectroPhysiology.jl/dev)
+- API reference (source-aligned): `docs/src/API.md`
 
 ## Development
 
@@ -76,9 +92,13 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ### Building Documentation
 
 To build the documentation locally:
-
-Is the core package for loading, analyzing and plotting neuroscience and physiology data in Julia. 
-This package comes with several related packages which can be accessed at the links below. 
+```julia
+cd("docs")
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+include("make.jl")
+```
 
 ## License
 

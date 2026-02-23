@@ -1,10 +1,20 @@
 # Roadmap
-Version 1.0: Can open, plot, and analyze datafiles from .ABF files. 
 
-Notebooks are included to help analyze some electroretinography data.
-To install notebooks use this link: https://github.com/mattar13/PhysiologyInterface.jl
+## Near-Term
 
-## ElectroPhysiology
+1. Stabilize and test all exported APIs in `ElectroPhysiology.jl`.
+2. Align docs pages with source-loaded APIs only.
+3. Resolve exported symbols with missing implementations.
+4. Finalize optional-extension strategy for XLSX/MAT/wavelet tooling.
 
-## Physio
+## Mid-Term
+
+1. Reorganize `src/` by domain (`Core`, `Readers`, `Stimulus`, `Imaging`, `Processing`).
+2. Add complete test coverage for each public method family.
+3. Introduce deprecation policy for renamed APIs.
+
+## Long-Term
+
+1. Tight integration with `PhysiologyAnalysis.jl` and `PhysiologyPlotting.jl` via shared data contracts.
+2. Extended reader support and standardized metadata schemas.
 
