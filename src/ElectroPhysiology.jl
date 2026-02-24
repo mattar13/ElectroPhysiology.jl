@@ -46,6 +46,7 @@ export scaleby, scaleby!
 export pad, pad!, chop, chop!
 export drop, drop!
 export truncate_data, truncate_data!
+export align_to_stimulus, align_to_stimulus!
 export average_trials, average_trials!
 export downsample, downsample!
 export dyadic_downsample, dyadic_downsample!

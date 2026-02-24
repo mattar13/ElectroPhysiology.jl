@@ -40,19 +40,19 @@ function concat!(exp::Experiment, exp2::Experiment;
     dims = 1, mode = :pad, position::Symbol=:post,
 )
     if mode == :strict
-        @assert size(exp) == size(exp_add)
+        @assert size(exp) == size(exp2)
     elseif mode == :pad || mode == :chop
         if size(exp, 2) > size(exp2, 2)
-            #println("Original exp larger $(size(exp,2)) > $(size(exp_add,2))")
-            n_vals = abs(size(exp, 2) - size(exp_add, 2))
+            #println("Original exp larger $(size(exp,2)) > $(size(exp2,2))")
+            n_vals = abs(size(exp, 2) - size(exp2, 2))
             if mode == :pad
                 pad!(exp2, n_vals; position=position)
             elseif mode == :chop
                 chop!(exp, n_vals; position=position)
             end
         elseif size(exp, 2) < size(exp2, 2)
-            #println("Original exp smaller $(size(exp,2)) < $(size(exp_add,2))")
-            n_vals = abs(size(exp, 2) - size(exp_add, 2))
+            #println("Original exp smaller $(size(exp,2)) < $(size(exp2,2))")
+            n_vals = abs(size(exp, 2) - size(exp2, 2))
             if mode == :pad
                 pad!(exp, n_vals; position=position)
             elseif mode == :chop
@@ -61,10 +61,14 @@ function concat!(exp::Experiment, exp2::Experiment;
         end
     end
     exp.data_array = cat(exp.data_array, exp2.data_array, dims = dims)
-    exp.chNames = [exp.chNames..., exp2.chNames...]
-    exp.chUnits = [exp.chUnits..., exp.chUnits...]
-    exp.chGains = [exp.chGains..., exp.chGains...]
-    return 
+
+    # Only channel-wise concatenation should extend channel metadata.
+    if dims == 3
+        exp.chNames = [exp.chNames..., exp2.chNames...]
+        exp.chUnits = [exp.chUnits..., exp2.chUnits...]
+        exp.chGains = [exp.chGains..., exp2.chGains...]
+    end
+    return exp
 end
 
 function concat(exp::Experiment{T}, exp_add::Experiment{T}; mode::Symbol=:pad, position::Symbol=:post, kwargs...) where {T}

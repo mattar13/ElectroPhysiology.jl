@@ -1,9 +1,16 @@
-@testset "Revision run case: stimulus + truncation workflow" begin
-    data = readABF(test_many_traces, stimulus_name = "IN 1", stimulus_threshold = 0.5)
-    @test isa(data, Experiment)
+using Revise
+using ElectroPhysiology
 
+erg_dir = raw"F:\ERG\Retinoschisis\2019_03_12_AdultWT\Mouse1_Adult_WT\BaCl_LAP4\Rods"
+erg_files = parseABF(erg_dir)
 
-#Lets open a .abf file and see if we can revamp and improve anything. 
+stim_channel = "IN 7"  # Set this to your stimulus channel (e.g. "Digital 1")
+data = readABF(
+    erg_files;
+    stimulus_name=stim_channel,
+    align_by_stimulus=true,
+    t_pre=0.1,   # seconds before stimulus onset
+    t_post=0.4,  # seconds after stimulus onset
+)
 
-erg_file = raw"F:\ERG\Retinoschisis\2019_03_12_AdultWT\Mouse1_Adult_WT\BaCl_LAP4\Rods\nd0_1p_2ms.abf"
-data = readABF(erg_file)
+data.data_array

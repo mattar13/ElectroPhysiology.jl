@@ -255,6 +255,89 @@ function truncate_data(trace::Experiment{F, T}, t_begin, t_end; kwargs...) where
     return data
 end
 
+function _stimulus_start_by_trial(stimulus::StimulusProtocol, n_trials::Int64, stimulus_index::Int64)
+    starts = fill(NaN, n_trials)
+    for trial in 1:n_trials
+        idxs = findall(==(trial), stimulus.sweeps)
+        if !isempty(idxs) && stimulus_index <= length(idxs)
+            starts[trial] = stimulus.timestamps[idxs[stimulus_index]][1]
+        elseif trial <= length(stimulus.timestamps)
+            # Fallback for legacy protocols where sweeps were not tracked by trial.
+            starts[trial] = stimulus.timestamps[trial][1]
+        end
+    end
+    starts
+end
+
+function align_to_stimulus!(trace::Experiment{F,T};
+    t_pre::Real,
+    t_post::Real,
+    stimulus_index::Int64=1,
+    pad_value::T=zero(T),
+) where {F,T<:Real}
+    @assert t_pre >= 0 "t_pre must be non-negative."
+    @assert t_post > 0 "t_post must be positive."
+
+    stimulus = getStimulusProtocol(trace)
+    if isnothing(stimulus)
+        throw(ArgumentError("No stimulus protocol found. Load stimulus_name when reading ABF files."))
+    end
+
+    n_trials, n_time, n_ch = size(trace)
+    stim_starts = _stimulus_start_by_trial(stimulus, n_trials, stimulus_index)
+    if any(isnan, stim_starts)
+        bad_trials = findall(isnan, stim_starts)
+        throw(ArgumentError("Missing stimulus timestamps for trial(s): $(bad_trials)."))
+    end
+
+    n_pre = round(Int64, t_pre / trace.dt)
+    n_post = round(Int64, t_post / trace.dt)
+    window_n = n_pre + n_post + 1
+
+    aligned = fill(pad_value, n_trials, window_n, n_ch)
+    for trial in 1:n_trials
+        stim_idx = round(Int64, stim_starts[trial] / trace.dt) + 1
+        src_start = stim_idx - n_pre
+        src_end = stim_idx + n_post
+
+        src_rng_start = max(1, src_start)
+        src_rng_end = min(n_time, src_end)
+        dst_rng_start = src_rng_start - src_start + 1
+        dst_rng_end = dst_rng_start + (src_rng_end - src_rng_start)
+
+        aligned[trial, dst_rng_start:dst_rng_end, :] .= trace.data_array[trial, src_rng_start:src_rng_end, :]
+    end
+
+    trace.data_array = aligned
+    trace.t = collect((-n_pre:n_post) .* trace.dt)
+
+    # Shift timestamps so each trial's selected stimulus starts at t=0.
+    keep_idxs = Int64[]
+    new_timestamps = Tuple{T,T}[]
+    for i in eachindex(stimulus.timestamps)
+        swp = stimulus.sweeps[i]
+        if 1 <= swp <= n_trials
+            ts = stimulus.timestamps[i]
+            shifted = (T(ts[1] - stim_starts[swp]), T(ts[2] - stim_starts[swp]))
+            if shifted[2] >= trace.t[1] && shifted[1] <= trace.t[end]
+                clipped = (max(shifted[1], trace.t[1]), min(shifted[2], trace.t[end]))
+                push!(keep_idxs, i)
+                push!(new_timestamps, clipped)
+            end
+        end
+    end
+    stimulus.sweeps = stimulus.sweeps[keep_idxs]
+    stimulus.timestamps = new_timestamps
+
+    return trace
+end
+
+function align_to_stimulus(trace::Experiment{F,T}; kwargs...) where {F,T<:Real}
+    data = deepcopy(trace)
+    align_to_stimulus!(data; kwargs...)
+    return data
+end
+
 """
     average_trials(trace::Experiment)
     average_trials!(trace::Experiment)

@@ -239,7 +239,10 @@ size(stimulus::StimulusProtocol, dim::Int64) = size(stimulus.timestamps, dim)
 length(stimulus::StimulusProtocol) = size(stimulus, 1)
 
 function push!(stimulus::StimulusProtocol, ts::Tuple)
-    if stimulus.timestamps[1] == (-Inf, Inf)
+    if isempty(stimulus.timestamps)
+        stimulus.sweeps = [1]
+        stimulus.timestamps = [ts]
+    elseif stimulus.timestamps[1] == (-Inf, Inf)
         stimulus.timestamps = [ts]
     else
         push!(stimulus.sweeps, maximum(stimulus.sweeps)+1)
@@ -254,7 +257,10 @@ function push!(stimulus::StimulusProtocol, ts::Tuple...)
 end
 
 function push!(stimulus::StimulusProtocol, sweep::Int64, ts::Tuple)
-    if sweep > maximum(stimulus.sweeps)
+    if isempty(stimulus.sweeps)
+        push!(stimulus.sweeps, sweep)
+        push!(stimulus.timestamps, ts)
+    elseif sweep > maximum(stimulus.sweeps)
         #We should warn the user that the next sweep number will be used instead
         @warn "The next sweep number will be used instead of $sweep"
         push!(stimulus.sweeps, maximum(stimulus.sweeps)+1)
@@ -266,7 +272,21 @@ function push!(stimulus::StimulusProtocol, sweep::Int64, ts::Tuple)
 end
 
 function push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol)
-    push!(stimulusA, stimulusB.timestamps...)
+    if isempty(stimulusB.timestamps)
+        return
+    end
+
+    # If this protocol only contains the default sentinel timestamp, clear it.
+    if length(stimulusA.timestamps) == 1 && stimulusA.timestamps[1] == (-Inf, Inf)
+        stimulusA.timestamps = similar(stimulusA.timestamps, 0)
+        stimulusA.sweeps = Int64[]
+    end
+
+    sweep_offset = isempty(stimulusA.sweeps) ? 0 : maximum(stimulusA.sweeps)
+    for (swp, ts) in zip(stimulusB.sweeps, stimulusB.timestamps)
+        push!(stimulusA.sweeps, swp + sweep_offset)
+        push!(stimulusA.timestamps, ts)
+    end
 end
 
 import Base.iterate
@@ -386,6 +406,8 @@ function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
 
     # Instantiate a StimulusProtocol object with the provided stimulus_name and the number of trials
     stimuli = StimulusProtocol(stimulus_name)
+    stimuli.sweeps = Int64[]
+    stimuli.timestamps = Tuple{Float64,Float64}[]
     stimulus_waveform = getWaveform(abfInfo, stimulus_name)
     # Iterate over the trials
     for swp in axes(abfInfo["data"], 1)
@@ -398,7 +420,7 @@ function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
         for event in events
             start_time = (event[1] - 1) * dt
             end_time = event[2] * dt
-            push!(stimuli, (start_time, end_time))
+            push!(stimuli, swp, (start_time, end_time))
         end
     end
 

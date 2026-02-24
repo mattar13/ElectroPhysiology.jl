@@ -191,10 +191,16 @@ function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
     end
     
     if average_trials
-        new_stimulus_protocol = deepcopy(HeaderDict["StimulusProtocol"])
-        new_stimulus_protocol.timestamps = [new_stimulus_protocol.timestamps[1]]
-        new_stimulus_protocol.sweeps = [new_stimulus_protocol.sweeps[1]]
-        HeaderDict["StimulusProtocol"] = new_stimulus_protocol
+        if haskey(HeaderDict, "StimulusProtocol")
+            new_stimulus_protocol = deepcopy(HeaderDict["StimulusProtocol"])
+            if !isempty(new_stimulus_protocol.timestamps) && !isempty(new_stimulus_protocol.sweeps)
+                first_sweep = new_stimulus_protocol.sweeps[1]
+                idxs = findall(==(first_sweep), new_stimulus_protocol.sweeps)
+                new_stimulus_protocol.timestamps = new_stimulus_protocol.timestamps[idxs]
+                new_stimulus_protocol.sweeps = fill(1, length(idxs))
+            end
+            HeaderDict["StimulusProtocol"] = new_stimulus_protocol
+        end
         data = sum(data, dims=1) / size(data, 1)
     end
     # Average trials if requested
@@ -205,19 +211,39 @@ end
 
 readABF(abf_path::Union{String,Vector{UInt8}}; kwargs...) = readABF(Float64, WHOLE_CELL, abf_path; kwargs...)
 
-function readABF(filenames::AbstractArray{String}; average_trials_inner=true, sort_by_date = true, kwargs...)
+function readABF(filenames::AbstractArray{String};
+    average_trials_inner=true,
+    sort_by_date=true,
+    align_by_stimulus::Bool=false,
+    t_pre::Union{Nothing,Real}=nothing,
+    t_post::Union{Nothing,Real}=nothing,
+    stimulus_index::Int64=1,
+    pad_value=nothing,
+    kwargs...
+)
+    if isempty(filenames)
+        throw(ArgumentError("No ABF filenames were provided."))
+    end
+
     #println("Currently stable")
     #println("Data length is $(size(filenames, 1))")
     data = readABF(filenames[1]; average_trials=average_trials_inner, kwargs...)
     all_dates = [data.HeaderDict["FileStartDateTime"]]
     all_paths = [data.HeaderDict["abfPath"]]
+    file_trial_counts = [size(data, 1)]
     #IN this case we want to ensure that the stim_protocol is only 1 stimulus longer
     for filename in filenames[2:end]
         data_add = readABF(filename; average_trials=average_trials_inner, kwargs...)
         #println(size(data_add))
-        concat!(data, data_add; kwargs...)
+        concat!(data, data_add)
+        if haskey(data.HeaderDict, "StimulusProtocol") && haskey(data_add.HeaderDict, "StimulusProtocol")
+            push!(data.HeaderDict["StimulusProtocol"], data_add.HeaderDict["StimulusProtocol"])
+        elseif !haskey(data.HeaderDict, "StimulusProtocol") && haskey(data_add.HeaderDict, "StimulusProtocol")
+            data.HeaderDict["StimulusProtocol"] = deepcopy(data_add.HeaderDict["StimulusProtocol"])
+        end
         push!(all_dates, data_add.HeaderDict["FileStartDateTime"])
         push!(all_paths, data_add.HeaderDict["abfPath"])
+        push!(file_trial_counts, size(data_add, 1))
         #println(size(data, 1))
     end
     #Here we can add some things that might be useful across all experiments
@@ -225,10 +251,46 @@ function readABF(filenames::AbstractArray{String}; average_trials_inner=true, so
     data.HeaderDict["abfPath"] = all_paths
     if sort_by_date
         #println("Sort idxs")
-        date_idxs = sortperm(data.HeaderDict["FileStartDateTime"])
-        data.data_array = data[date_idxs, :, :]
-        data.stimulus_protocol = data.stimulus_protocol[date_idxs]
+        date_idxs = sortperm(all_dates)
+
+        trial_ranges = UnitRange{Int64}[]
+        start_idx = 1
+        for n_trials in file_trial_counts
+            stop_idx = start_idx + n_trials - 1
+            push!(trial_ranges, start_idx:stop_idx)
+            start_idx = stop_idx + 1
+        end
+        trial_idxs = Int64[]
+        for file_idx in date_idxs
+            append!(trial_idxs, trial_ranges[file_idx])
+        end
+        data.data_array = data[trial_idxs, :, :]
+
+        if haskey(data.HeaderDict, "StimulusProtocol")
+            stim = data.HeaderDict["StimulusProtocol"]
+            old_to_new_trial = Dict{Int64,Int64}(old => new for (new, old) in enumerate(trial_idxs))
+            keep_idxs = findall(swp -> haskey(old_to_new_trial, swp), stim.sweeps)
+            if !isempty(keep_idxs)
+                stim.timestamps = stim.timestamps[keep_idxs]
+                stim.sweeps = [old_to_new_trial[stim.sweeps[idx]] for idx in keep_idxs]
+                sort_idxs = sortperm(eachindex(stim.sweeps), by=i -> (stim.sweeps[i], i))
+                stim.timestamps = stim.timestamps[sort_idxs]
+                stim.sweeps = stim.sweeps[sort_idxs]
+            end
+        end
+
+        data.HeaderDict["FileStartDateTime"] = all_dates[date_idxs]
+        data.HeaderDict["abfPath"] = all_paths[date_idxs]
     end
+
+    if align_by_stimulus
+        if isnothing(t_pre) || isnothing(t_post)
+            throw(ArgumentError("When align_by_stimulus=true, both t_pre and t_post must be provided."))
+        end
+        pad_val = isnothing(pad_value) ? zero(eltype(data.data_array)) : eltype(data.data_array)(pad_value)
+        align_to_stimulus!(data; t_pre=t_pre, t_post=t_post, stimulus_index=stimulus_index, pad_value=pad_val)
+    end
+
     return data
 end
 
