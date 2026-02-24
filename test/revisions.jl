@@ -1,6 +1,6 @@
-using Revise
-using Pkg; Pkg.activate(".")
-using ElectroPhysiology
+@testset "Revision run case: stimulus + truncation workflow" begin
+    data = readABF(test_many_traces, stimulus_name = "IN 1", stimulus_threshold = 0.5)
+    @test isa(data, Experiment)
 
 
 #Lets open a .abf file and see if we can revamp and improve anything. 

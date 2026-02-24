@@ -33,18 +33,16 @@ function readImage(::Type{T}, filename;
      #HeaderDict["date:modify"] = DateTime(magickinfo(filename, "date:modify")[1:end-6], dateformat"yyyy-mm-ddTHH:MM:SS")
 
      comment_string = magickinfo(filename, "comment")["comment"]
-     #Base.gc.gc()
-     comment_substrings = split(comment_string, "\r")[1:end-1]
-     for comment_string in comment_substrings
-          further_substr = split(comment_string, "=")
-          is_int = tryparse(Int64, further_substr[2] |> String)
-          is_float = tryparse(Float64, further_substr[2] |> String)
-          if !isnothing(is_int)
-               HeaderDict[further_substr[1]] = is_int
-          elseif !isnothing(is_float)
-               HeaderDict[further_substr[1]] = is_float
+     for line in eachsplit(comment_string, '\r'; keepempty=false)
+          key, value = split(line, "="; limit = 2)
+          parsed_int = tryparse(Int64, value)
+          parsed_float = isnothing(parsed_int) ? tryparse(Float64, value) : nothing
+          HeaderDict[key] = if !isnothing(parsed_int)
+               parsed_int
+          elseif !isnothing(parsed_float)
+               parsed_float
           else
-               HeaderDict[further_substr[1]] = further_substr[2] |> String
+               value
           end
      end
      HeaderDict["FileStartDateTime"] = DateTime(HeaderDict["state.internal.triggerTimeString"], "'m/d/Y H:M:S.s'")
@@ -56,7 +54,6 @@ function readImage(::Type{T}, filename;
      HeaderDict["y_pixels"] = px_x
      HeaderDict["xrng"] = LinRange(0, fov/zoom, px_y)
      HeaderDict["yrng"] = LinRange(0, fov/zoom, px_x)
-     println(HeaderDict["xrng"])
      sampling_rate = HeaderDict["state.acq.frameRate"]
      #Resize the data so that all of the pixels are in single value
      resize_data_arr = reshape(data_array, px_x*px_y, n_frames, 1)
@@ -79,17 +76,17 @@ end
 
 readImage(filename; kwargs...) = readImage(Float64, filename; kwargs...)
 
-function get_frame(exp::Experiment{TWO_PHOTON, T}, frame::Int64) where T <: Real
+function get_frame(exp::Experiment{TWO_PHOTON, T}, frame::Integer) where T <: Real
      px, py = exp.HeaderDict["framesize"]
-     data_frame = reshape(exp.data_array[:, frame, :], (px, py, 1, size(exp, 3)))
+     @views data_frame = reshape(exp.data_array[:, frame, :], (px, py, 1, size(exp, 3)))
      return data_frame
 end
  
-get_frame(exp::Experiment{TWO_PHOTON, T}, frames::AbstractArray) where T<:Real = cat(map(frame -> get_frame(exp, frame), frames)..., dims = 3)
+get_frame(exp::Experiment{TWO_PHOTON, T}, frames::AbstractVector{<:Integer}) where T<:Real = cat((get_frame(exp, frame) for frame in frames)..., dims = 3)
  
 function get_all_frames(exp::Experiment{TWO_PHOTON, T}) where T <: Real
-     n_frames = size(exp, 2)
-     return get_frame(exp, 1:n_frames)
+     px, py = exp.HeaderDict["framesize"]
+     return reshape(exp.data_array, px, py, size(exp, 2), size(exp, 3))
 end
 
 setScale(exp::Experiment{TWO_PHOTON, T}, pixels_per_micron) where T <: Real = exp.HeaderDict["PixelsPerMicron"] = pixels_per_micron

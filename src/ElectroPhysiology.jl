@@ -3,7 +3,7 @@ module ElectroPhysiology
 #=Import all experiment objects=======================#
 using Requires
 capabilies = Symbol[] #This indicates all the things the package is capable of doing
-using Dates, TimeZones
+using Dates
 import Base: size, axes, length, getindex, setindex!, sum, copy, maximum, minimum, push!, cumsum, argmin, argmax, abs
 using Base.Threads: @threads #Allow for multi-threading
 import Statistics: std, mean, median
@@ -13,7 +13,6 @@ using ProgressMeter
 #=2) Reads =#
 #=3) Modifies experiment objects =#
 #Also make sure to move this eventually
-# using DSP #Used for lowpass, highpass, EI, and notch filtering
 
 include("Experiment/Experiments.jl") #This file contains the Experiment structure. 
 export getSampleFreq
@@ -41,7 +40,6 @@ using ImageMagick #This package is for getting metadata of .tif files
 import ImageMagick.magickinfo 
 #import Images.Kernel #Where are these functions used?
 #import OffsetArrays.OffsetArray #Where are these functions used?
-#using CurveFit #Where are these functions used?
 
 include("Experiment/ModifyExperiments.jl") #These functions modify individual experiments
 export scaleby, scaleby!
