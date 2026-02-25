@@ -561,6 +561,10 @@ function time_offset(exp::Experiment{FORMAT, T}, offset) where {FORMAT, T<:Real}
     new_exp
 end
 
+sortTrialBy_idx!(exp, sorted_idx) = exp.data_array = exp.data_array[sorted_idx, :, :]
+
+sortChannelBy_idx!(exp, sorted_idx) = exp.data_array = exp.data_array[:, :, sorted_idx]
+
 #%% 
 #=
 function create_episodes(expt::Experiment{FORMAT,T}, split_indices::Vector{Int}) where {FORMAT,T}

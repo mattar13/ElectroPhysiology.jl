@@ -55,6 +55,7 @@ export downsample, downsample!
 export dyadic_downsample, dyadic_downsample!
 export baseline_adjust, baseline_adjust!
 export time_offset, time_offset!
+export sortTrialBy_idx!, sortChannelBy_idx!
 
 #Image reading utilities
 using OffsetArrays
