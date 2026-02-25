@@ -261,8 +261,8 @@ function push!(stimulus::StimulusProtocol, sweep::Int64, ts::Tuple)
         push!(stimulus.sweeps, sweep)
         push!(stimulus.timestamps, ts)
     elseif sweep > maximum(stimulus.sweeps)
-        #We should warn the user that the next sweep number will be used instead
-        @warn "The next sweep number will be used instead of $sweep"
+        # #We should warn the user that the next sweep number will be used instead
+        # @warn "The next sweep number will be used instead of $sweep"
         push!(stimulus.sweeps, maximum(stimulus.sweeps)+1)
         push!(stimulus.timestamps, ts)
     else

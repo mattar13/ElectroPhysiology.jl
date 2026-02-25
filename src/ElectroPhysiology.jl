@@ -95,7 +95,7 @@ export loadROIfn!
 export make_circular_roi!
 
 include("convienance_functions.jl")
-export openData
+export openERGData
 
 #For some reason this is starting
 function OLD__init__()    
