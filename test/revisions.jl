@@ -6,3 +6,9 @@ erg_files = parseABF(erg_dir)
 
 data = openERGData(erg_files)
 size(data)
+
+
+stimulus_name = "some_other_bullshit\\nd0_1p_2ms.abf"
+
+
+calculate_photons(stimulus_name)
