@@ -94,6 +94,9 @@ export getROIindexes, getROImask, getROIarr
 export loadROIfn!
 export make_circular_roi!
 
+include("convienance_functions.jl")
+export openData
+
 #For some reason this is starting
 function OLD__init__()    
     @require XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0" begin
