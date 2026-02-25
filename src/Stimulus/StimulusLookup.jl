@@ -9,8 +9,12 @@ end
 
 percent_to_photons_eq(percent::Float64; slope = 1881.7, intercept = 1824.9) = slope * percent + intercept
 
+nd_filter(val, nd::Int) = val * 10.0^-nd
+
 function calculate_photons(stimulus_name::AbstractString)
     params = parse_stimulus_name(stimulus_name)
-    photons = percent_to_photons_eq(params.percent) * 10.0^-params.nd * params.flash_duration
+    nd = params.nd
+    flash_duration = params.flash_duration
+    photons = nd_filter(percent_to_photons_eq(params.percent), nd) * flash_duration
     return photons
 end
