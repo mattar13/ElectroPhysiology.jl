@@ -20,7 +20,7 @@ export abs
 export std,mean
 
 include("Stimulus/StimulusLookup.jl") #This file contains functions for looking up stimulus parameters from the stimulus name.
-export calculate_photons
+export parse_stimulus_name, calculate_photons
 
 include("Stimulus/StimulusProtocol.jl")
 export StimulusProtocol
