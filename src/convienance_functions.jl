@@ -2,8 +2,8 @@ function openERGData(
     fn;
     channel=1,
     stimulus_name="IN 7",
-    t_pre=0.1,
-    t_post=2.0,
+    t_pre=:stim_start,
+    t_post = 6.0,
     baseline_region=(0.0, 1.0),
     downsample_rate=-1.0,
     time_unit = :s,
@@ -21,8 +21,17 @@ function openERGData(
         stimulus_name=stimulus_name,
         average_trials=true,
     )
+    if t_pre == :stim_end
+        t_pre = getStimulusEndTime(dataERG)[1]
+    elseif t_pre == :stim_start
+        t_pre = getStimulusStartTime(dataERG)[1]
+    elseif isa(t_pre, Number)
+        t_pre = t_pre
+    else
+        error("Invalid t_pre value. Must be :stim_end, :stim_start, or a numeric value.")
+    end
     baseline_adjust!(dataERG, region=baseline_region, mode=:mean)
-    align_to_stimulus!(dataERG, t_pre=t_pre, t_post=t_post)
+    truncate_data!(dataERG, t_pre, t_post)
 
     if downsample_rate != -1.0
         downsample!(dataERG, downsample_rate)
