@@ -14,7 +14,7 @@ nd_filter(val, nd::Int) = val * 10.0^-nd
 function calculate_photons(stimulus_name::AbstractString)
     params = parse_stimulus_name(stimulus_name)
     nd = params.nd
-    flash_duration = params.flash_duration
-    photons = nd_filter(percent_to_photons_eq(params.percent), nd) * flash_duration
+    photons = nd_filter(percent_to_photons_eq(params.percent), nd)
     return photons
 end
+

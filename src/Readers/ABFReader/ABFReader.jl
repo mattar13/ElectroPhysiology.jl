@@ -186,6 +186,13 @@ function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
 
     if !isnothing(stimulus_name)
         HeaderDict["StimulusProtocol"] = stimulus_protocol = extractStimulus(HeaderDict, stimulus_name; stimulus_threshold = stimulus_threshold)
+        # Set flash intensity from the filename as early as possible
+        if isa(stimulus_protocol.type, Vector{Flash}) && haskey(HeaderDict, "abfPath")
+            try
+                set_flash_intensity!(stimulus_protocol, basename(HeaderDict["abfPath"]))
+            catch
+            end
+        end
     else
         #stimulus_protocol = StimulusProtocol() #I think there should be easier ways to do this but here we are
     end
@@ -198,6 +205,9 @@ function readABF(::Type{T}, FORMAT::Type, abf_data::Union{String,Vector{UInt8}};
                 idxs = findall(==(first_sweep), new_stimulus_protocol.sweeps)
                 new_stimulus_protocol.timestamps = new_stimulus_protocol.timestamps[idxs]
                 new_stimulus_protocol.sweeps = fill(1, length(idxs))
+                if isa(new_stimulus_protocol.type, Vector)
+                    new_stimulus_protocol.type = new_stimulus_protocol.type[idxs]
+                end
             end
             HeaderDict["StimulusProtocol"] = new_stimulus_protocol
         end

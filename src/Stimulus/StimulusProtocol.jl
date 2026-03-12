@@ -134,33 +134,30 @@ This allows the intensity of the stimulus protocol (or multiple stimulus protoco
 
 ```
 """
-function setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photons::Vector{T}) where T<:Real
-    @assert size(stimulus_protocols) == size(photons)
+function setIntensity(stimulus_protocols::StimulusProtocol{T, Vector{Flash}}, photons::Vector) where T<:Real
+    @assert length(stimulus_protocols.type) == length(photons)
     for (idx, photon) in enumerate(photons)
-        setIntensity(stimulus_protocols.type[idx], photon)
+        stimulus_protocols.type[idx].intensity = photon
     end
 end
 
-function setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photon::T) where T<:Real
-    photons = fill(photon, size(stimulus_protocols))
-    setIntensity(stimulus_protocols, photons)
+function setIntensity(stimulus_protocols::StimulusProtocol{T, Vector{Flash}}, photon::Real) where T<:Real
+    for flash in stimulus_protocols.type
+        flash.intensity = photon
+    end
 end
 """
-    setIntensity(stimulus_protocols::StimulusProtocol{T, Flash}, photons::Vector)
+    setIntensity(stimulus_protocols::StimulusProtocol{T, Vector{Flash}}, photons::Vector)
 
-This allows the intensity of the stimulus protocol (or multiple stimulus protocols be set). 
+This allows the intensity of the stimulus protocol (or multiple stimulus protocols be set).
 
 ## Arguments
 
-- `stimulus_protocol::StimulusProtocol{T, S} where S <: Flash`: A stimulus protocol 
-- `photons::Vector`: a vector of numbers representing the photon amount. 
+- `stimulus_protocol::StimulusProtocol{T, Vector{Flash}}`: A stimulus protocol
+- `photons::Vector`: a vector of numbers representing the photon amount.
 """
-function getIntensity(stimulus_protocols::StimulusProtocol{T, Flash}) where T<:Real
-    photon_list = T[]
-    for stimulus in stimulus_protocols
-        push!(photon_list, stimulus.type[1].intensity)
-    end
-    return photon_list
+function getIntensity(stimulus_protocols::StimulusProtocol{T, Vector{Flash}}) where T<:Real
+    return [flash.intensity for flash in stimulus_protocols.type]
 end
 
 """
@@ -287,6 +284,11 @@ function push!(stimulusA::StimulusProtocol, stimulusB::StimulusProtocol)
         push!(stimulusA.sweeps, swp + sweep_offset)
         push!(stimulusA.timestamps, ts)
     end
+
+    # Concatenate type vectors if both are vectors
+    if isa(stimulusA.type, Vector) && isa(stimulusB.type, Vector)
+        append!(stimulusA.type, stimulusB.type)
+    end
 end
 
 import Base.iterate
@@ -404,8 +406,8 @@ function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
     # Get the time interval between data points
     dt = abfInfo["dataSecPerPoint"]
 
-    # Instantiate a StimulusProtocol object with the provided stimulus_name and the number of trials
-    stimuli = StimulusProtocol(stimulus_name)
+    # Instantiate a StimulusProtocol object with Vector{Flash} type and the provided stimulus_name
+    stimuli = StimulusProtocol(Flash[], stimulus_name, (0.0, 0.0))
     stimuli.sweeps = Int64[]
     stimuli.timestamps = Tuple{Float64,Float64}[]
     stimulus_waveform = getWaveform(abfInfo, stimulus_name)
@@ -413,13 +415,14 @@ function extractStimulus(abfInfo::Dict{String,Any}, stimulus_name::String;
     for swp in axes(abfInfo["data"], 1)
         # Get the stimulus waveform for the current trial and apply the threshold
         stim_wave = stimulus_waveform[swp, :, 1] .> stimulus_threshold
-        
+
         #Find the start and end timestamps of the stimulus event in the current trial
         events = extract_events(stim_wave)
         #Update the StimulusProtocol object with the timestamps for the current trial
         for event in events
             start_time = (event[1] - 1) * dt
             end_time = event[2] * dt
+            push!(stimuli.type, Flash())
             push!(stimuli, swp, (start_time, end_time))
         end
     end

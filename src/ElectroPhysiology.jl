@@ -33,6 +33,9 @@ export addStimulus! #This allows us to either add a stimulus from a StimulusProt
 export getStimulusStartTime, getStimulusEndTime
 export getStimulusStartIndex, getStimulusEndIndex
 
+include("Stimulus/StimulusToDataFrame.jl")
+export set_flash_intensity!, stimulus_to_table, save_stimulus_csv
+
 include("Experiment/IterateExperiments.jl")
 export getdata, getchannel, eachchannel, eachtrial
 
@@ -111,8 +114,6 @@ function OLD__init__()
             export readXLSX
 
             import .DataFrames.DataFrame
-            include("Stimulus/StimulusToDataFrame.jl")
-            export DataFrame
         end
     end
 
